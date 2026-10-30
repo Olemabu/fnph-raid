@@ -1,0 +1,335 @@
+<title>FNPH Raid</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: arcade cabinet. Home base is a scrolling briefing room; the raid is a full-window canvas with HTML HUD and teaching cards on top. Single dark look by design. */
+:root{
+  --night:#06080d; --panel:#10141c; --panel2:#171d28; --line:#273042;
+  --text:#eef1f6; --muted:#97a0b3;
+  --gold:#f2b84b; --cyan:#62e6ff; --pink:#ff4fa8; --ember:#ff5a3c; --good:#5dffa0; --bad:#ff5468;
+  --display:'Bungee', Impact, 'Arial Black', sans-serif; --ui:'Chakra Petch','Segoe UI',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--text);font-family:var(--ui);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.page{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:22px 48px;display:flex;flex-direction:column;gap:18px}
+.btn{border:1px solid var(--line);background:var(--panel2);padding:11px 18px;border-radius:6px;font-weight:600;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--gold);color:#1b1305;border-color:var(--gold)}
+.btn.primary:hover{background:#ffcb69}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:default}
+.chipbtn{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.chipbtn:hover{color:var(--text);border-color:var(--gold)}
+.actions,.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0}
+h1,h2,h3{margin:0;text-wrap:balance}
+.muted{color:var(--muted)}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.errs{color:var(--bad);font-family:var(--mono);font-size:12.5px;margin:0;white-space:pre-wrap}
+
+/* ---------- home ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,8vw,78px);line-height:.95;letter-spacing:.01em}
+.hero h1 span{color:var(--pink);text-shadow:0 0 24px rgba(255,79,168,.45)}
+.lede{max-width:60ch;color:#cfd6e4;margin:0;font-size:16px}
+.mapbox{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#000}
+.mapbox canvas{display:block;width:100%;height:auto;aspect-ratio:16/10;max-width:100%}
+.homeGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.homeGrid{grid-template-columns:minmax(0,1fr)}}
+.stations{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.st{display:grid;grid-template-columns:30px minmax(0,1fr) 66px;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;text-align:left;width:100%}
+.st .num{font-family:var(--display);color:var(--gold);text-align:center}
+.st.cap .num{color:var(--cyan)}
+.st .nm{display:flex;flex-direction:column;min-width:0}
+.st .nm b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st .nm small{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st .mast{display:flex;flex-direction:column;gap:3px;align-items:flex-end;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.bar{height:4px;width:100%;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good)}
+.st[aria-pressed="false"]{opacity:.42}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.how div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.how b{display:block;margin-bottom:4px;color:var(--gold);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.how p{margin:0;color:#cfd6e4;font-size:14px}
+kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel2)}
+.padStatus{margin:0;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.padStatus.on{color:var(--good)}
+details.credits{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--muted)}
+details.credits summary{cursor:pointer;color:var(--text)}
+details.credits pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:8px 0 0}
+
+/* ---------- raid ---------- */
+#play{position:fixed;inset:0;overflow:hidden;background:#000;z-index:1}
+#stage{position:absolute;inset:0}
+#stage canvas{position:absolute;left:0;top:0;display:block}
+#cfg{cursor:none;touch-action:none}
+.hud{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:calc(env(safe-area-inset-top,0px) + 10px) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));pointer-events:none;background:linear-gradient(rgba(3,5,9,.78),rgba(3,5,9,0));padding-bottom:26px}
+.hud>*{pointer-events:auto}
+.stn{display:flex;flex-direction:column;gap:2px;min-width:0;max-width:30%;text-shadow:0 1px 4px #000}
+.stn b{font-family:var(--display);font-weight:400;font-size:18px;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stn #hTopic{font-size:12px;color:#cfd6e4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stn .bar{width:170px;max-width:100%;height:5px;margin-top:4px}
+.stn .bar i{background:var(--cyan);transition:width .3s}
+.life{width:170px;max-width:100%;height:5px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:3px}
+.life i{display:block;height:100%;width:100%}
+.hudR{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.stats{display:flex;gap:14px;text-shadow:0 1px 4px #000}
+.stat{display:flex;align-items:baseline;gap:6px}
+.stat b{font-family:var(--display);font-weight:400;font-size:18px;font-variant-numeric:tabular-nums}
+#hStreak{color:var(--cyan)}
+.icon{border:1px solid var(--line);background:rgba(16,20,28,.85);border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:600}
+#qbar{position:absolute;z-index:3;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);width:min(640px,calc(100% - 2*min(32%,330px) - 20px));min-width:min(420px,calc(100% - 20px));box-sizing:border-box;background:rgba(8,10,18,.82);backdrop-filter:blur(6px);border:1px solid rgba(255,79,168,.4);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;pointer-events:none}
+@media (max-width:980px){#qbar{top:calc(env(safe-area-inset-top,0px) + 92px);width:calc(100% - 20px);min-width:0}}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,79,168,.5);border-radius:999px;padding:2px 10px;color:var(--pink)}
+.chip.obj{color:var(--ember);border-color:rgba(255,90,60,.5)}
+#qText{margin:0;font-size:clamp(16px,2.3vw,22px);font-weight:700;line-height:1.25}
+.eta{width:100%;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.eta i{display:block;height:100%;width:100%;background:var(--pink);transform-origin:left}
+.chain{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.chain:empty{display:none}
+.chain span{font-size:12px;border-radius:4px;padding:1px 7px;background:rgba(98,230,255,.12);color:var(--cyan);border:1px solid rgba(98,230,255,.35)}
+.toast{position:absolute;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);margin:0;padding:7px 16px;border-radius:999px;background:rgba(10,12,18,.88);border:1px solid var(--line);font-weight:600;font-size:14px;max-width:min(680px,90%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.toast.hot{border-color:var(--pink);color:#ffd0e8}
+#hurt{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at center,rgba(255,0,40,0) 30%,rgba(255,0,40,.6) 100%)}
+#hurt.on{opacity:1}
+.keys{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:3;margin:0;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;text-shadow:0 1px 3px #000;pointer-events:none;line-height:1.6}
+@media (max-width:760px){.keys{display:none}}
+
+/* ---------- teaching cards ---------- */
+#cardWrap{position:absolute;inset:0;z-index:10;display:grid;place-items:center;background:rgba(3,5,9,.62);backdrop-filter:blur(3px);padding:14px}
+.card{width:min(680px,100%);max-height:min(88vh,860px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--gold);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.card.learn{border-top-color:var(--good)}
+.card.death{border-top-color:var(--bad)}
+.card.brief{border-top-color:var(--ember)}
+#cardInner{overflow-y:auto;padding:18px 22px 6px;display:flex;flex-direction:column;gap:12px}
+.kicker{margin:0;font-family:var(--display);font-size:clamp(24px,4vw,34px);line-height:1}
+.card.learn .kicker{color:var(--good)}
+.card.death .kicker{color:var(--bad)}
+.card.brief .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+.card.brief h2{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,34px);color:var(--gold)}
+.card.pause .kicker{color:var(--gold)}
+.cq{margin:0;font-weight:700;font-size:17px}
+.ans{display:flex;flex-direction:column;gap:3px;border-radius:7px;padding:10px 12px;border:1px solid var(--line)}
+.ans.good{border-color:rgba(93,255,160,.45);background:rgba(93,255,160,.07)}
+.ans.good b,.ans.good li{color:var(--good)}
+.ans.bad{border-color:rgba(255,84,104,.5);background:rgba(255,84,104,.08)}
+.ans.bad b{color:#ffb3bd}
+.ans ol,.ans ul{margin:2px 0 0;padding-left:22px}
+.note{border-left:3px solid var(--cyan);padding:2px 0 2px 12px;color:#dde3ee;display:flex;flex-direction:column;gap:6px}
+.note p{margin:0}
+.note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.others{display:flex;flex-direction:column;gap:6px}
+.others ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.others li{display:flex;flex-direction:column;gap:1px;padding:7px 10px;border-radius:6px;background:var(--panel2)}
+.others li b{color:#ffb3bd;font-weight:600}
+.others li span{color:#cfd6e4;font-size:14px}
+.meta{margin:0;color:var(--muted);font-size:13px}
+.cardFoot{padding:12px 22px 18px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line)}
+.cardFoot .bar{height:3px}
+.cardFoot .bar i{background:var(--gold);transform-origin:left;width:100%}
+#cardBtn{align-self:flex-end;min-width:150px}
+
+
+/* ---------- overall progress + station timer ---------- */
+.gbar{position:absolute;z-index:4;left:0;right:0;top:0;padding:0 max(10px,env(safe-area-inset-right,0px)) 0 max(10px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:2px;pointer-events:none}
+.segs{display:flex;gap:3px;width:100%}
+.seg{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:0 0 3px 3px;overflow:hidden;position:relative}
+.seg i{display:block;height:100%;background:var(--good)}
+.seg.cap{box-shadow:inset 0 -2px 0 var(--cyan)}
+.seg.cap i{background:var(--cyan)}
+.seg.cur{outline:1px solid var(--ember);outline-offset:0}
+#gLabel{align-self:center;font-family:var(--mono);font-size:10.5px;color:#cfd6e4;text-shadow:0 1px 3px #000;letter-spacing:.04em}
+.hud{padding-top:calc(env(safe-area-inset-top,0px) + 26px)!important}
+#qbar{top:calc(env(safe-area-inset-top,0px) + 26px)}
+@media (max-width:980px){#qbar{top:calc(env(safe-area-inset-top,0px) + 110px)}}
+.timer{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-shadow:0 1px 4px #000}
+.timer b{font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums;color:var(--text);line-height:1}
+.timer b.over{color:#ffb3bd}
+.tbar i.over{background:var(--bad)}
+.plan b.win{color:var(--good)}
+@keyframes blink{50%{opacity:.45}}
+.tbar{width:150px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:var(--gold);transform-origin:left;transform:scaleX(0)}
+.homeG{display:flex;flex-direction:column;gap:5px}
+.homeG .seg{height:8px;border-radius:3px}
+.plan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.plan{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.plan div{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;flex-direction:column}
+.plan b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--gold)}
+.plan span{font-size:12px;color:var(--muted)}
+.mbar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.mbar i{display:block;height:100%;background:var(--good)}
+
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(3,5,9,.7);backdrop-filter:blur(3px);padding:14px}
+.padCard{width:min(620px,100%)}
+.padBig{font-size:20px;font-weight:700;margin:0;line-height:1.3}
+.padMsg{margin:0;color:var(--good);font-weight:600}
+.padSum{margin:0;padding-left:20px}
+.padLive{display:flex;flex-direction:column;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.axes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px 12px}
+.ax{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px}
+.ax span{width:52px;color:var(--muted)}
+.ax b{flex:1;height:8px;background:var(--line);border-radius:4px;position:relative}
+.ax b i{position:absolute;top:-2px;width:4px;height:12px;margin-left:-2px;background:var(--cyan);border-radius:2px}
+.btns{display:flex;flex-wrap:wrap;gap:5px}
+.btns span{font-family:var(--mono);font-size:12px;min-width:26px;text-align:center;padding:3px 0;border:1px solid var(--line);border-radius:4px;color:var(--muted)}
+.btns span.on{background:var(--gold);color:#1b1305;border-color:var(--gold)}
+.strow{display:flex;gap:6px;align-items:stretch}
+.strow .st{flex:1;min-width:0}
+.btn.attack{flex:none;padding:6px 14px;font-size:13px;border-color:rgba(255,90,60,.55);color:#ffd2c6;background:rgba(255,90,60,.12)}
+.btn.attack:hover{background:rgba(255,90,60,.25);border-color:var(--ember)}
+#homeMap{cursor:pointer}
+/* ---------- recall first ---------- */
+.recall{position:absolute;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(640px,calc(100% - 20px));box-sizing:border-box;background:rgba(10,12,20,.93);backdrop-filter:blur(8px);border:1px solid rgba(242,184,75,.55);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 40px rgba(0,0,0,.55)}
+.chip.rec{color:var(--gold);border-color:rgba(242,184,75,.55);align-self:flex-start}
+.rq{margin:0;font-weight:700;font-size:16px}
+.rrow{display:flex;gap:8px}
+.rrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;padding:10px 12px}
+.rrow input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.rhint{margin:0;font-size:12px;color:var(--muted)}
+.typed{margin:0;color:#cfd6e4;font-style:italic}
+.ra{display:flex;flex-direction:column;gap:2px;border:1px solid rgba(93,255,160,.45);background:rgba(93,255,160,.07);border-radius:7px;padding:8px 12px}
+.ra b,.ra li{color:var(--good)}
+.ra ul{margin:2px 0 0;padding-left:20px}
+.v{font-weight:600;font-size:14px;color:var(--muted)}
+.v.good{color:var(--good)}.v.mid{color:var(--gold)}.v.bad{color:var(--bad)}
+.rate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rate .btn{padding:9px 10px}
+.rate .btn.sug{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+/* ---------- study, edit, debrief ---------- */
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.walkTabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.walkTabs button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+.walkTabs button[aria-current="true"]{border-color:var(--gold);color:var(--gold)}
+#walkHead{display:flex;flex-direction:column;gap:8px}
+#walkHead h2{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.6vw,32px)}
+.note.brief{background:var(--panel);border-radius:0 6px 6px 0;padding:10px 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.qcard .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.qcard .q{font-weight:700}
+.qcard .a{color:var(--good)}
+.qcard ol,.qcard ul{margin:0;padding-left:20px}
+.dots{letter-spacing:2px;color:var(--gold)}
+textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:12px;font-family:var(--mono);font-size:13px;line-height:1.5;resize:vertical}
+.help{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+.help code{font-family:var(--mono);font-size:12.5px;color:var(--gold)}
+.help p{margin:0}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.sum div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.sum b{font-family:var(--display);font-weight:400;font-size:26px;font-variant-numeric:tabular-nums}
+.miss{display:flex;flex-direction:column;gap:8px}
+.miss .grp{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:8px}
+.miss .row{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--bad);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;align-items:stretch;gap:5px}
+.miss .row .a{color:var(--good)}
+.miss .row .p{color:#ffb3bd;font-size:13px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<section id="home" class="page">
+  <div class="hero">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <p class="eyebrow">Psychiatry exam raid · FNPH Barnawa</p>
+      <h1>FNPH <span>Raid</span></h1>
+      <p class="lede">A fork of the arcade shooter Radius Raid, rebuilt around your exam. Fly in from the Zaire Road gate and take FNPH station by station. At each station, the answers come at you as gunships. Destroy the right one and the rest go down with it. Hit a wrong one and you're killed. Either way, a teaching card shows you what it means and why the other options were wrong.</p>
+      <div class="actions"><button id="bStart" class="btn primary">Start the raid</button><button id="bStudy" class="btn">Study the stations</button><button id="bEdit" class="btn ghost">Edit questions</button></div>
+      <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bRecall" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
+      <div class="homeG"><div class="segs" id="homeSegs"></div><span id="homeGLabel" class="muted"></span></div>
+      <p id="progLine" class="muted" style="margin:0;font-size:13px"></p>
+      <p id="padStatus" class="padStatus"></p>
+      <div id="homeMsg"></div>
+    </div>
+    <div class="mapbox"><canvas id="homeMap" width="960" height="600" aria-label="FNPH battlefield map with the 10 stations"></canvas></div>
+  </div>
+  <div class="homeGrid">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2 style="font-size:18px">Your route</h2>
+      <p class="muted" style="margin:0;font-size:13px"><b>Attack</b> raids just that station. You can also click a station on the map. Tap a station's name to include or skip it in the full raid. The green bar shows how well you know it.</p>
+      <ol class="stations" id="stations"></ol>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h2 style="font-size:18px">How it plays</h2>
+      <div class="how">
+        <div><b>Briefing</b><p>Each station opens with a briefing card: the framework for that topic, before you're tested on it.</p></div>
+        <div><b>Answers attack</b><p>Four gunships carry the options and close in on you. Each needs 3 hits. Swarms keep the pressure on.</p></div>
+        <div><b>Close calls</b><p>The wrong options are near-misses: a different number, the wrong cluster, the DSM rule instead of ICD-11, the neighbouring step. Read carefully before you fire. Recall-first mode is still available on this screen.</p></div>
+        <div><b>Beat par</b><p>Each station has a par time. The clock stops while you read, and you can't fail on time. Get an item right 3 times in a row and it is mastered: it drops out, so the station gets shorter and par easier to beat.</p></div>
+        <div><b>Procedures</b><p>For steps in order, destroy step 1, then step 2, and so on. Shooting a step out of order kills you and shows the full sequence.</p></div>
+      </div>
+      <div class="how">
+        <div><b>Keyboard and mouse</b><p><kbd>WASD</kbd> move · mouse aims, hold click to fire · <kbd>1</kbd>–<kbd>4</kbd> lock onto an answer, <kbd>Space</kbd> fires · <kbd>Tab</kbd> switches lock · <kbd>P</kbd> pause · <kbd>M</kbd> mute</p></div>
+        <div><b>USB controller</b><p>Left stick moves the machine left, right, forward and back. Right stick turns the whole machine on its axis to face where you point, and it snaps onto an answer you point near. Any face button or trigger fires · Start pauses. Different controller? Use <b>Set up controller</b>.</p></div>
+      </div>
+      <details class="credits"><summary>Credits and licence</summary>
+        <p>Game engine: <b>Radius Raid</b> by Jack Rugile (js13kGames 2013), used and modified under the MIT licence. Sound effects: jsfxr. Exam content, FNPH map, answer gunships, teaching cards and controller support were added for this version.</p>
+        <pre>The MIT License (MIT)
+
+Copyright (c) 2014 Jack Rugile
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre>
+        <p>The starter questions and teaching notes were written by Claude. Check them against your textbooks and local guidelines.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="play" hidden>
+  <div id="stage"><canvas id="cmg"></canvas><canvas id="cfg" aria-label="Raid battlefield"></canvas></div>
+  <div id="hurt"></div>
+  <div class="gbar" title="Overall progress"><div class="segs" id="gSegs"></div><span id="gLabel"></span></div>
+  <div class="hud">
+    <div class="stn"><span class="lbl" id="hStn"></span><b id="hLoc"></b><span id="hTopic"></span><div class="bar"><i id="hProg"></i></div><span class="lbl" id="hCount"></span><div class="life" title="Health"><i id="hLife"></i></div></div>
+    <div class="hudR">
+      <div class="timer"><span class="lbl">Clock · <span id="hPar">par --</span></span><b id="hTime">0:00</b><div class="tbar"><i id="hTimeBar"></i></div></div>
+      <div class="stats"><div class="stat"><span class="lbl">Score</span><b id="hScore">0</b></div><div class="stat"><span class="lbl">Streak</span><b id="hStreak">×1</b></div><div class="stat"><span class="lbl">Deaths</span><b id="hDeaths">0</b></div></div>
+      <div class="row"><button id="bMusic" class="icon">Music on</button><button id="bSound" class="icon">Sound on</button><button id="bPause" class="icon">Pause</button></div>
+    </div>
+  </div>
+  <div id="qbar" hidden><span class="chip" id="qChip"></span><p id="qText"></p><div class="chain" id="qChain"></div><div class="eta"><i id="qEta"></i></div></div>
+  <p class="keys">WASD move · mouse aim · hold click fire<br>1–4 lock on · Space fire · P pause</p>
+  <div id="recall" class="recall" hidden></div>
+  <p id="toast" class="toast" hidden></p>
+  <div id="cardWrap" hidden><div class="card" id="card"><div id="cardInner"></div><div class="cardFoot"><div class="bar"><i id="cardBar"></i></div><button id="cardBtn" class="btn primary">Next</button></div></div></div>
+</section>
+
+<div class="modal" id="padModal" hidden><div class="card padCard"><div id="cardInnerPad" style="padding:18px 22px;display:flex;flex-direction:column;gap:12px;overflow-y:auto"><p class="kicker" style="color:var(--gold)">Controller setup</p><div id="padBody"></div></div><div class="cardFoot" style="flex-direction:row;justify-content:space-between"><button id="padReset" class="btn ghost">Use automatic layout</button><button id="padDone" class="btn primary">Cancel</button></div></div></div>
+
+<section id="walk" class="page" hidden>
+  <div class="topbar"><button class="btn ghost" data-go="home">← Base</button><p class="eyebrow">Study the stations</p></div>
+  <div class="walkTabs" id="walkTabs"></div>
+  <div id="walkHead"></div>
+  <div class="cards" id="walkCards"></div>
+  <div class="actions"><button id="walkPrev" class="btn">Previous station</button><button id="walkSolo" class="btn primary">Raid this station</button><button id="walkNext" class="btn">Next station</button></div>
+</section>
+
+<section id="edit" class="page" hidden>
+  <div class="topbar"><button class="btn ghost" data-go="home">← Base</button><p class="eyebrow">Edit questions</p></div>
+  <div class="help">
+    <p><code>## Station | Topic</code> starts a station, in route order from the gate. The first 13 go on the map.</p>
+    <p><code>&gt; text</code> lines under a station are its briefing. Under a question they are its teaching note. Start a line with <code>&gt; - </code> for a bullet.</p>
+    <p><code>Q: question = right answer | wrong :: why it's wrong | wrong :: why</code></p>
+    <p><code>L: procedure = step 1 | step 2 | step 3 ~~ decoy :: why</code> must be shot in order · <code>S: list = item | item ~~ decoy :: why</code> any order</p>
+  </div>
+  <textarea id="deckText" spellcheck="false" aria-label="Question deck"></textarea>
+  <p class="errs" id="deckErr"></p>
+  <div class="actions"><button id="deckSave" class="btn primary">Save deck</button><button id="deckReset" class="btn ghost">Restore starter deck</button><span id="deckMsg" class="muted"></span></div>
+</section>
+
+<section id="debrief" class="page" hidden>
+  <div class="topbar"><button class="btn ghost" data-go="home">← Base</button><p class="eyebrow">Raid debrief</p></div>
+  <div class="sum" id="dSum"></div>
+  <h3>What killed you, with the teaching notes</h3>
+  <div class="miss" id="dMiss"></div>
+  <div class="actions"><button id="dAgain" class="btn primary">Continue the raid</button><button id="dStudy" class="btn">Study these stations</button></div>
+</section>
+/*__SCRIPTS__*/
