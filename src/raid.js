@@ -442,7 +442,7 @@ R.start=function(rooms,si){
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
-  Object.assign(R,{active:true,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
+  Object.assign(R,{active:true,concept:null,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
   R.tier=null;applyArsenal(false);
   const s=SP(R.rooms[R.si].idx);
   if(R.si===0){$.hero.x=Math.min($.ww-30,s.x+170);$.hero.y=s.y+20;}else{const p=SP(R.rooms[R.si-1].idx);$.hero.x=p.x;$.hero.y=p.y;}
@@ -473,10 +473,13 @@ R.update=function(){
 };
 function openBriefing(){
   const r=R.rooms[R.si];
-  const C=R.concept=pickConcept(r),pool=C?C.items:r.items;
+  const C=R.concept=r.missionConcept||pickConcept(r),basePool=C?C.items:r.items,
+    pool=R.campaignRun&&R.campaign?R.campaign.missionItems(basePool):basePool;
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
-  R.phase='briefing';R.queue=mixQueue(fresh.concat(review));R.total=R.queue.length;R.cleared=0;
+  R.phase='briefing';R.queue=mixQueue(fresh.concat(review));
+  if(R.campaignRun&&r.review)R.queue=mixQueue(pool);
+  if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
@@ -541,9 +544,9 @@ R.carrierDown=function(c){
     c.explode(190,true);$.textPops.push(new $.TextPop({x:c.x,y:c.y,value:pts,hue:190,saturation:100,lightness:70}));
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
-    if(it.type==='q'){grade(it.id,true);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
+    if(it.type==='q'){grade(it.id,true);if(R.campaign)R.campaign.recordItem(it);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
     else{it.found.push(c.text);Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');
-      if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
+      if(it.found.length===it.seq.length){grade(it.id,true);if(R.campaign)R.campaign.recordItem(it);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
     if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
@@ -554,7 +557,7 @@ R.carrierDown=function(c){
 };
 /* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
 function reinforce(it){
-  if(deathMode!=='drill'||!it.drillMiss)return;
+  if((!R.campaignRun&&deathMode!=='drill')||!it.drillMiss)return;
   it.drillMiss=false;
   const pos=Math.min(R.queue.length,2+Math.floor(Math.random()*2));
   R.queue.splice(pos,0,it);R.total++;
@@ -567,7 +570,7 @@ function afterCorrect(){
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
   if(R.wasMastered){R.toast('Mastered already · card skipped',true);nextQuestion();return;}
-  if(teachAll){learnCard(it);}else nextQuestion();
+  if(teachAll&&!R.campaignRun){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
   let body='<p class="cq">'+esc(it.prompt)+'</p>';
@@ -598,7 +601,7 @@ R.die=function(picked){
 R.overrun=function(){if(R.phase==='fight')R.die(null);};
 R.deathCard=function(){
   Q('#hurt').classList.remove('on');
-  const it=R.cur,{picked,opts,found}=R.deadInfo;let body='<p class="cq">'+esc(it.prompt)+'</p>';
+  const dm=R.campaignRun?'drill':deathMode,it=R.cur,{picked,opts,found}=R.deadInfo;let body='<p class="cq">'+esc(it.prompt)+'</p>';
   if(it.type==='q'){
     if(picked)body+='<div class="ans bad"><span class="lbl">You picked</span><b>'+esc(picked)+'</b><span>'+esc(reasonFor(it,picked))+'</span></div>';
     else body+='<div class="ans bad"><span class="lbl">Overrun</span><span>The answers reached you before you destroyed the right one.</span></div>';
@@ -615,18 +618,18 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(deathMode==='restart'?'This station restarts from the beginning.':deathMode==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
-  const it=R.cur;it.found=[];
-  if(deathMode==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
-  else if(deathMode==='drill'){it.drillMiss=true;R.queue.unshift(it);}
+  const it=R.cur,dm=R.campaignRun?'drill':deathMode;it.found=[];
+  if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
+  else if(dm==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
-  if(deathMode==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
-  else if(deathMode==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
+  if(dm==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
+  else if(dm==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
   clearAnswerSplash();
@@ -661,6 +664,7 @@ function stationCleared(){
     '<p class="meta">'+mNow+' of '+r.items.length+' mastered here ('+(mNow-R.m0>=0?'+'+(mNow-R.m0):mNow-R.m0)+' this run) · '+(R.deaths-R.d0)+' death'+(R.deaths-R.d0===1?'':'s')+' here.</p>';
   if(left.length)body+='<div class="others"><span class="lbl">Still to master here (they come back next time)</span><ul>'+left.slice(0,8).map(it=>'<li><b>'+esc(it.prompt)+'</b><span>'+esc(it.type==='q'?it.answer:it.seq.join(' → '))+'</span></li>').join('')+(left.length>8?'<li><span>…and '+(left.length-8)+' more. See Study the stations.</span></li>':'')+'</ul></div>';
   else body+='<p>Every item here is mastered. Next time this station is just a quick review.</p>';
+  if(R.onCampaignClear&&R.onCampaignClear())return;
   const nxt=R.si+1<R.rooms.length?R.rooms[R.si+1]:null;
   card('learn',C&&!allC?'Concept secured':'Station taken',body,nxt?'Advance to '+nxt.locus:'Finish the raid',()=>{
     if(nxt){R.si++;R.phase='travel';objective();}else victory();
@@ -679,7 +683,7 @@ R.pause=function(){
   Q('#cEnd').onclick=()=>{closeCard(true);debrief();};
   Q('#cHome').onclick=()=>{closeCard(true);quitToHome();};
 };
-function quitToHome(){clearAnswerSplash();R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
+function quitToHome(){clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
@@ -712,11 +716,12 @@ function globalBar(){
 let gKey='';
 function updateGlobal(){const g=globalBar();if(g.key===gKey)return;gKey=g.key;Q('#gSegs').innerHTML=g.html;Q('#gLabel').textContent=g.label;}
 function hud(){
+  if(R.campaign)R.campaign.updateRibbon();
   if(!R.active)return;
   updateGlobal();
   const r=R.rooms[R.si],tot=R.total||r.items.length,done=R.phase==='travel'?0:R.cleared;
   const key=[r.idx,done,tot,$.score,R.deaths,R.streak,Math.round($.hero.life*20),R.par,R.phase].join('|');if(key===hudKey)return;hudKey=key;
-  Q('#hStn').textContent='Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=R.concept?r.topic+' · '+R.concept.title:r.topic;
+  Q('#hStn').textContent=R.campaignRun&&R.campaign?R.campaign.hudLabel():'Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=R.concept?r.topic+' · '+R.concept.title:r.topic;
   Q('#hProg').style.width=(tot?done/tot*100:0)+'%';Q('#hCount').textContent=done+' / '+tot+' cleared';
   Q('#hScore').textContent=$.score.toLocaleString();Q('#hStreak').textContent='×'+Math.min(5,1+Math.floor(R.streak/3));Q('#hDeaths').textContent=R.deaths;
   Q('#hLife').style.width=Math.max(0,$.hero.life*100)+'%';
@@ -914,9 +919,9 @@ let wiz=null; // controller setup wizard state
 function readPad(){let p=null;try{const ps=navigator.getGamepads?navigator.getGamepads():[];for(const g of ps)if(g&&g.connected!==false&&g.buttons&&g.buttons.length){p=g;break;}}catch(e){}return p;}
 let navLast='',navT=0,navRep=false;
 function padNav(scr,dir){
-  const els=[...scr.querySelectorAll('button:not([disabled]),a.btn,input[type=checkbox],select')].filter(e=>e.offsetParent!==null);if(!els.length)return;
+  const els=[...scr.querySelectorAll('button:not([disabled]),a.btn,input[type=checkbox],select,summary')].filter(e=>e.offsetParent!==null);if(!els.length)return;
   let cur=document.querySelector('.padf');if(!cur||!scr.contains(cur)){cur=null;}
-  if(!cur){const first=scr.querySelector('#bStart')||els[0];first.classList.add('padf');first.focus({preventScroll:true});first.scrollIntoView({block:'nearest'});return;}
+  if(!cur){const first=els.find(e=>e.id==='campaignLaunch')||els.find(e=>e.id==='bStart')||els[0];first.classList.add('padf');first.focus({preventScroll:true});first.scrollIntoView({block:'nearest'});return;}
   const a=cur.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;let best=null,bs=1e9;
   els.forEach(e=>{if(e===cur)return;const b=e.getBoundingClientRect(),bx=b.left+b.width/2,by=b.top+b.height/2,dx=bx-ax,dy=by-ay;
     const main=dir==='r'?dx:dir==='l'?-dx:dir==='d'?dy:-dy,off=dir==='r'||dir==='l'?Math.abs(dy):Math.abs(dx);
@@ -948,9 +953,9 @@ R.pollPad=function(){
      const now=performance.now();
      if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
      if(!dir){navLast='';navRep=false;}
-     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
      else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
-     else if(anyPauseEdge){if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(anyPauseEdge){if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
   // drive
@@ -1037,6 +1042,7 @@ function showScreen(id){SCREENS.forEach(s=>Q('#'+s).hidden=s!==id);if(id==='play
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{renderHome();showScreen(b.dataset.go);}));
 function alertHome(msg){renderHome();showScreen('home');const p=document.createElement('p');p.className='errs';p.textContent=msg;Q('#homeMsg').appendChild(p);setTimeout(()=>p.remove(),4000);}
 function renderHome(){
+  if(R.campaign){R.campaign.render();R.campaign.updateRibbon();}
   const ol=Q('#stations');ol.innerHTML='';
   deck.rooms.forEach((r,i)=>{
     const on=!skipped.has(r.topic),onMap=i<SLOTS.length,m=Math.round(mastery(r)*100),cap=captured.has(r.topic);
@@ -1224,6 +1230,7 @@ function drawTactical(ctx){
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
   ctx.restore();
 }
+R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 window.addEventListener('load',()=>{
   $.init();buildMap();renderHome();showScreen('home');

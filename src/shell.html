@@ -221,9 +221,35 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
 .miss .row .a{color:var(--good)}
 .miss .row .p{color:#ffb3bd;font-size:13px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* Operation Nightingale: a cinematic hangar above the retained free-flight mode. */
+#home{max-width:1440px;padding-top:18px}
+.campaignPanel{border:1px solid #405b6266;border-radius:12px;overflow:hidden;background:#09131d;box-shadow:0 24px 100px #0008}
+.campaignMast{display:flex;justify-content:space-between;gap:12px;padding:13px 24px;border-bottom:1px solid #c2e5e01a;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:#b0ccc8;text-transform:uppercase;background:#0a141de6}
+.campaignMast b{color:#e0ce9e;font-weight:400}.hangar{position:relative;min-height:550px;isolation:isolate;display:flex;align-items:center}.hangar canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}.campaignCopy{width:43%;max-width:550px;padding:40px 44px;color:#e7f4ef}
+.campaignTag{font-family:var(--mono);color:#90c8be;font-size:10px;letter-spacing:.18em}.campaignCopy h1{font-size:clamp(36px,4.5vw,67px);line-height:1.04;margin:12px 0 20px;letter-spacing:-.035em;font-family:var(--display);font-weight:400}.campaignCopy h1 em{display:block;font-style:normal;color:#e5cf9f}.campaignCopy>p{max-width:405px;color:#b1c7c7;font-size:15px;line-height:1.7}.campaignObjective{margin:24px 0 20px;border-left:2px solid #d5bc7b;padding:3px 0 3px 14px}.campaignObjective small{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:#94a7ab}.campaignObjective b{display:block;font-size:17px;font-weight:500;margin-top:5px;color:#f2e5c8}.launchBtn{background:#e9d2a0!important;color:#14212a!important;border-color:#e9d2a0!important;border-radius:3px;padding:14px 24px;min-width:210px;text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;box-shadow:0 0 30px #efd7a311}.launchBtn:hover{box-shadow:0 0 30px #efd7a344}.campaignCopy .campaignFootnote{font-size:11px;margin:10px 0 0;color:#9bafad}
+.framePlaque{position:absolute;right:28px;bottom:30px;text-align:right;pointer-events:none}.framePlaque h2{font-family:var(--display);font-size:27px;letter-spacing:.08em;font-weight:400;margin:0;color:#f5ead0}.framePlaque p{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#a7c4c5;margin:5px 0}.framePlaque small{font-size:10px;color:#b8ab8b}
+.campaignLedger{display:grid;grid-template-columns:1fr auto;gap:10px 30px;align-items:center;padding:17px 24px;border-top:1px solid #adc9c122;background:#0a151e}.campaignLedger p{font:10px var(--mono);color:#a7c4c0;margin:0 0 9px}.campaignMeter{height:3px;background:#c3dfdf15;max-width:500px}.campaignMeter i{display:block;height:100%;background:#d7c08d;transition:width .5s}.frameSteps{display:flex;gap:16px;font:9px var(--mono);color:#68808a}.frameSteps span{display:flex;align-items:center;gap:5px}.frameSteps i{display:block;width:5px;height:5px;background:#344954;transform:rotate(45deg)}.frameSteps .earned{color:#e7cf9c}.frameSteps .earned i{background:#e7cf9c;box-shadow:0 0 8px #e7cf9c55}
+.chapterRail{display:flex;gap:0;overflow-x:auto;scrollbar-width:thin;background:#070e16;padding:6px 12px 12px}.chapterNode{position:relative;min-width:132px;max-width:132px;padding:18px 12px 12px;border-top:1px solid #364853;margin-top:12px;color:#647782}.chapterNode:before{content:'';position:absolute;top:-4px;left:12px;width:7px;height:7px;border:1px solid #485965;background:#101e29;border-radius:50%}.chapterNode span{font:10px var(--mono);letter-spacing:.12em}.chapterNode b{display:block;font-size:12px;font-weight:500;margin:7px 0 5px;line-height:1.25}.chapterNode small{font:9px var(--mono);opacity:.7}.chapterNode.current{color:#f2dfb9;border-top-color:#d8bd83}.chapterNode.current:before{background:#e8cea0;box-shadow:0 0 13px #e8cea0}.chapterNode.done{color:#91cbbc;border-top-color:#91cbbc}.chapterNode.done:before{background:#91cbbc}
+.freeFlight{border:1px solid #344752;border-radius:8px;padding:15px 20px;background:#0b131c}.freeFlight>summary{cursor:pointer;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#bccdcb}.freeFlight[open]>.hero{padding-top:25px}.freeFlight .hero{margin-bottom:25px}.freeFlight .hero h1{font-size:36px}
+#play.campaignPlay .keys{display:none}
+#missionRibbon{position:absolute;z-index:4;left:20px;bottom:18px;max-width:min(440px,45vw);padding:10px 15px;background:#07121be0;border-left:2px solid #dcc28e;pointer-events:none;backdrop-filter:blur(8px)}#missionRibbon span{display:block;font:9px var(--mono);letter-spacing:.18em;color:#e2cba0}#missionRibbon b{display:block;font-size:13px;font-weight:500;color:#e6f1ec;margin:4px 0}#missionRibbon small{font-size:10px;color:#94aaa9}.card.cinema{width:min(780px,94vw);background:radial-gradient(ellipse at 100% 0%,#26434c,transparent 60%),#09131e;border:1px solid #8ca5a755;box-shadow:0 24px 100px #000b}.card.cinema #cardInner{padding:28px 34px}.card.cinema .kicker{display:none}.cinemaTop,.cinemaBottom{display:flex;justify-content:space-between;gap:15px;font:9px var(--mono);letter-spacing:.1em;color:#95b2b2;align-items:center}.cinemaEyebrow{font:10px var(--mono);letter-spacing:.2em;color:#e4c78b;margin:35px 0 10px}.cinemaTitle{font-family:var(--display);font-size:clamp(28px,5vw,48px);line-height:1.12;font-weight:400;margin:0 0 18px;color:#f1e2c2}.cinemaStory{font-size:16px;line-height:1.7;color:#b8ced0;max-width:610px}.missionDossier{border:1px solid #c4dbd422;border-left:2px solid #d9c18d;padding:15px 20px;background:#050e1777;margin:25px 0}.missionDossier>span{font:9px var(--mono);letter-spacing:.15em;color:#99b6b5}.missionDossier h3{font-size:19px;font-weight:500;color:#f0e2c5;margin:8px 0}.missionDossier p{font-size:12px;color:#a3bdbb;margin:0}.cinemaBottom .btn{font-size:10px}.card.cinema .cardFoot{background:#07101c88;border-top:1px solid #c6dcd122}.card.cinema .btn.primary{background:#e6cca0;border-color:#e6cca0;color:#13222b;text-transform:uppercase;letter-spacing:.12em;font-size:11px;padding:13px 24px}
+@media(max-width:800px){.campaignMast{padding:12px 16px;font-size:8px}.campaignMast>span:last-child{display:none}.hangar{min-height:660px;align-items:flex-end}.campaignCopy{width:auto;max-width:100%;padding:275px 25px 30px;background:linear-gradient(transparent 35%,#050a12e8 57%)}.campaignCopy h1{font-size:35px;max-width:90%}.campaignCopy>p{font-size:13px;line-height:1.5;max-width:440px}.campaignCopy .campaignTag{font-size:8px}.framePlaque{top:18px;bottom:auto;right:18px}.framePlaque h2{font-size:20px}.framePlaque p{max-width:180px;font-size:8px}.framePlaque small{display:none}.campaignObjective{margin:17px 0}.campaignObjective b{font-size:14px}.campaignLedger{display:block;padding:16px}.frameSteps{margin-top:16px;gap:12px;flex-wrap:wrap}.chapterNode{min-width:113px;max-width:113px}#missionRibbon{left:10px;bottom:9px;max-width:45vw;padding:6px 9px}#missionRibbon small{display:none}#missionRibbon b{font-size:10px}.card.cinema #cardInner{padding:24px 20px}.cinemaStory{font-size:14px}.cinemaTop{font-size:8px}.cinemaBottom{letter-spacing:0}}
+
 </style>
 
 <section id="home" class="page">
+  <section class="campaignPanel" aria-label="Operation Nightingale campaign">
+    <div class="campaignMast"><b>FNPH RAID / OPERATION NIGHTINGALE</b><span>Psychiatry residency · 20 chapters</span><span>Command link established</span></div>
+    <div class="hangar"><canvas id="hangarArt" aria-label="Your evolving mecha in the Nightingale hangar"></canvas>
+      <div class="campaignCopy"><span class="campaignTag" id="campaignChapter"></span><h1>Restore the<br><em>human signal.</em></h1><span class="campaignTag" id="campaignTitle"></span><p id="campaignStory"></p><div class="campaignObjective"><small>NEXT MISSION</small><b id="campaignObjective"></b></div><button id="campaignLaunch" class="btn launchBtn">Begin the story</button><p class="campaignFootnote">One story. The whole course. Progress saved as you answer.</p></div>
+      <div class="framePlaque"><p id="frameCode"></p><h2 id="frameName"></h2><small id="frameNext"></small></div>
+    </div>
+    <div class="campaignLedger"><div><p id="campaignProgress"></p><div class="campaignMeter"><i id="campaignFill"></i></div></div><div id="frameSteps" class="frameSteps" aria-label="Frame evolution milestones"></div></div>
+    <div id="chapterRail" class="chapterRail" aria-label="Linear campaign timeline"></div>
+  </section>
+  <details class="freeFlight"><summary>Free flight · individual stations · daily review · study · settings</summary>
+
   <div class="hero">
     <div style="display:flex;flex-direction:column;gap:14px">
       <p class="eyebrow">Psychiatry exam raid · FNPH Barnawa</p>
@@ -272,11 +298,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       </details>
     </div>
   </div>
+</details>
 </section>
 
 <section id="play" hidden>
   <div id="stage"><canvas id="cmg"></canvas><canvas id="cfg" aria-label="Raid battlefield"></canvas></div>
   <div id="hurt"></div>
+  <div id="missionRibbon" hidden aria-live="polite"></div>
   <div id="answerSplash" class="answerSplash" hidden role="status" aria-live="polite" aria-atomic="true"><strong id="answerSplashText"></strong></div>
   <div class="gbar" title="Overall progress"><div class="segs" id="gSegs"></div><span id="gLabel"></span></div>
   <div class="hud">

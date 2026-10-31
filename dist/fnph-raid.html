@@ -221,9 +221,35 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
 .miss .row .a{color:var(--good)}
 .miss .row .p{color:#ffb3bd;font-size:13px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* Operation Nightingale: a cinematic hangar above the retained free-flight mode. */
+#home{max-width:1440px;padding-top:18px}
+.campaignPanel{border:1px solid #405b6266;border-radius:12px;overflow:hidden;background:#09131d;box-shadow:0 24px 100px #0008}
+.campaignMast{display:flex;justify-content:space-between;gap:12px;padding:13px 24px;border-bottom:1px solid #c2e5e01a;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:#b0ccc8;text-transform:uppercase;background:#0a141de6}
+.campaignMast b{color:#e0ce9e;font-weight:400}.hangar{position:relative;min-height:550px;isolation:isolate;display:flex;align-items:center}.hangar canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}.campaignCopy{width:43%;max-width:550px;padding:40px 44px;color:#e7f4ef}
+.campaignTag{font-family:var(--mono);color:#90c8be;font-size:10px;letter-spacing:.18em}.campaignCopy h1{font-size:clamp(36px,4.5vw,67px);line-height:1.04;margin:12px 0 20px;letter-spacing:-.035em;font-family:var(--display);font-weight:400}.campaignCopy h1 em{display:block;font-style:normal;color:#e5cf9f}.campaignCopy>p{max-width:405px;color:#b1c7c7;font-size:15px;line-height:1.7}.campaignObjective{margin:24px 0 20px;border-left:2px solid #d5bc7b;padding:3px 0 3px 14px}.campaignObjective small{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:#94a7ab}.campaignObjective b{display:block;font-size:17px;font-weight:500;margin-top:5px;color:#f2e5c8}.launchBtn{background:#e9d2a0!important;color:#14212a!important;border-color:#e9d2a0!important;border-radius:3px;padding:14px 24px;min-width:210px;text-transform:uppercase;font-size:11px;letter-spacing:.15em;font-weight:700;box-shadow:0 0 30px #efd7a311}.launchBtn:hover{box-shadow:0 0 30px #efd7a344}.campaignCopy .campaignFootnote{font-size:11px;margin:10px 0 0;color:#9bafad}
+.framePlaque{position:absolute;right:28px;bottom:30px;text-align:right;pointer-events:none}.framePlaque h2{font-family:var(--display);font-size:27px;letter-spacing:.08em;font-weight:400;margin:0;color:#f5ead0}.framePlaque p{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#a7c4c5;margin:5px 0}.framePlaque small{font-size:10px;color:#b8ab8b}
+.campaignLedger{display:grid;grid-template-columns:1fr auto;gap:10px 30px;align-items:center;padding:17px 24px;border-top:1px solid #adc9c122;background:#0a151e}.campaignLedger p{font:10px var(--mono);color:#a7c4c0;margin:0 0 9px}.campaignMeter{height:3px;background:#c3dfdf15;max-width:500px}.campaignMeter i{display:block;height:100%;background:#d7c08d;transition:width .5s}.frameSteps{display:flex;gap:16px;font:9px var(--mono);color:#68808a}.frameSteps span{display:flex;align-items:center;gap:5px}.frameSteps i{display:block;width:5px;height:5px;background:#344954;transform:rotate(45deg)}.frameSteps .earned{color:#e7cf9c}.frameSteps .earned i{background:#e7cf9c;box-shadow:0 0 8px #e7cf9c55}
+.chapterRail{display:flex;gap:0;overflow-x:auto;scrollbar-width:thin;background:#070e16;padding:6px 12px 12px}.chapterNode{position:relative;min-width:132px;max-width:132px;padding:18px 12px 12px;border-top:1px solid #364853;margin-top:12px;color:#647782}.chapterNode:before{content:'';position:absolute;top:-4px;left:12px;width:7px;height:7px;border:1px solid #485965;background:#101e29;border-radius:50%}.chapterNode span{font:10px var(--mono);letter-spacing:.12em}.chapterNode b{display:block;font-size:12px;font-weight:500;margin:7px 0 5px;line-height:1.25}.chapterNode small{font:9px var(--mono);opacity:.7}.chapterNode.current{color:#f2dfb9;border-top-color:#d8bd83}.chapterNode.current:before{background:#e8cea0;box-shadow:0 0 13px #e8cea0}.chapterNode.done{color:#91cbbc;border-top-color:#91cbbc}.chapterNode.done:before{background:#91cbbc}
+.freeFlight{border:1px solid #344752;border-radius:8px;padding:15px 20px;background:#0b131c}.freeFlight>summary{cursor:pointer;font:11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#bccdcb}.freeFlight[open]>.hero{padding-top:25px}.freeFlight .hero{margin-bottom:25px}.freeFlight .hero h1{font-size:36px}
+#play.campaignPlay .keys{display:none}
+#missionRibbon{position:absolute;z-index:4;left:20px;bottom:18px;max-width:min(440px,45vw);padding:10px 15px;background:#07121be0;border-left:2px solid #dcc28e;pointer-events:none;backdrop-filter:blur(8px)}#missionRibbon span{display:block;font:9px var(--mono);letter-spacing:.18em;color:#e2cba0}#missionRibbon b{display:block;font-size:13px;font-weight:500;color:#e6f1ec;margin:4px 0}#missionRibbon small{font-size:10px;color:#94aaa9}.card.cinema{width:min(780px,94vw);background:radial-gradient(ellipse at 100% 0%,#26434c,transparent 60%),#09131e;border:1px solid #8ca5a755;box-shadow:0 24px 100px #000b}.card.cinema #cardInner{padding:28px 34px}.card.cinema .kicker{display:none}.cinemaTop,.cinemaBottom{display:flex;justify-content:space-between;gap:15px;font:9px var(--mono);letter-spacing:.1em;color:#95b2b2;align-items:center}.cinemaEyebrow{font:10px var(--mono);letter-spacing:.2em;color:#e4c78b;margin:35px 0 10px}.cinemaTitle{font-family:var(--display);font-size:clamp(28px,5vw,48px);line-height:1.12;font-weight:400;margin:0 0 18px;color:#f1e2c2}.cinemaStory{font-size:16px;line-height:1.7;color:#b8ced0;max-width:610px}.missionDossier{border:1px solid #c4dbd422;border-left:2px solid #d9c18d;padding:15px 20px;background:#050e1777;margin:25px 0}.missionDossier>span{font:9px var(--mono);letter-spacing:.15em;color:#99b6b5}.missionDossier h3{font-size:19px;font-weight:500;color:#f0e2c5;margin:8px 0}.missionDossier p{font-size:12px;color:#a3bdbb;margin:0}.cinemaBottom .btn{font-size:10px}.card.cinema .cardFoot{background:#07101c88;border-top:1px solid #c6dcd122}.card.cinema .btn.primary{background:#e6cca0;border-color:#e6cca0;color:#13222b;text-transform:uppercase;letter-spacing:.12em;font-size:11px;padding:13px 24px}
+@media(max-width:800px){.campaignMast{padding:12px 16px;font-size:8px}.campaignMast>span:last-child{display:none}.hangar{min-height:660px;align-items:flex-end}.campaignCopy{width:auto;max-width:100%;padding:275px 25px 30px;background:linear-gradient(transparent 35%,#050a12e8 57%)}.campaignCopy h1{font-size:35px;max-width:90%}.campaignCopy>p{font-size:13px;line-height:1.5;max-width:440px}.campaignCopy .campaignTag{font-size:8px}.framePlaque{top:18px;bottom:auto;right:18px}.framePlaque h2{font-size:20px}.framePlaque p{max-width:180px;font-size:8px}.framePlaque small{display:none}.campaignObjective{margin:17px 0}.campaignObjective b{font-size:14px}.campaignLedger{display:block;padding:16px}.frameSteps{margin-top:16px;gap:12px;flex-wrap:wrap}.chapterNode{min-width:113px;max-width:113px}#missionRibbon{left:10px;bottom:9px;max-width:45vw;padding:6px 9px}#missionRibbon small{display:none}#missionRibbon b{font-size:10px}.card.cinema #cardInner{padding:24px 20px}.cinemaStory{font-size:14px}.cinemaTop{font-size:8px}.cinemaBottom{letter-spacing:0}}
+
 </style>
 
 <section id="home" class="page">
+  <section class="campaignPanel" aria-label="Operation Nightingale campaign">
+    <div class="campaignMast"><b>FNPH RAID / OPERATION NIGHTINGALE</b><span>Psychiatry residency · 20 chapters</span><span>Command link established</span></div>
+    <div class="hangar"><canvas id="hangarArt" aria-label="Your evolving mecha in the Nightingale hangar"></canvas>
+      <div class="campaignCopy"><span class="campaignTag" id="campaignChapter"></span><h1>Restore the<br><em>human signal.</em></h1><span class="campaignTag" id="campaignTitle"></span><p id="campaignStory"></p><div class="campaignObjective"><small>NEXT MISSION</small><b id="campaignObjective"></b></div><button id="campaignLaunch" class="btn launchBtn">Begin the story</button><p class="campaignFootnote">One story. The whole course. Progress saved as you answer.</p></div>
+      <div class="framePlaque"><p id="frameCode"></p><h2 id="frameName"></h2><small id="frameNext"></small></div>
+    </div>
+    <div class="campaignLedger"><div><p id="campaignProgress"></p><div class="campaignMeter"><i id="campaignFill"></i></div></div><div id="frameSteps" class="frameSteps" aria-label="Frame evolution milestones"></div></div>
+    <div id="chapterRail" class="chapterRail" aria-label="Linear campaign timeline"></div>
+  </section>
+  <details class="freeFlight"><summary>Free flight · individual stations · daily review · study · settings</summary>
+
   <div class="hero">
     <div style="display:flex;flex-direction:column;gap:14px">
       <p class="eyebrow">Psychiatry exam raid · FNPH Barnawa</p>
@@ -272,11 +298,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       </details>
     </div>
   </div>
+</details>
 </section>
 
 <section id="play" hidden>
   <div id="stage"><canvas id="cmg"></canvas><canvas id="cfg" aria-label="Raid battlefield"></canvas></div>
   <div id="hurt"></div>
+  <div id="missionRibbon" hidden aria-live="polite"></div>
   <div id="answerSplash" class="answerSplash" hidden role="status" aria-live="polite" aria-atomic="true"><strong id="answerSplashText"></strong></div>
   <div class="gbar" title="Overall progress"><div class="segs" id="gSegs"></div><span id="gLabel"></span></div>
   <div class="hud">
@@ -3700,7 +3728,7 @@ R.start=function(rooms,si){
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
-  Object.assign(R,{active:true,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
+  Object.assign(R,{active:true,concept:null,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
   R.tier=null;applyArsenal(false);
   const s=SP(R.rooms[R.si].idx);
   if(R.si===0){$.hero.x=Math.min($.ww-30,s.x+170);$.hero.y=s.y+20;}else{const p=SP(R.rooms[R.si-1].idx);$.hero.x=p.x;$.hero.y=p.y;}
@@ -3731,10 +3759,13 @@ R.update=function(){
 };
 function openBriefing(){
   const r=R.rooms[R.si];
-  const C=R.concept=pickConcept(r),pool=C?C.items:r.items;
+  const C=R.concept=r.missionConcept||pickConcept(r),basePool=C?C.items:r.items,
+    pool=R.campaignRun&&R.campaign?R.campaign.missionItems(basePool):basePool;
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
-  R.phase='briefing';R.queue=mixQueue(fresh.concat(review));R.total=R.queue.length;R.cleared=0;
+  R.phase='briefing';R.queue=mixQueue(fresh.concat(review));
+  if(R.campaignRun&&r.review)R.queue=mixQueue(pool);
+  if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
@@ -3799,9 +3830,9 @@ R.carrierDown=function(c){
     c.explode(190,true);$.textPops.push(new $.TextPop({x:c.x,y:c.y,value:pts,hue:190,saturation:100,lightness:70}));
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
-    if(it.type==='q'){grade(it.id,true);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
+    if(it.type==='q'){grade(it.id,true);if(R.campaign)R.campaign.recordItem(it);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
     else{it.found.push(c.text);Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');
-      if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
+      if(it.found.length===it.seq.length){grade(it.id,true);if(R.campaign)R.campaign.recordItem(it);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
     if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
@@ -3812,7 +3843,7 @@ R.carrierDown=function(c){
 };
 /* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
 function reinforce(it){
-  if(deathMode!=='drill'||!it.drillMiss)return;
+  if((!R.campaignRun&&deathMode!=='drill')||!it.drillMiss)return;
   it.drillMiss=false;
   const pos=Math.min(R.queue.length,2+Math.floor(Math.random()*2));
   R.queue.splice(pos,0,it);R.total++;
@@ -3825,7 +3856,7 @@ function afterCorrect(){
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
   if(R.wasMastered){R.toast('Mastered already · card skipped',true);nextQuestion();return;}
-  if(teachAll){learnCard(it);}else nextQuestion();
+  if(teachAll&&!R.campaignRun){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
   let body='<p class="cq">'+esc(it.prompt)+'</p>';
@@ -3856,7 +3887,7 @@ R.die=function(picked){
 R.overrun=function(){if(R.phase==='fight')R.die(null);};
 R.deathCard=function(){
   Q('#hurt').classList.remove('on');
-  const it=R.cur,{picked,opts,found}=R.deadInfo;let body='<p class="cq">'+esc(it.prompt)+'</p>';
+  const dm=R.campaignRun?'drill':deathMode,it=R.cur,{picked,opts,found}=R.deadInfo;let body='<p class="cq">'+esc(it.prompt)+'</p>';
   if(it.type==='q'){
     if(picked)body+='<div class="ans bad"><span class="lbl">You picked</span><b>'+esc(picked)+'</b><span>'+esc(reasonFor(it,picked))+'</span></div>';
     else body+='<div class="ans bad"><span class="lbl">Overrun</span><span>The answers reached you before you destroyed the right one.</span></div>';
@@ -3873,18 +3904,18 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(deathMode==='restart'?'This station restarts from the beginning.':deathMode==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
-  const it=R.cur;it.found=[];
-  if(deathMode==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
-  else if(deathMode==='drill'){it.drillMiss=true;R.queue.unshift(it);}
+  const it=R.cur,dm=R.campaignRun?'drill':deathMode;it.found=[];
+  if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
+  else if(dm==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
-  if(deathMode==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
-  else if(deathMode==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
+  if(dm==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
+  else if(dm==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
   clearAnswerSplash();
@@ -3919,6 +3950,7 @@ function stationCleared(){
     '<p class="meta">'+mNow+' of '+r.items.length+' mastered here ('+(mNow-R.m0>=0?'+'+(mNow-R.m0):mNow-R.m0)+' this run) · '+(R.deaths-R.d0)+' death'+(R.deaths-R.d0===1?'':'s')+' here.</p>';
   if(left.length)body+='<div class="others"><span class="lbl">Still to master here (they come back next time)</span><ul>'+left.slice(0,8).map(it=>'<li><b>'+esc(it.prompt)+'</b><span>'+esc(it.type==='q'?it.answer:it.seq.join(' → '))+'</span></li>').join('')+(left.length>8?'<li><span>…and '+(left.length-8)+' more. See Study the stations.</span></li>':'')+'</ul></div>';
   else body+='<p>Every item here is mastered. Next time this station is just a quick review.</p>';
+  if(R.onCampaignClear&&R.onCampaignClear())return;
   const nxt=R.si+1<R.rooms.length?R.rooms[R.si+1]:null;
   card('learn',C&&!allC?'Concept secured':'Station taken',body,nxt?'Advance to '+nxt.locus:'Finish the raid',()=>{
     if(nxt){R.si++;R.phase='travel';objective();}else victory();
@@ -3937,7 +3969,7 @@ R.pause=function(){
   Q('#cEnd').onclick=()=>{closeCard(true);debrief();};
   Q('#cHome').onclick=()=>{closeCard(true);quitToHome();};
 };
-function quitToHome(){clearAnswerSplash();R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
+function quitToHome(){clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
@@ -3970,11 +4002,12 @@ function globalBar(){
 let gKey='';
 function updateGlobal(){const g=globalBar();if(g.key===gKey)return;gKey=g.key;Q('#gSegs').innerHTML=g.html;Q('#gLabel').textContent=g.label;}
 function hud(){
+  if(R.campaign)R.campaign.updateRibbon();
   if(!R.active)return;
   updateGlobal();
   const r=R.rooms[R.si],tot=R.total||r.items.length,done=R.phase==='travel'?0:R.cleared;
   const key=[r.idx,done,tot,$.score,R.deaths,R.streak,Math.round($.hero.life*20),R.par,R.phase].join('|');if(key===hudKey)return;hudKey=key;
-  Q('#hStn').textContent='Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=R.concept?r.topic+' · '+R.concept.title:r.topic;
+  Q('#hStn').textContent=R.campaignRun&&R.campaign?R.campaign.hudLabel():'Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=R.concept?r.topic+' · '+R.concept.title:r.topic;
   Q('#hProg').style.width=(tot?done/tot*100:0)+'%';Q('#hCount').textContent=done+' / '+tot+' cleared';
   Q('#hScore').textContent=$.score.toLocaleString();Q('#hStreak').textContent='×'+Math.min(5,1+Math.floor(R.streak/3));Q('#hDeaths').textContent=R.deaths;
   Q('#hLife').style.width=Math.max(0,$.hero.life*100)+'%';
@@ -4172,9 +4205,9 @@ let wiz=null; // controller setup wizard state
 function readPad(){let p=null;try{const ps=navigator.getGamepads?navigator.getGamepads():[];for(const g of ps)if(g&&g.connected!==false&&g.buttons&&g.buttons.length){p=g;break;}}catch(e){}return p;}
 let navLast='',navT=0,navRep=false;
 function padNav(scr,dir){
-  const els=[...scr.querySelectorAll('button:not([disabled]),a.btn,input[type=checkbox],select')].filter(e=>e.offsetParent!==null);if(!els.length)return;
+  const els=[...scr.querySelectorAll('button:not([disabled]),a.btn,input[type=checkbox],select,summary')].filter(e=>e.offsetParent!==null);if(!els.length)return;
   let cur=document.querySelector('.padf');if(!cur||!scr.contains(cur)){cur=null;}
-  if(!cur){const first=scr.querySelector('#bStart')||els[0];first.classList.add('padf');first.focus({preventScroll:true});first.scrollIntoView({block:'nearest'});return;}
+  if(!cur){const first=els.find(e=>e.id==='campaignLaunch')||els.find(e=>e.id==='bStart')||els[0];first.classList.add('padf');first.focus({preventScroll:true});first.scrollIntoView({block:'nearest'});return;}
   const a=cur.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;let best=null,bs=1e9;
   els.forEach(e=>{if(e===cur)return;const b=e.getBoundingClientRect(),bx=b.left+b.width/2,by=b.top+b.height/2,dx=bx-ax,dy=by-ay;
     const main=dir==='r'?dx:dir==='l'?-dx:dir==='d'?dy:-dy,off=dir==='r'||dir==='l'?Math.abs(dy):Math.abs(dx);
@@ -4206,9 +4239,9 @@ R.pollPad=function(){
      const now=performance.now();
      if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
      if(!dir){navLast='';navRep=false;}
-     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
      else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
-     else if(anyPauseEdge){if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(anyPauseEdge){if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
   // drive
@@ -4295,6 +4328,7 @@ function showScreen(id){SCREENS.forEach(s=>Q('#'+s).hidden=s!==id);if(id==='play
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{renderHome();showScreen(b.dataset.go);}));
 function alertHome(msg){renderHome();showScreen('home');const p=document.createElement('p');p.className='errs';p.textContent=msg;Q('#homeMsg').appendChild(p);setTimeout(()=>p.remove(),4000);}
 function renderHome(){
+  if(R.campaign){R.campaign.render();R.campaign.updateRibbon();}
   const ol=Q('#stations');ol.innerHTML='';
   deck.rooms.forEach((r,i)=>{
     const on=!skipped.has(r.topic),onMap=i<SLOTS.length,m=Math.round(mastery(r)*100),cap=captured.has(r.topic);
@@ -4482,6 +4516,7 @@ function drawTactical(ctx){
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
   ctx.restore();
 }
+R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 window.addEventListener('load',()=>{
   $.init();buildMap();renderHome();showScreen('home');
@@ -4585,12 +4620,12 @@ function choose(){
 
 /* ------------------------------ rendering ------------------------------ */
 function draw(){
-  const r=run;resize();const c=cx,hor=Math.round(H*.40),camH=1.0,focal=H*.9;
+  const r=run;resize();const theme=R.routeTheme||(R.campaign?R.campaign.routeFor((R.rooms&&R.rooms[R.si]?R.rooms[R.si].idx:0)):{name:'Night dispatch',label:'Hospital perimeter',sky:['#05060f','#1a1036','#4a1d4f'],ground:'#0b1a10',edge:'#62e6ff'});const c=cx,hor=Math.round(H*.40),camH=1.0,focal=H*.9;
   const sh=r&&r.shake?(Math.random()-.5)*r.shake:0;
   c.save();c.translate(sh,sh*.6);
   if(r){const dx=r.x-(r.px==null?r.x:r.px);r.px=r.x;r.roll=(r.roll||0)*.9+dx*.9;c.translate(W/2,H*.6);c.rotate(-r.roll);c.translate(-W/2,-H*.6);}
   // sky
-  let g=c.createLinearGradient(0,0,0,hor);g.addColorStop(0,'#05060f');g.addColorStop(.6,'#1a1036');g.addColorStop(1,'#4a1d4f');
+  let g=c.createLinearGradient(0,0,0,hor);g.addColorStop(0,theme.sky[0]);g.addColorStop(.6,theme.sky[1]);g.addColorStop(1,theme.sky[2]);
   c.fillStyle=g;c.fillRect(-20,-20,W+40,hor+20);
   for(let i=0;i<70;i++){const sx=((i*97.3)%1)*0+((i*137)%W),sy=(i*53)%(hor*.8);c.fillStyle='rgba(255,255,255,'+(.25+((i*31)%7)/12+.1*Math.sin(Date.now()/500+i))+')';c.fillRect(sx,sy,i%5?1:2,i%5?1:2);}
   const drift=r?Math.sin(r.curveT*.35)*60:0;
@@ -4602,7 +4637,7 @@ function draw(){
     c.fillStyle='#0d0f1f';c.fillRect(bx,hor-bh,bw*.92,bh);
     c.fillStyle='rgba(255,210,122,.35)';for(let wy=hor-bh+6;wy<hor-6;wy+=9)for(let wx=bx+4;wx<bx+bw*.85;wx+=8)if(((wx*7+wy*3+i)|0)%5===0)c.fillRect(wx,wy,3,4);}
   // ground
-  c.fillStyle='#0b1a10';c.fillRect(-20,hor,W+40,H-hor+20);
+  c.fillStyle=theme.ground;c.fillRect(-20,hor,W+40,H-hor+20);
   if(!r){c.restore();return;}
   // road by scanlines (perspective: screen offset and width both scale with ZR/z)
   const pos=r.pos,n=r.n,ZR=10,span=H-hor;
@@ -4611,9 +4646,9 @@ function draw(){
     const sc=(y-hor)/span,z=ZR/sc;if(z>Z0*1.6)continue;
     const half=W*.6*sc,cxs=W/2+(curveAt(z,r)-r.x)*half;
     const stripe=Math.floor((z+pos)/40)%2===0;
-    c.fillStyle=stripe?'#0f2416':'#0b1a10';c.fillRect(0,y,W,2);
-    c.fillStyle=stripe?'#e8e8e8':'#d03030';c.fillRect(cxs-half*1.12,y,half*2.24,2);
-    c.fillStyle=stripe?'#2a2d36':'#25272f';c.fillRect(cxs-half,y,half*2,2);
+    c.fillStyle=theme.ground;c.fillRect(0,y,W,2);
+    c.fillStyle=stripe?theme.edge:'#17252e';c.fillRect(cxs-half*1.12,y,half*2.24,2);
+    c.fillStyle=theme.wet?(stripe?'#213242':'#192a38'):(stripe?'#303943':'#28313b');c.fillRect(cxs-half,y,half*2,2);
     if(stripe){c.fillStyle='rgba(255,255,255,.75)';for(let l=1;l<n;l++){const lx=cxs-half+half*2*l/n;c.fillRect(lx-Math.max(1,half*.012),y,Math.max(2,half*.024),2);}}
   }
   // roadside scenery: hospital blocks and trees, drawn far to near
@@ -4636,6 +4671,24 @@ function draw(){
       c.fillStyle='#2b2f3a';c.fillRect(p.x-p.half*.02,p.y-hgt,Math.max(1,p.half*.04),hgt);
       c.fillStyle='rgba(255,220,150,.9)';c.beginPath();c.arc(p.x,p.y-hgt,Math.max(1.5,p.half*.05),0,Math.PI*2);c.fill();
       if(k%4===0&&side===1){c.fillStyle='#d01f3c';const sw=p.half*.35;c.fillRect(p.x-sw/2,p.y-hgt*1.25,sw,sw*.55);c.fillStyle='#fff';c.fillRect(p.x-sw*.06,p.y-hgt*1.25+sw*.08,sw*.12,sw*.4);c.fillRect(p.x-sw*.2,p.y-hgt*1.25+sw*.22,sw*.4,sw*.12);}}}
+  // Moving lamp standards, luminous lane-edge reflections and underpass ribs.
+  for(let k=10;k>=0;k--){
+    const z=((k*105-pos)%1150+1150)%1150+18;
+    const l=proj(-1.28,z),rr=proj(1.28,z),height=l.half*1.35;
+    if(theme.tunnel){
+      c.strokeStyle='#02080ed9';c.lineWidth=Math.max(3,l.half*.14);c.beginPath();c.moveTo(l.x,l.y);c.lineTo(l.x,l.y-height*.6);c.bezierCurveTo(l.x,l.y-height*1.6,rr.x,rr.y-height*1.6,rr.x,rr.y-height*.6);c.lineTo(rr.x,rr.y);c.stroke();
+      c.strokeStyle=theme.edge+'55';c.lineWidth=Math.max(1,l.half*.015);c.beginPath();c.moveTo(l.x+l.half*.08,l.y-height*.3);c.bezierCurveTo(l.x,l.y-height*1.5,rr.x,rr.y-height*1.5,rr.x-l.half*.08,rr.y-height*.3);c.stroke();
+    }else for(const side of [-1,1]){
+      const p=side<0?l:rr;c.strokeStyle='#b0cbd466';c.lineWidth=Math.max(1,p.half*.016);c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x,p.y-height);c.lineTo(p.x-side*p.half*.22,p.y-height);c.stroke();
+      c.fillStyle='#e7e7c9';c.fillRect(p.x-side*p.half*.22-2,p.y-height-2,Math.max(2,p.half*.12),Math.max(1,p.half*.025));
+      if(theme.wet){c.globalAlpha=.1;c.fillStyle=theme.edge;c.fillRect(p.x-side*p.half*.18,p.y,Math.max(1,p.half*.04),Math.min(H-p.y,p.half*.8));c.globalAlpha=1;}
+    }
+  }
+  // Roadside traffic stays outside the answer lanes; it never changes grading.
+  for(let k=0;k<5;k++){
+    const z=((k*223-pos*.64)%1200+1200)%1200+35,p=proj(k%2?-1.75:1.75,z),bw=p.half*.32,bh=bw*.65;
+    if(bw<2)continue;c.fillStyle=k%2?'#34526a':'#ac8b6a';c.fillRect(p.x-bw/2,p.y-bh,bw,bh);c.fillStyle='#101e2e';c.fillRect(p.x-bw*.35,p.y-bh*.85,bw*.7,bh*.4);c.fillStyle=k%2?'#ee7668':'#ffe8b5';c.fillRect(p.x-bw*.43,p.y-bh*.2,bw*.18,bh*.1);c.fillRect(p.x+bw*.25,p.y-bh*.2,bw*.18,bh*.1);
+  }
   // answer gantry
   if(r.z>0){
     const zz=Math.max(8,15+r.z*.4),pl=proj(-1.1,zz),pr=proj(1.1,zz),gh=pl.half*1.15;
@@ -4655,17 +4708,22 @@ function draw(){
   if(R.phase==='fight'&&r.boost>1.2){c.strokeStyle='rgba(255,255,255,.18)';c.lineWidth=2;for(let i=0;i<22;i++){const a=(i*2.399+Date.now()/90)%(Math.PI*2),r0=W*.18+((Date.now()/3+i*97)%(W*.4));c.beginPath();c.moveTo(W/2+Math.cos(a)*r0,hor+Math.sin(a)*r0*.5);c.lineTo(W/2+Math.cos(a)*(r0+60),hor+Math.sin(a)*(r0+60)*.5);c.stroke();}}
   // burst when passing the gantry
   if(r.parts){r.parts=r.parts.filter(q=>(q.l-=1)>0);r.parts.forEach(q=>{q.x+=q.vx;q.y+=q.vy;q.vy+=.25;c.globalAlpha=Math.min(1,q.l/30);c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s,q.s);});c.globalAlpha=1;}
+  if(theme.wet){c.strokeStyle='#d5edff33';c.lineWidth=1;const tm=Date.now()/16;for(let k=0;k<65;k++){const x=(k*157.7+tm*1.3)%W,y=(k*79.1+tm*4)%H;c.beginPath();c.moveTo(x,y);c.lineTo(x-5,y+15);c.stroke();}}
+  // Cinematic route identity and progress to the destination.
+  c.fillStyle='#06101dd9';c.fillRect(16,hor-56,Math.min(310,W*.43),48);c.fillStyle=theme.edge;c.font='600 10px "JetBrains Mono", monospace';c.fillText(theme.label.toUpperCase(),28,hor-37);c.fillStyle='#eef5ec';c.font='600 15px "Chakra Petch", sans-serif';c.fillText(theme.name,28,hor-16);
+  const progress=R.total?Math.min(1,(R.cleared+(R.wave?R.wave.t:0))/R.total):0;c.fillStyle='#a4c7c733';c.fillRect(16,hor-6,Math.min(310,W*.43),2);c.fillStyle=theme.edge;c.fillRect(16,hor-6,Math.min(310,W*.43)*progress,2);
   // ambulance (rear view)
   const lane=laneOf(r.x,n),tilt=(r.target!=null?(r.target-r.x):0)*.25+((($.keys&&$.keys.state.right)?1:0)-(($.keys&&$.keys.state.left)?1:0))*.06;
   const narrow=W<700,cols=narrow?2:n,rows=Math.ceil(n/cols),cardH=narrow?74:Math.max(86,H*.13-10),cardsTop=H-rows*(cardH+10)-10*(narrow?1:0)-(narrow?0:0),cw=Math.min(W*.15,180),chh=cw*.78,ax=W/2,ay=cardsTop-chh*.95;
   c.save();c.translate(ax,ay);c.rotate(tilt);
   c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(0,chh*.52,cw*.62,chh*.12,0,0,Math.PI*2);c.fill();
   c.fillStyle='#111';c.fillRect(-cw*.48,chh*.30,cw*.18,chh*.22);c.fillRect(cw*.30,chh*.30,cw*.18,chh*.22);
-  c.fillStyle='#f2f4f8';c.fillRect(-cw/2,-chh*.5,cw,chh*.86);
+  const body=c.createLinearGradient(-cw/2,0,cw/2,0);body.addColorStop(0,'#8ca4af');body.addColorStop(.12,'#edf0e8');body.addColorStop(.7,'#d5dfdf');body.addColorStop(1,'#718c9f');c.fillStyle=body;c.fillRect(-cw/2,-chh*.5,cw,chh*.86);c.strokeStyle='#e5efff';c.lineWidth=1;c.strokeRect(-cw/2,-chh*.5,cw,chh*.86);
   c.fillStyle='#d01f3c';c.fillRect(-cw/2,chh*.02,cw,chh*.1);
   c.fillStyle='#1c2a3a';c.fillRect(-cw*.36,-chh*.40,cw*.3,chh*.28);c.fillRect(cw*.06,-chh*.40,cw*.3,chh*.28);
   c.fillStyle='#d01f3c';c.fillRect(-cw*.05,-chh*.36,cw*.1,chh*.22);c.fillRect(-cw*.11,-chh*.3,cw*.22,chh*.09);
-  const blink=(Date.now()/120|0)%2;
+  c.strokeStyle='#bad2e177';c.lineWidth=1;c.beginPath();c.moveTo(0,-chh*.46);c.lineTo(0,chh*.3);c.moveTo(-cw*.36,-chh*.39);c.lineTo(-cw*.09,-chh*.18);c.moveTo(cw*.07,-chh*.39);c.lineTo(cw*.34,-chh*.18);c.stroke();
+  const blink=(Date.now()/180|0)%2;
   c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.fillRect(-cw*.42,-chh*.62,cw*.3,chh*.12);
   c.fillStyle=blink?'#ff2a3d':'#2f7bff';c.fillRect(cw*.12,-chh*.62,cw*.3,chh*.12);
   c.globalAlpha=.18;c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.beginPath();c.ellipse(blink?-cw*.27:cw*.27,-chh*.56,cw*.32,chh*.16,0,0,Math.PI*2);c.fill();c.globalAlpha=1;
@@ -4928,13 +4986,14 @@ function draw(){
   // tracers
   r.tracers.forEach(q=>{c.strokeStyle=q.col;c.globalAlpha=q.life/6;c.lineWidth=3;c.beginPath();c.moveTo(q.x0,q.y0);c.lineTo(q.x1,q.y1);c.stroke();c.globalAlpha=1;});
   // gun
-  const gc=($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
+  const frame=R.frames?R.frames[R.campaign?R.campaign.frameTier():Math.min(4,R.tier||0)]:null,gc=frame?frame.core:($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
   const gs=Math.min(W,H*1.6)/1000;
   c.fillStyle='#141a26';c.beginPath();c.moveTo(gx-90*gs,H+10);c.lineTo(gx-34*gs,gy-20*gs);c.lineTo(gx+40*gs,gy-20*gs);c.lineTo(gx+120*gs,H+10);c.closePath();c.fill();
   c.fillStyle='#2c3647';c.beginPath();c.moveTo(gx-26*gs,gy-20*gs);c.lineTo(gx-14*gs,gy-110*gs);c.lineTo(gx+22*gs,gy-110*gs);c.lineTo(gx+34*gs,gy-20*gs);c.closePath();c.fill();
   c.fillStyle='#3d4a60';c.fillRect(gx-10*gs,gy-128*gs,28*gs,24*gs);
   c.fillStyle=gc;c.globalAlpha=.9;c.fillRect(gx-20*gs,gy-90*gs,4*gs,60*gs);c.fillRect(gx+22*gs,gy-90*gs,4*gs,60*gs);c.fillRect(gx-4*gs,gy-124*gs,16*gs,5*gs);c.globalAlpha=1;
   if(r.recoil>.6){c.fillStyle=gc;c.globalAlpha=.75;c.beginPath();c.arc(gx+4*gs,gy-134*gs,34*gs*r.recoil,0,Math.PI*2);c.fill();c.globalAlpha=1;}
+  if(frame){const tier=R.campaign?R.campaign.frameTier():0;for(let k=0;k<=tier;k++){c.strokeStyle=frame.light+'99';c.lineWidth=2;c.beginPath();c.moveTo(gx-29*gs-k*5,gy-20*gs);c.lineTo(gx-38*gs-k*5,gy-62*gs);c.lineTo(gx-22*gs-k*5,gy-80*gs);c.stroke();}}
   // crosshair
   const ch=crosshair(),over=r.t.find(t=>t.alive&&t.rect&&ch.x>=t.rect.x&&ch.x<=t.rect.x+t.rect.w&&ch.y>=t.rect.y&&ch.y<=t.rect.y+t.rect.h);
   c.strokeStyle=over?COL[over.i]:'rgba(235,245,235,.95)';c.lineWidth=2;
@@ -4986,6 +5045,214 @@ function loop(now){
   draw();
 }
 ensureCanvas();requestAnimationFrame(loop);
+})();
+
+</script>
+<script>/* src/mecha.js */
+/* Original vector frames for FNPH Raid. Shared hangar and battlefield renderer. */
+(function(){
+'use strict';
+const R=$.raid;
+const FRAMES=R.frames=[
+ {name:'Kestrel',code:'RX–01',role:'Reconnaissance frame',at:0,ink:'#24394a',metal:'#91a7b0',light:'#f1e6c7',core:'#7affdb'},
+ {name:'Sentinel',code:'RX–02',role:'Armoured response frame',at:3,ink:'#183047',metal:'#8bb4cf',light:'#d9f5ff',core:'#67dfff'},
+ {name:'Seraph',code:'RX–03',role:'Wing-assisted assault frame',at:7,ink:'#402f35',metal:'#c2a18b',light:'#ffedcf',core:'#ff9b62'},
+ {name:'Archon',code:'RX–04',role:'Prismatic command frame',at:12,ink:'#2e2849',metal:'#9d94c9',light:'#eee6ff',core:'#c5a1ff'},
+ {name:'Nightingale',code:'RX–05',role:'Ascendant guardian frame',at:17,ink:'#293342',metal:'#d3bf87',light:'#fff7dd',core:'#ffe392'}
+];
+const poly=(c,pts,fill,stroke)=>{c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}};
+const line=(c,p,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();p.forEach((v,i)=>i?c.lineTo(...v):c.moveTo(...v));c.stroke();};
+function glow(c,x,y,r,col){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'transparent');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}
+function plate(c,pts,f){const yy=pts.map(p=>p[1]),g=c.createLinearGradient(0,Math.min(...yy),20,Math.max(...yy)+1);g.addColorStop(0,f.light);g.addColorStop(.23,f.metal);g.addColorStop(1,f.ink);poly(c,pts,g,f.metal);const a=pts[0],b=pts[1];line(c,[[a[0]+2,a[1]+2],[b[0]-2,b[1]+2]],f.light,1.6);}
+R.drawFrame=function(c,x,y,scale,tier,time,topDown,heading,recoil){
+ const f=FRAMES[Math.max(0,Math.min(4,tier|0))];c.save();c.translate(x,y);c.scale(scale,scale);
+ if(topDown){
+  c.rotate(heading||0);c.shadowColor=f.core;c.shadowBlur=10;
+  for(const s of [-1,1]){
+   poly(c,[[-20,s*9],[-29-8*Math.sin(time*24),s*13],[-20,s*17]],f.core);
+   c.shadowBlur=0;plate(c,[[-18,s*8],[-6,s*17],[10,s*14],[16,s*7],[1,s*4]],f);
+   if(tier>=1)plate(c,[[-13,s*16],[-7,s*(22+tier)],[6,s*(22+tier)],[14,s*15]],f);
+   if(tier>=2)poly(c,[[-13,s*20],[-28-tier*3,s*(30+tier*3)],[-21,s*12]],f.ink,f.core);
+   if(tier>=3)line(c,[[-24,s*24],[-34,s*33],[-25,s*14]],f.core,1.5);
+   c.fillStyle=f.ink;c.fillRect(-5,s*10-2,24,4);c.fillStyle=f.light;c.fillRect(8,s*10-1,14,2);
+  }
+  plate(c,[[-17,0],[-7,-9],[11,-7],[20,0],[11,7],[-7,9]],f);
+  c.fillStyle=f.ink;c.fillRect(1-(recoil||0)*3,-3,27,6);c.fillStyle=f.core;c.fillRect(24-(recoil||0)*3,-2,5,4);
+  glow(c,2,0,12,f.core+'88');poly(c,[[-4,0],[3,-4],[9,0],[3,4]],f.core);
+  if(tier===4){c.strokeStyle=f.core+'99';c.lineWidth=.8;c.beginPath();c.arc(0,0,34,time*.6,time*.6+Math.PI*1.5);c.stroke();}
+ }else{
+  // A front three-quarter hangar portrait: every plate is drawn, not a sprite filter.
+  const bob=Math.sin(time*1.4)*2;c.translate(0,bob);
+  for(const s of [-1,1]){
+   if(tier>=2){
+    c.save();c.scale(s,1);const wing=23+tier*15;
+    poly(c,[[20,-65],[wing+28,-112],[wing+19,-28],[30,-5]],f.ink,f.metal);
+    plate(c,[[35,-65],[wing+20,-103],[wing+10,-49],[43,-30]],f);
+    line(c,[[40,-62],[wing+13,-91],[wing+4,-49]],f.core,2);
+    if(tier>=3){poly(c,[[42,-40],[wing+45,-64],[wing+14,2],[36,20]],f.ink,f.core);line(c,[[50,-35],[wing+33,-51],[wing+10,-4]],f.light,2);}
+    c.restore();
+   }
+   glow(c,s*24,94,44,f.core+'44');
+   // Thigh, knee, shin and broad mechanical foot.
+   plate(c,[[s*8,15],[s*34,11],[s*41,47],[s*29,64],[s*12,49]],f);
+   poly(c,[[s*13,49],[s*36,48],[s*40,64],[s*23,72]],f.ink,f.metal);
+   plate(c,[[s*17,66],[s*39,62],[s*46,99],[s*24,108],[s*14,89]],f);
+   poly(c,[[s*23,99],[s*44,94],[s*55,113],[s*15,113]],f.ink,f.light);
+   line(c,[[s*27,72],[s*31,94]],f.core,3);
+   // Shoulder silhouette grows at every refit.
+   const shoulder=45+tier*4;
+   plate(c,[[s*24,-65],[s*shoulder,-73],[s*(shoulder+13),-53],[s*(shoulder+9),-27],[s*28,-33]],f);
+   poly(c,[[s*30,-64],[s*(shoulder-1),-68],[s*(shoulder+7),-54],[s*33,-47]],f.ink,f.light);
+   line(c,[[s*35,-58],[s*(shoulder+4),-58]],f.core,2);
+   poly(c,[[s*34,-30],[s*51,-27],[s*53,-7],[s*38,0]],f.ink,f.metal);
+   plate(c,[[s*37,-7],[s*56,-12],[s*62,22],[s*47,34],[s*37,19]],f);
+   poly(c,[[s*44,29],[s*58,25],[s*60,42],[s*46,45]],f.ink,f.light);
+   // Wrist cannon, barrel bores and glowing capacitors.
+   c.save();c.scale(s,1);c.fillStyle=f.ink;c.fillRect(44,2,13,58+tier*3);c.strokeStyle=f.metal;c.strokeRect(44,2,13,58+tier*3);c.fillStyle=f.core;c.fillRect(48,9,3,25);c.fillStyle='#080f16';c.fillRect(47,54+tier*3,7,9);c.restore();
+   if(tier>=1){c.save();c.scale(s,1);c.fillStyle=f.ink;c.fillRect(33,-90,12,25);c.strokeStyle=f.light;c.strokeRect(33,-90,12,25);for(let k=0;k<3;k++){c.fillStyle=f.core;c.fillRect(36,-86+k*6,6,2);}c.restore();}
+  }
+  // Pelvis, abdominal articulation, ribbed torso and reactor.
+  poly(c,[[-26,10],[26,10],[35,30],[13,42],[-13,42],[-35,30]],f.ink,f.light);
+  for(let k=0;k<3;k++)plate(c,[[-17,-9+k*8],[17,-9+k*8],[14,0+k*8],[-14,0+k*8]],f);
+  plate(c,[[-29,-64],[29,-64],[35,-31],[20,-7],[-20,-7],[-35,-31]],f);
+  poly(c,[[-26,-59],[0,-48],[26,-59],[22,-32],[0,-19],[-22,-32]],f.ink,f.light);
+  glow(c,0,-37,33,f.core+'77');poly(c,[[0,-49],[12,-38],[0,-24],[-12,-38]],f.core,f.light);
+  for(let k=0;k<3;k++)for(const s of [-1,1])line(c,[[s*17,-34+k*5],[s*27,-39+k*5]],f.light,1.4);
+  // Helmet, brow, visor, cheek vents and signature antennae.
+  poly(c,[[-10,-85],[-5,-99],[7,-100],[14,-85],[10,-67],[0,-61],[-12,-70]],f.ink,f.light);
+  plate(c,[[-12,-86],[0,-94],[13,-85],[8,-77],[-9,-77]],f);
+  c.shadowColor=f.core;c.shadowBlur=13;line(c,[[-9,-80],[0,-77],[10,-81]],f.core,3);c.shadowBlur=0;
+  poly(c,[[-3,-74],[5,-74],[4,-64],[0,-61]],f.light,f.ink);
+  line(c,[[-8,-88],[-15,-111],[-4,-96]],f.light,2);line(c,[[8,-88],[18,-112],[5,-96]],f.light,2);
+  if(tier>=3){line(c,[[-13,-82],[-25,-99],[-17,-73]],f.core,1.5);line(c,[[13,-82],[25,-99],[17,-73]],f.core,1.5);}
+  if(tier===4){c.save();c.translate(0,-105);c.scale(1,.25);c.strokeStyle=f.core;c.lineWidth=2;c.shadowColor=f.core;c.shadowBlur=20;c.beginPath();c.arc(0,0,44,0,Math.PI*2);c.stroke();c.restore();}
+ }
+ c.restore();
+};
+// Same earned frame in actual top-down combat. Controls, hitbox and weapons are unchanged.
+$.Hero.prototype.render=function(){
+ if(this.life<=0)return;const c=$.ctxmg;const tier=R.campaign?R.campaign.frameTier():Math.min(4,R.tier||0);
+ c.save();c.fillStyle='#0007';c.beginPath();c.ellipse(this.x+5,this.y+9,34+tier*2,24,0,0,Math.PI*2);c.fill();c.restore();
+ R.drawFrame(c,this.x,this.y,1.25,tier,$.tick/60,true,this.direction,this.recoil);
+ this.recoil=Math.max(0,(this.recoil||0)-.25*$.dt);
+ c.strokeStyle=this.takingDamage?'#ff5468':FRAMES[tier].core+'99';c.lineWidth=1.5;c.beginPath();c.arc(this.x,this.y,40,-Math.PI/2,-Math.PI/2+Math.PI*2*this.life);c.stroke();
+};
+})();
+
+</script>
+<script>/* src/campaign.js */
+/* Operation Nightingale. A linear campaign through the existing course content. */
+(function(){
+'use strict';
+const R=$.raid,Q=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='fnphraid.campaign.v1';let save;
+try{save=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+if(!save||!Array.isArray(save.done))save={done:[],partial:null};
+if(save.partial&&(!Array.isArray(save.partial.cleared)||typeof save.partial.mission!=='string'))save.partial=null;
+let complete=new Set(save.done),active=null,lastTier=0,ribbonKey='';
+const persist=()=>{save.done=[...complete];try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}};
+// Fictional dispatch narrative; all examinable content comes from the existing deck.
+const STORY=[
+ ['First contact','The blackout begins at the gate. Reports are fragmented. Restore the language of symptoms before the next dispatch arrives.','Know what you are seeing.'],
+ ['A human signal','A voice breaks through the static. Reach the person behind the symptoms. Every careful question restores part of the network.','Listen before you label.'],
+ ['Light and shadow','The main block flickers between bright activity and deep silence. Trace the course, recognise the pattern, and carry the story forward.','Follow the course.'],
+ ['Patterns beneath','The north wing holds stories that began long before tonight. Separate enduring patterns from the immediate crisis.','Find the pattern across time.'],
+ ['The fractured signal','The pink quad is broadcasting contradictory messages. Make sense of the experiences, then practise the conversations that treatment requires.','Understand. Explain. Reconnect.'],
+ ['The treatment forge','The clinic powers up its treatment systems. Every intervention needs an indication, a conversation and a watchful eye.','Choose, monitor, protect.'],
+ ['Red dispatch','The emergency channel interrupts. This is where a memorised sequence becomes an action: follow the existing clinical steps in order.','Stay clear under pressure.'],
+ ['Breaking the loop','The U-block signal keeps returning to the same point. Explore the pattern of use, recognise its consequences and find a route out.','Understand the loop.'],
+ ['The inheritance archive','The sports-field relay opens a hidden archive. Follow the underlying mechanisms and rebuild the missing links.','Trace the connections.'],
+ ['Two lives, one mission','The courtyard receives a new dispatch. Work through the perinatal syllabus and its clinical conversations with care.','Think beyond one encounter.'],
+ ['The memory quarter','Some lights have been fading for years; others changed tonight. Follow the history and the course before drawing conclusions.','Time changes the meaning.'],
+ ['The long view','The round huts become a place of careful observation. Keep the person, their function and their circumstances in view.','Preserve the whole picture.'],
+ ['Signals in motion','The south ward exposes another layer of the network. Observe, localise and work through the neurological examination sequences.','Make every finding count.'],
+ ['The examination engine','The courtyard instruments come online. Turn the examination into a sequence you can perform, rather than a list you can merely name.','Look. Test. Interpret.'],
+ ['Rights under pressure','The clinic gates will not open without clear reasoning. Work through capacity, consent and the legal concepts in the source course.','A decision needs a reason.'],
+ ['Beyond the gate','The administration relay carries difficult accounts. Assess the question you were asked, follow the evidence and explain your conclusion.','Keep the question in focus.'],
+ ['The wider circle','The restored network reaches beyond the hospital walls. Follow the community syllabus from individual encounters to connected services.','Care extends beyond the ward.'],
+ ['Across the distance','A remote signal appears in the pharmacy relay. Rebuild communication across distance without losing the structure of the consultation.','Connection is part of care.'],
+ ['Those who came before','The library lights return. Recover the history that shaped the profession and place each development in its own time.','Know how we arrived here.'],
+ ['The final proof','The last lock is in the records office. Read the evidence, test your reasoning and bring the hospital network back into focus.','Let the evidence speak.']
+];
+const ROUTES=R.routes=[
+ {name:'Barnawa afterglow',label:'Hospital perimeter',sky:['#071829','#244a54','#f0ae78'],ground:'#122e2d',edge:'#62e6d2',wet:false,tunnel:false},
+ {name:'Neon arterial',label:'City transfer',sky:['#080a22','#281744','#ac4c72'],ground:'#111321',edge:'#ee8bd3',wet:true,tunnel:false},
+ {name:'Underpass relay',label:'Tunnel response',sky:['#03080e','#10202d','#2e5868'],ground:'#091920',edge:'#64dff4',wet:true,tunnel:true},
+ {name:'Blue-hour return',label:'Inter-hospital transfer',sky:['#081528','#2e465c','#d6a77a'],ground:'#1d2929',edge:'#ffe1a1',wet:false,tunnel:false}
+];
+function chapters(){return R.deckRooms().map((r,i)=>({room:r,index:i,story:STORY[i]||STORY[0],concepts:r.concepts.filter(c=>c.items.length)}));}
+function timeline(){const out=[];chapters().forEach(ch=>{
+ if(ch.index)out.push({id:'transfer::'+ch.room.topic,kind:'transfer',chapter:ch.index,ch,title:'Dispatch to '+ch.room.locus});
+ ch.concepts.forEach(c=>out.push({id:'concept::'+ch.room.topic+'::'+c.title,kind:'concept',chapter:ch.index,ch,concept:c,title:c.title.replace(/^OSCE: /,'')}));
+ });return out;}
+function next(){return timeline().find(m=>!complete.has(m.id))||null;}
+function clearedChapters(){return chapters().filter(ch=>ch.concepts.length&&ch.concepts.every(c=>complete.has('concept::'+ch.room.topic+'::'+c.title))).length;}
+function frameTier(){const n=clearedChapters();let tier=0;R.frames.forEach((f,i)=>{if(n>=f.at)tier=i;});return tier;}
+function routeFor(ch){return ROUTES[ch%ROUTES.length];}
+function weakTransfer(m){const prev=chapters()[m.chapter-1].room;const stats=R.itemStats();const now=Date.now();return prev.items.slice().sort((a,b)=>{
+ const rank=i=>{const s=stats[i.id]||{};return(s.wrong||0)*5-(s.box||0)*2+(s.due&&s.due<=now?8:0);};return rank(b)-rank(a);
+ }).slice(0,8);}
+function launch(){
+ const m=next();if(!m){render();return;}launchMission(m);
+}
+function launchMission(m){
+ active=m;lastTier=frameTier();
+ const room=m.kind==='transfer'?{...m.ch.room,mode:'race',review:true,missionConcept:null,concepts:[],items:weakTransfer(m),locus:m.ch.room.locus,topic:'Transfer to '+m.ch.room.topic,note:['Dispatch route: '+routeFor(m.chapter).name+'.','Answer lanes rehearse material from the chapter you just completed. Brake for reading time; the route has no speed deadline.'] }:{...m.ch.room,missionConcept:m.concept};
+ R.start([room],0,{campaign:true});R.routeTheme=routeFor(m.chapter);
+ const enter=()=>{const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.openBriefing();};
+ const alreadyInChapter=m.kind==='concept'&&timeline().some(x=>x.kind==='concept'&&x.chapter===m.chapter&&complete.has(x.id));
+ if(alreadyInChapter&&!m.concept.title.startsWith('OSCE:')){enter();updateRibbon();return;}
+ const f=R.frames[frameTier()],title=m.ch.story[0],route=m.kind==='transfer';
+ const body='<div class="cinemaTop"><span>OPERATION NIGHTINGALE</span><span>CHAPTER '+String(m.chapter+1).padStart(2,'0')+' / 20</span></div><p class="cinemaEyebrow">'+(route?'AMBULANCE DISPATCH':'SECTOR '+String(m.chapter+1).padStart(2,'0'))+'</p><h2 class="cinemaTitle">'+esc(route?R.routeTheme.name:title)+'</h2><p class="cinemaStory">'+esc(route?'The next relay is waiting. Take the ambulance through '+R.routeTheme.label.toLowerCase()+'. The questions on this road come from the chapter you just cleared.':m.ch.story[1])+'</p><div class="missionDossier"><span>YOUR NEXT OBJECTIVE</span><h3>'+esc(route?'Reach '+m.ch.room.locus:m.title)+'</h3><p>'+esc(route?'Eight review checkpoints · steer into the correct answer lane':m.ch.room.topic+' · '+m.concept.items.length+' course items · '+(m.concept.mode==='fps'?'ward-round simulation':'combat drill'))+'</p></div><div class="cinemaBottom"><span>'+esc(f.code+' '+f.name)+'</span><span>'+esc(m.ch.story[2])+'</span></div>';
+ R.showCard('cinema','Incoming transmission',body,route?'Accept dispatch':'Enter mission',enter,300);
+ updateRibbon();
+}
+const originalStart=R.start;
+R.start=function(rooms,si,options){R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
+R.onCampaignClear=function(){
+ if(!R.campaignRun||!active)return false;
+ const finished=active;complete.add(finished.id);save.partial=null;persist();const tier=frameTier(),upgrade=tier>lastTier,m=next(),f=R.frames[tier];
+ const list=timeline(),done=list.filter(x=>complete.has(x.id)).length;
+ const body='<div class="cinemaTop"><span>TRANSMISSION CONFIRMED</span><span>'+done+' / '+list.length+' MISSIONS</span></div><p class="cinemaEyebrow">'+(upgrade?'FRAME EVOLUTION UNLOCKED':'SIGNAL RESTORED')+'</p><h2 class="cinemaTitle">'+esc(upgrade?f.name:finished.kind==='transfer'?'Arrival confirmed':'Objective secured')+'</h2><p class="cinemaStory">'+esc(upgrade?f.code+' · '+f.role+'. Your new frame is waiting in the hangar and is equipped for the next combat mission.':finished.title)+'</p><div class="missionDossier"><span>'+(m?'NEXT IN THE STORY':'NETWORK RESTORED')+'</span><h3>'+esc(m?m.title:'Operation Nightingale complete')+'</h3><p>'+clearedChapters()+' / 20 chapters restored · '+(R.correct||0)+' correct choices this mission</p></div><div class="cinemaBottom"><span>Progress saved automatically</span><button class="btn ghost" id="campaignHangar">Return to hangar</button></div>';
+ R.showCard('cinema',upgrade?'Mecha refit complete':'Mission complete',body,m?'Continue the story':'Return to hangar',()=>m?launchMission(m):home(),300);
+ Q('#campaignHangar').onclick=home;render();updateRibbon();return true;
+};
+function home(){active=null;R.campaignRun=false;R.active=false;R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#cardWrap').hidden=true;$.setState('idle');R.toHome();render();}
+function recordItem(it){if(!R.campaignRun||!active)return;if(!save.partial||save.partial.mission!==active.id)save.partial={mission:active.id,cleared:[]};if(!save.partial.cleared.includes(it.id))save.partial.cleared.push(it.id);persist();}
+function missionItems(items){if(!R.campaignRun||!active||!save.partial||save.partial.mission!==active.id)return items;return items.filter(i=>!save.partial.cleared.includes(i.id));}
+function render(){
+ const m=next(),tier=frameTier(),f=R.frames[tier],list=timeline(),done=list.filter(x=>complete.has(x.id)).length,percent=list.length?Math.round(done/list.length*100):0;
+ const chapter=m?m.chapter:19;Q('#campaignChapter').textContent='CHAPTER '+String(chapter+1).padStart(2,'0')+' / 20';Q('#campaignTitle').textContent=m?m.ch.story[0]:'Network restored';Q('#campaignStory').textContent=m?m.ch.story[1]:'The course has been traversed. Keep building mastery through daily review and free-flight missions.';
+ Q('#campaignObjective').textContent=m?m.title:'Operation Nightingale complete';Q('#campaignLaunch').textContent=m?(done?'Continue mission':'Begin the story'):'Campaign complete';Q('#campaignLaunch').disabled=!m;
+ Q('#frameName').textContent=f.name;Q('#frameCode').textContent=f.code+' / '+f.role;Q('#campaignProgress').textContent=done+' / '+list.length+' missions · '+clearedChapters()+' / 20 chapters';Q('#campaignFill').style.width=percent+'%';
+ Q('#frameNext').textContent=R.frames[tier+1]?'Next refit: '+R.frames[tier+1].name+' · restore '+R.frames[tier+1].at+' chapters':'Ascendant frame fully unlocked';
+ Q('#chapterRail').innerHTML=chapters().map(ch=>{const n=ch.concepts.filter(c=>complete.has('concept::'+ch.room.topic+'::'+c.title)).length,status=n===ch.concepts.length?'done':ch.index===chapter?'current':'locked';return '<div class="chapterNode '+status+'" title="'+esc(ch.room.topic)+'"><span>'+String(ch.index+1).padStart(2,'0')+'</span><b>'+esc(ch.story[0])+'</b><small>'+n+'/'+ch.concepts.length+' missions</small></div>';}).join('');
+ Q('#frameSteps').innerHTML=R.frames.map((fr,i)=>'<span class="'+(i<=tier?'earned':'')+'"><i></i>'+esc(fr.name)+'</span>').join('');
+}
+function updateRibbon(){const el=Q('#missionRibbon');el.hidden=!R.campaignRun||!R.active||!active||!!R.modeName();if(el.hidden){ribbonKey='';return;}const key=active.id+'::'+frameTier();if(key===ribbonKey)return;ribbonKey=key;const f=R.frames[frameTier()];el.innerHTML='<span>CH '+String(active.chapter+1).padStart(2,'0')+' · '+(active.kind==='transfer'?'DISPATCH':'NIGHTINGALE')+'</span><b>'+esc(active.title)+'</b><small>'+esc(f.name)+' · progress saves as you answer</small>';}
+R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch,render,frameTier,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon};
+Q('#campaignLaunch').onclick=launch;
+// Animated hangar, drawn at a bounded resolution and paused when it is off screen.
+let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
+function hangar(now){requestAnimationFrame(hangar);if(now-last<(reduced?1000:33)||Q('#home').hidden)return;const rect=canvas.getBoundingClientRect();if(rect.bottom<0||rect.top>window.innerHeight)return;last=now;
+ const dpr=Math.min(window.devicePixelRatio||1,1.5),w=rect.width,h=rect.height;if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}c.setTransform(dpr,0,0,dpr,0,0);const t=reduced?0:now/1000,tier=frameTier(),f=R.frames[tier];
+ const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#080f18');bg.addColorStop(.55,'#142c38');bg.addColorStop(1,'#080e16');c.fillStyle=bg;c.fillRect(0,0,w,h);
+ const narrow=w<650,cx=narrow?w*.5:w*.71,cy=narrow?155:h*.48,sc=narrow?Math.min(1.15,w/285):Math.min(h/290,w/450)*.93;
+ // Cathedral-like hangar architecture and warm shafts of light.
+ for(let k=0;k<9;k++){const x=w*.34+k*w*.1;c.fillStyle=k%2?'#152632':'#1c3440';c.fillRect(x,0,w*.025,h);c.fillStyle='#aacac519';c.fillRect(x+w*.025,0,2,h);}
+ c.save();c.globalCompositeOperation='screen';for(let k=0;k<3;k++){const x=w*.53+k*w*.17;c.beginPath();c.moveTo(x,-20);c.lineTo(x+30,-20);c.lineTo(x-90,h);c.lineTo(x-210,h);c.closePath();const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#d5e8c22b');g.addColorStop(1,'#d5e8c200');c.fillStyle=g;c.fill();}c.restore();
+ c.strokeStyle='#89bbc322';c.lineWidth=1;for(let i=0;i<14;i++){const y=h*.69+Math.pow(i/13,1.7)*h*.4;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}for(let i=-8;i<12;i++){c.beginPath();c.moveTo(cx+i*20,h*.69);c.lineTo(cx+i*120,h);c.stroke();}
+ // Refit platform and projected reticle.
+ c.save();c.translate(cx,narrow?285:h*.86);c.scale(1,.24);c.fillStyle='#02070dbb';c.beginPath();c.arc(0,0,sc*111,0,Math.PI*2);c.fill();for(let k=0;k<3;k++){c.strokeStyle=k?f.core+'44':f.core+'aa';c.lineWidth=k?1:3;c.beginPath();c.arc(0,0,sc*(90+k*17),t*.12+k,t*.12+k+Math.PI*1.7);c.stroke();}c.restore();
+ c.save();c.translate(cx,cy);c.strokeStyle=f.core+'1e';c.lineWidth=1;c.setLineDash([4,8]);c.beginPath();c.arc(0,0,sc*125,0,Math.PI*2);c.stroke();c.setLineDash([]);c.restore();
+ R.drawFrame(c,cx,cy,sc,tier,t,false);
+ // Technical annotation lines, indexing and a scan pass.
+ c.font='10px monospace';c.fillStyle=f.core+'bb';c.strokeStyle=f.core+'66';for(const [dy,label] of (narrow?[]:[[-65,'NEURAL LINK / ONLINE'],[20,'ARMOUR / INTEGRITY 100%'],[80,'PROPULSION / STANDBY']])){const yy=cy+dy*sc;c.beginPath();c.moveTo(cx+45*sc,yy);c.lineTo(cx+100*sc,yy-16);c.lineTo(w-22,yy-16);c.stroke();c.fillText(label,Math.min(w-190,cx+95*sc),yy-22);}
+ const scan=(t*.12%1)*h;c.fillStyle=f.core+'08';c.fillRect(w*.38,scan,w*.62,2);
+ for(let i=0;i<36;i++){const x=(i*127.1+t*(i%2?3:-2))%w,y=(i*79.3+t*7)%h;c.fillStyle=i%3?'#b9ebda44':'#ffd9a477';c.fillRect(x,y,1.5,1.5);}
+ const shade=narrow?c.createLinearGradient(0,250,0,430):c.createLinearGradient(0,0,w,0);shade.addColorStop(0,narrow?'#050a1200':'#050a12');shade.addColorStop(.35,narrow?'#050a1244':'#050a12ed');shade.addColorStop(narrow?1:.6,narrow?'#050a12':'#050a1200');c.fillStyle=shade;c.fillRect(0,0,w,h);
+}
+render();requestAnimationFrame(hangar);
 })();
 
 </script>

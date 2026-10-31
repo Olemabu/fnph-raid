@@ -33,7 +33,9 @@ $order = @(
     'src/core.js',
     'src/raid.js',
     'src/mode-race.js',
-    'src/mode-fps.js'
+    'src/mode-fps.js',
+    'src/mecha.js',
+    'src/campaign.js'
 )
 
 foreach ($f in $order) {

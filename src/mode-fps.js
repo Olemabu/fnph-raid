@@ -207,13 +207,14 @@ function draw(){
   // tracers
   r.tracers.forEach(q=>{c.strokeStyle=q.col;c.globalAlpha=q.life/6;c.lineWidth=3;c.beginPath();c.moveTo(q.x0,q.y0);c.lineTo(q.x1,q.y1);c.stroke();c.globalAlpha=1;});
   // gun
-  const gc=($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
+  const frame=R.frames?R.frames[R.campaign?R.campaign.frameTier():Math.min(4,R.tier||0)]:null,gc=frame?frame.core:($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
   const gs=Math.min(W,H*1.6)/1000;
   c.fillStyle='#141a26';c.beginPath();c.moveTo(gx-90*gs,H+10);c.lineTo(gx-34*gs,gy-20*gs);c.lineTo(gx+40*gs,gy-20*gs);c.lineTo(gx+120*gs,H+10);c.closePath();c.fill();
   c.fillStyle='#2c3647';c.beginPath();c.moveTo(gx-26*gs,gy-20*gs);c.lineTo(gx-14*gs,gy-110*gs);c.lineTo(gx+22*gs,gy-110*gs);c.lineTo(gx+34*gs,gy-20*gs);c.closePath();c.fill();
   c.fillStyle='#3d4a60';c.fillRect(gx-10*gs,gy-128*gs,28*gs,24*gs);
   c.fillStyle=gc;c.globalAlpha=.9;c.fillRect(gx-20*gs,gy-90*gs,4*gs,60*gs);c.fillRect(gx+22*gs,gy-90*gs,4*gs,60*gs);c.fillRect(gx-4*gs,gy-124*gs,16*gs,5*gs);c.globalAlpha=1;
   if(r.recoil>.6){c.fillStyle=gc;c.globalAlpha=.75;c.beginPath();c.arc(gx+4*gs,gy-134*gs,34*gs*r.recoil,0,Math.PI*2);c.fill();c.globalAlpha=1;}
+  if(frame){const tier=R.campaign?R.campaign.frameTier():0;for(let k=0;k<=tier;k++){c.strokeStyle=frame.light+'99';c.lineWidth=2;c.beginPath();c.moveTo(gx-29*gs-k*5,gy-20*gs);c.lineTo(gx-38*gs-k*5,gy-62*gs);c.lineTo(gx-22*gs-k*5,gy-80*gs);c.stroke();}}
   // crosshair
   const ch=crosshair(),over=r.t.find(t=>t.alive&&t.rect&&ch.x>=t.rect.x&&ch.x<=t.rect.x+t.rect.w&&ch.y>=t.rect.y&&ch.y<=t.rect.y+t.rect.h);
   c.strokeStyle=over?COL[over.i]:'rgba(235,245,235,.95)';c.lineWidth=2;

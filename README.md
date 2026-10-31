@@ -101,3 +101,15 @@ Progress is saved in the browser's localStorage under keys starting `fnphraid.` 
 - Content changes go in `src/deck.txt`, not in code.
 - After any change, run `python build.py` and open `dist/fnph-raid.html` to test: start a raid, answer right and wrong, and check the teaching cards.
 - Medical content must stay accurate to ICD-11 and standard guidance (NICE, Maudsley). Flag anything uncertain rather than inventing it.
+
+## Operation Nightingale campaign
+
+Chapter and OSCE introductions use cinematic dispatch cards; ordinary concepts within a chapter go straight to their source briefing. The home hangar opens a saved, linear campaign with 20 chapters, all 339 existing concepts, and 19 inter-chapter ambulance transfers (358 missions). The story is fictional; clinical questions, OSCE checklists, source order and question IDs are retained in `src/deck.txt`.
+
+- **Continue mission** resumes the first incomplete mission. Successful whole questions/processes save immediately to `fnphraid.campaign.v1`, so reloading resumes that mission without replaying already secured items. An unfinished process restarts its sequence. Existing mastery and free-flight progress are separate and preserved.
+- All questions in the current concept that are not yet mastered are played; a small selection of mastered items is reviewed. OSCE process drills go first. Correct choices keep the campaign moving; wrong choices open the existing teaching card and repeat until right, then reinforce later in the run.
+- Each transfer selects eight questions from the chapter just completed, prioritising misses, overdue items and low mastery. Four original road environments rotate: hospital perimeter at dusk, wet neon city, underpass and blue-hour transfer. Roadside vehicles are scenery and do not interfere with answer grading.
+- Five original vector mecha frames unlock after 0, 3, 7, 12 and 17 completed chapters: Kestrel, Sentinel, Seraph, Archon and Nightingale. Silhouettes, wings, armour, reactor colours, hangar portraits, battlefield frames and ward-round weapon accents change. These frame rewards are cosmetic; the separate mastery-based weapon arsenal still determines combat upgrades.
+- Returning to the hangar, pausing or closing the tab keeps earned progress. The original station selection, daily review, question editor, settings and credits are under **Free flight**.
+
+`src/mecha.js` provides the shared vector renderer. `src/campaign.js` provides mission ordering, narrative, checkpoint saving, review transfers and hangar art. Both are included after the original game modes by both build scripts. No server, framework, raster download or external runtime dependency is added.
