@@ -3308,7 +3308,7 @@ function indexDeck(){ALL_ANS=[];ALL_LIST=[];deck.rooms.forEach(r=>r.items.forEac
 indexDeck();
 let stats=store.get('stats',{}),captured=new Set(store.get('captured',[])),skipped=new Set(store.get('skip',[]));
 let timerOn=store.get('timer',true);const MASTER_AT=3;
-let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode','shuffle');
+let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode2','drill');
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 function grade(id,ok,neutral){const s=st(id);s.seen++;if(neutral){}else if(ok){s.right++;s.box=Math.min(5,s.box+1);}else{s.wrong++;s.box=0;}store.set('stats',stats);}
 let recallOn=store.get('recall2',false);
@@ -3784,9 +3784,9 @@ R.carrierDown=function(c){
     c.explode(190,true);$.textPops.push(new $.TextPop({x:c.x,y:c.y,value:pts,hue:190,saturation:100,lightness:70}));
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
-    if(it.type==='q'){gradeRecall(it);R.cleared++;R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
+    if(it.type==='q'){gradeRecall(it);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
     else{it.found.push(c.text);
-      if(it.found.length===it.seq.length){gradeRecall(it);R.cleared++;R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
+      if(it.found.length===it.seq.length){gradeRecall(it);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
@@ -3794,6 +3794,14 @@ R.carrierDown=function(c){
   }
   hud();
 };
+/* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
+function reinforce(it){
+  if(deathMode!=='drill'||!it.drillMiss)return;
+  it.drillMiss=false;
+  const pos=Math.min(R.queue.length,2+Math.floor(Math.random()*2));
+  R.queue.splice(pos,0,it);R.total++;
+  setTimeout(()=>R.toast('Got it. It comes back once more after '+pos+' more question'+(pos===1?'':'s')+' to lock it in.',true),1100);
+}
 function gradeRecall(it){const r=recallOn?(it.rec||'missed'):'got';if(r==='got')grade(it.id,true);else if(r==='partly')grade(it.id,true,true);else grade(it.id,false);}
 function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
@@ -3849,16 +3857,18 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(deathMode==='restart'?'This station restarts from the beginning.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(deathMode==='restart'?'This station restarts from the beginning.':deathMode==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?'Killed':'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
   const it=R.cur;it.found=[];
   if(deathMode==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
+  else if(deathMode==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
-  if(deathMode!=='restart')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
+  if(deathMode==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
+  else if(deathMode==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
   R.phase='swarmdead';R.deaths++;R.streak=0;$.rumble.level=25;$.audio.play('death');synth('killed');
@@ -4261,7 +4271,7 @@ function renderHome(){
   Q('#bStart').textContent=(nSel<nAll?'Raid '+nSel+' selected station'+(nSel===1?'':'s'):nT===0?'Start the full raid':'Continue raid')+(nxt&&nT?' · next: '+nxt.locus:'');
   Q('#progLine').textContent=nT+' of '+rr.length+' stations taken · best score '+best.toLocaleString();
   Q('#bTeach').textContent='Teaching card after correct answers: '+(teachAll?'on':'off');
-  Q('#bMode').textContent='When I die: '+(deathMode==='shuffle'?'question goes back into the queue':'station restarts');
+  Q('#bMode').textContent='When I die: '+({drill:'repeat it until right, then again 2 to 3 later',shuffle:'question goes back into the queue',restart:'station restarts'}[deathMode]||'repeat it until right');
   Q('#bReset').hidden=nT===0;padStatus();
   Q('#bTimer').textContent='Par-time clock: '+(timerOn?'on':'off');
   Q('#bRecall').textContent='Recall first: '+(recallOn?'on (options stay sealed until you recall)':'off');
@@ -4280,7 +4290,7 @@ Q('#homeMap').addEventListener('click',e=>{
 });
 Q('#bStart').addEventListener('click',()=>{ac();const rr=routeRooms();if(!rr.length){alertHome('Pick at least one station with questions.');return;}let i=rr.findIndex(r=>!captured.has(r.topic));if(i<0){captured.clear();store.set('captured',[]);i=0;}R.start(rr,i);});
 Q('#bTeach').addEventListener('click',()=>{teachAll=!teachAll;store.set('teachAll',teachAll);renderHome();});
-Q('#bMode').addEventListener('click',()=>{deathMode=deathMode==='shuffle'?'restart':'shuffle';store.set('deathMode',deathMode);renderHome();});
+Q('#bMode').addEventListener('click',()=>{deathMode={drill:'shuffle',shuffle:'restart',restart:'drill'}[deathMode]||'drill';store.set('deathMode2',deathMode);renderHome();});
 Q('#bPad').addEventListener('click',()=>{ac();openWiz();});
 Q('#padDone').addEventListener('click',closeWiz);
 Q('#padReset').addEventListener('click',()=>{padMap=null;store.set('padMap2',null);wiz=null;Q('#padModal').hidden=true;renderHome();});

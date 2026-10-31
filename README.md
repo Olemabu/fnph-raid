@@ -50,6 +50,8 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 
 - **Ramming:** flying into the correct answer counts as answering it, with a "Rammed it!" toast. Flying into a wrong answer counts as choosing it, so you die and see why it was wrong.
 
+- **Drill mode (default):** a missed question comes straight back until you get it right, then once more 2 to 3 questions later for reinforcement. The home-screen "When I die" button cycles through drill, back into the queue, and restart station.
+
 ## Saved progress
 
 Progress is saved in the browser's localStorage under keys starting `fnphraid.` (stats, captured stations, settings, custom deck). Saved progress is specific to the browser and file location.
