@@ -540,7 +540,7 @@ R.carrierDown=function(c){
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
     if(it.type==='q'){grade(it.id,true);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
-    else{it.found.push(c.text);
+    else{it.found.push(c.text);Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');
       if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
     if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
