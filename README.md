@@ -50,16 +50,17 @@ S: list in any order = item | item | item ~~ decoy :: why
 
 Rules: exactly 4 options per `Q:` (the first is correct). Every wrong option and decoy needs a ` :: reason`. Wrong options should be near-misses: one key detail different from the right answer.
 
-## Recall and spaced repetition
+## Learning through gameplay
 
-- **Recall first** (home chip): *new and weak questions* (the default), *every question*, or *off*. The options stay sealed until you produce the answer yourself (say it aloud or type it), reveal it, and rate yourself: Got it, Partly or Missed. Only an honest "Got it" counts towards mastery.
-- **Hint ladder:** button 4 on the controller, or H, shows the first letters, then half of each word, then nearly all of it. Using a hint caps your rating at Partly.
-- **Spaced repetition:** every rating schedules the next review. A correct answer comes back in 1, 3, 7, 16, then 35 days; a miss comes back within the hour. **Daily review** on the home screen plays up to 30 due items from every station, mixed together.
-- **Full raid order** (home chip): map order, study plan (mood first), weakest station first, or most reviews due first. Tap a station's name to include it in or skip it from the full raid.
+- Answers are visible immediately. Shoot the correct gunship, drive through its lane, or hit its ward-round panel. No reveal, hints or self-rating gate.
+- Correct choices advance mastery and schedule later practice automatically. Missed choices return through the selected death mode; default drill repeats them until right, then again 2–3 questions later.
+- Mnemonic lists can use `Term => description` for each item and decoy. The player sees the description; the canonical term appears after the choice. Ordered mnemonic prompts show the current letter. IDs and saved progress remain tied to the original prompt.
+- Daily review plays due questions with the same direct gameplay. Correct answers are scheduled in 1, 3, 7, 16, then 35 days; misses are due within 30 minutes.
+- Full raid order supports map order, study plan, weakest station first or most reviews due first.
 
 ## Controller
 
-**Menus with only a gamepad:** use the d-pad or left stick to move the highlight, **button 1** to press, **button 2** to go back, and **Start** to start the raid. On cards, any button continues. In recall: button 1 reveals, button 4 gives a hint, then buttons 1, 2 or 3 rate Got it, Partly or Missed.
+**Menus with only a gamepad:** use the d-pad or left stick to move the highlight, **button 1** to press, **button 2** to go back, and **Start** to start the raid. On cards, any button continues.
 
 
 There is a built-in profile for the user's USB Gamepad (vendor 0810, product 0001): left stick (axes 0, 1) moves, right stick turns (axis 5 = left/right, axis 2 = up/down), axis 9 is the D-pad hat. It needs the ANALOG light on. See `PROFILE` in `R.pollPad` in `src/raid.js`. Other pads use automatic detection or the in-game **Set up controller** wizard.

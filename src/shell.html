@@ -187,23 +187,6 @@ details.credits pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5p
 .btn.attack{flex:none;padding:6px 14px;font-size:13px;border-color:rgba(255,90,60,.55);color:#ffd2c6;background:rgba(255,90,60,.12)}
 .btn.attack:hover{background:rgba(255,90,60,.25);border-color:var(--ember)}
 #homeMap{cursor:pointer}
-/* ---------- recall first ---------- */
-.recall{position:absolute;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(640px,calc(100% - 20px));box-sizing:border-box;background:rgba(10,12,20,.93);backdrop-filter:blur(8px);border:1px solid rgba(242,184,75,.55);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 40px rgba(0,0,0,.55)}
-.chip.rec{color:var(--gold);border-color:rgba(242,184,75,.55);align-self:flex-start}
-.rq{margin:0;font-weight:700;font-size:16px}
-.rrow{display:flex;gap:8px}
-.rrow input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--text);font:inherit;padding:10px 12px}
-.rrow input:focus{outline:2px solid var(--gold);outline-offset:1px}
-.rhint{margin:0;font-size:12px;color:var(--muted)}
-.typed{margin:0;color:#cfd6e4;font-style:italic}
-.ra{display:flex;flex-direction:column;gap:2px;border:1px solid rgba(93,255,160,.45);background:rgba(93,255,160,.07);border-radius:7px;padding:8px 12px}
-.ra b,.ra li{color:var(--good)}
-.ra ul{margin:2px 0 0;padding-left:20px}
-.v{font-weight:600;font-size:14px;color:var(--muted)}
-.v.good{color:var(--good)}.v.mid{color:var(--gold)}.v.bad{color:var(--bad)}
-.rate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.rate .btn{padding:9px 10px}
-.rate .btn.sug{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
 /* ---------- study, edit, debrief ---------- */
 .topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .walkTabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
@@ -241,7 +224,7 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
       <h1>FNPH <span>Raid</span></h1>
       <p class="lede">A fork of the arcade shooter Radius Raid, rebuilt around your exam. Fly in from the Zaire Road gate and take FNPH station by station. At each station, the answers come at you as gunships. Destroy the right one and the rest go down with it. Hit a wrong one and you're killed. Either way, a teaching card shows you what it means and why the other options were wrong.</p>
       <div class="actions"><button id="bStart" class="btn primary">Start the raid</button><button id="bReview" class="btn">Daily review</button><button id="bStudy" class="btn">Study the stations</button><button id="bEdit" class="btn ghost">Edit questions</button></div>
-      <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bOrder" class="chipbtn"></button><button id="bRecall" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
+      <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bOrder" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
       <div class="homeG"><div class="segs" id="homeSegs"></div><span id="homeGLabel" class="muted"></span></div>
       <p id="progLine" class="muted" style="margin:0;font-size:13px"></p>
       <p id="padStatus" class="padStatus"></p>
@@ -260,7 +243,7 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
       <div class="how">
         <div><b>Briefing</b><p>Each station opens with a briefing card: the framework for that topic, before you're tested on it.</p></div>
         <div><b>Answers attack</b><p>Four gunships carry the options and close in on you. Each needs 3 hits. Swarms keep the pressure on.</p></div>
-        <div><b>Close calls</b><p>The wrong options are near-misses: a different number, the wrong cluster, the DSM rule instead of ICD-11, the neighbouring step. Read carefully before you fire. Recall-first mode is still available on this screen.</p></div>
+        <div><b>Close calls</b><p>The wrong options are near-misses: a different number, the wrong cluster, the DSM rule instead of ICD-11, the neighbouring step. Read carefully before you fire. Choose the description that matches each acronym letter.</p></div>
         <div><b>Beat par</b><p>Each station has a par time. The clock stops while you read, and you can't fail on time. Get an item right 3 times in a row and it is mastered: it drops out, so the station gets shorter and par easier to beat.</p></div>
         <div><b>Procedures</b><p>For steps in order, destroy step 1, then step 2, and so on. Shooting a step out of order kills you and shows the full sequence.</p></div>
       </div>
@@ -299,7 +282,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   </div>
   <div id="qbar" hidden><span class="chip" id="qChip"></span><p id="qText"></p><div class="chain" id="qChain"></div><div class="eta"><i id="qEta"></i></div></div>
   <p class="keys">WASD move · mouse aim · hold click fire<br>1–4 lock on · Space fire · P pause</p>
-  <div id="recall" class="recall" hidden></div>
   <p id="toast" class="toast" hidden></p>
   <div id="cardWrap" hidden><div class="card" id="card"><div id="cardInner"></div><div class="cardFoot"><div class="bar"><i id="cardBar"></i></div><button id="cardBtn" class="btn primary">Next</button></div></div></div>
 </section>
@@ -321,6 +303,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <p><code>&gt; text</code> lines under a station are its briefing. Under a question they are its teaching note. Start a line with <code>&gt; - </code> for a bullet.</p>
     <p><code>Q: question = right answer | wrong :: why it's wrong | wrong :: why</code></p>
     <p><code>L: procedure = step 1 | step 2 | step 3 ~~ decoy :: why</code> must be shot in order · <code>S: list = item | item ~~ decoy :: why</code> any order</p>
+    <p>Mnemonic options: <code>Term =&gt; description</code> shows only the description during play and reveals the term after your choice.</p>
   </div>
   <textarea id="deckText" spellcheck="false" aria-label="Question deck"></textarea>
   <p class="errs" id="deckErr"></p>

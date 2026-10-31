@@ -31,10 +31,13 @@ function parseDeck(text){
     const prompt=body.slice(0,eq).trim(),rest=body.slice(eq+3),t=m[1].toUpperCase();
     let it;
     if(t==='Q'){const {opts,why}=splitOpts(rest);if(!opts.length){errors.push('Line '+(i+1)+': no answer');return;}it={type:'q',prompt,answer:opts[0],wrongs:opts.slice(1),why};}
-    else{const cut=rest.indexOf(' ~~ ');const seq=(cut<0?rest:rest.slice(0,cut)).split('|').map(x=>x.trim()).filter(Boolean);
+    else{const cut=rest.indexOf(' ~~ ');const clues={};
+      const labelled=x=>{const k=x.indexOf(' => ');if(k<0)return x;const term=x.slice(0,k).trim();clues[term]=x.slice(k+4).trim();return term;};
+      const seq=(cut<0?rest:rest.slice(0,cut)).split('|').map(x=>x.trim()).filter(Boolean).map(labelled);
       const d=cut<0?{opts:[],why:{}}:splitOpts(rest.slice(cut+4));
       if(seq.length<2){errors.push('Line '+(i+1)+': a list needs at least 2 items');return;}
-      it={type:t==='L'?'l':'s',prompt,seq,decoys:d.opts,why:d.why};}
+      const why={};const decoys=d.opts.map(x=>{const term=labelled(x);if(d.why[x])why[term]=d.why[x];return term;});
+      it={type:t==='L'?'l':'s',prompt,seq,decoys,why,clues};}
     it.note=[];it.concept=curC;if(curC)curC.items.push(it);cur.items.push(it);target=it;
   });
   rooms.forEach((r,ri)=>{r.idx=ri;r.items.forEach(it=>{it.id=hash(r.topic+'::'+it.type+'::'+it.prompt);it.room=r;});});
@@ -62,17 +65,15 @@ let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.g
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 /* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
 const SRS_DAYS=[0,1,3,7,16,35];
-function grade(id,ok,neutral){const s=st(id);s.seen++;if(neutral){s.due=Date.now()+12*3600e3;}else if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}store.set('stats',stats);}
+function grade(id,ok){const s=st(id);s.seen++;if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}store.set('stats',stats);}
 function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
 function reviewRoom(){
   const items=dueItems(30);if(!items.length)return null;
   const cnt={};items.forEach(it=>cnt[it.room.idx]=(cnt[it.room.idx]||0)+1);
   const idx=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
   return{review:true,locus:'Daily review',topic:'Daily review · spaced repetition',mode:'',idx:Math.min(idx,SLOTS.length-1),concepts:[],
-    note:['These are the items due today across every station, mixed together. Recall each one before the options open.','- Right: it comes back in 1, 3, 7, 16, then 35 days.','- Wrong: it comes back within the hour.'],items};
+    note:['These are the items due today across every station, mixed together. Choose the correct answer in play; missed items return automatically.','- Right: it comes back in 1, 3, 7, 16, then 35 days.','- Wrong: it comes back within the hour.'],items};
 }
-let recallMode=store.get('recallMode',store.get('recall2',false)?'always':'smart');
-const needRecall=it=>recallMode==='always'||(recallMode==='smart'&&!(stats[it.id]&&stats[it.id].box>=2));
 function mastered(it){return !!stats[it.id]&&stats[it.id].box>=MASTER_AT;}
 function masteredCount(room){return room.items.filter(mastered).length;}
 function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=(stats[it.id]?stats[it.id].box:0));return t/(room.items.length*5);}
@@ -235,7 +236,7 @@ function makeLabel(text,num){
 }
 $.Carrier=function(o){
   for(const k in o)this[k]=o[k];
-  this.radius=26;this.life=this.lifeMax=3+(($.arsenal&&$.arsenal.armour)||0);this.hitFlag=0;this.t=Math.random()*6;this.label=makeLabel(this.text,this.num);this.vx=0;this.vy=0;this.alive=true;
+  this.radius=26;this.life=this.lifeMax=3+(($.arsenal&&$.arsenal.armour)||0);this.hitFlag=0;this.t=Math.random()*6;this.label=makeLabel(R.optionLabel(this.text),this.num);this.vx=0;this.vy=0;this.alive=true;
 };
 $.Carrier.prototype.update=function(i){
   if(!this.alive)return;
@@ -254,7 +255,7 @@ $.Carrier.prototype.update=function(i){
 $.Carrier.prototype.hit=function(dmg){
   if(!this.alive||R.phase!=='fight')return;
   this.life-=dmg;this.hitFlag=10;$.audio.play('hit');
-  if(!this.warned){this.warned=1;R.toast('Hitting '+this.num+' · '+this.text);}
+  if(!this.warned){this.warned=1;R.toast('Hitting '+this.num+' · '+R.optionLabel(this.text));}
   if(this.life<=0)R.carrierDown(this);
 };
 $.Carrier.prototype.render=function(){
@@ -355,7 +356,7 @@ $.Carrier.prototype.render=function(){
   ctx.restore();
 
   // 4. Holographic Answer Plate (Positioned above gunship)
-  const L=R.phase==='recall'?(this.sealedL||(this.sealedL=makeLabel('? Sealed. Recall the answer first',this.num))):this.label;
+  const L=this.label;
   const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-8;
   let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
@@ -466,7 +467,7 @@ function openBriefing(){
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
   R.phase='briefing';R.queue=mixQueue(fresh.concat(review));R.total=R.queue.length;R.cleared=0;
-  R.par=Math.max(60,fresh.length*(recallMode!=='off'?55:30)+review.length*(recallMode!=='off'?30:15));R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
+  R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
   const head=C?'<p class="meta">'+esc(r.topic)+' · concept '+(cs.indexOf(C)+1)+' of '+cs.length+' · '+conceptsDone(r)+' secured so far</p><h2>'+esc(C.title)+'</h2>'+(C.note.length?'<div class="note">'+noteHTML(C.note)+'</div>':''):'<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'');
@@ -481,7 +482,7 @@ function fmt(sec){sec=Math.max(0,Math.ceil(sec));return Math.floor(sec/60)+':'+S
 let tLast=performance.now();
 function timerLoop(now){
   const dt=Math.min(.25,(now-tLast)/1000);tLast=now;
-  if(R.active&&timerOn&&R.par&&!R.paused&&Q('#cardWrap').hidden&&$.state==='play'&&['recall','fight','resolve','dead','swarmdead'].includes(R.phase)){
+  if(R.active&&timerOn&&R.par&&!R.paused&&Q('#cardWrap').hidden&&$.state==='play'&&['fight','resolve','dead','swarmdead'].includes(R.phase)){
     R.clock+=dt;
     const el=Q('#hTime');if(el){el.textContent=fmt(R.clock);el.classList.toggle('over',R.clock>R.par);}
     const tb=Q('#hTimeBar');if(tb){tb.style.transform='scaleX('+Math.min(1,R.clock/R.par).toFixed(3)+')';tb.classList.toggle('over',R.clock>R.par);}
@@ -491,8 +492,9 @@ function timerLoop(now){
 requestAnimationFrame(timerLoop);
 function nextQuestion(){
   if(!R.queue.length){stationCleared();return;}
-  R.cur=R.queue.shift();R.cur.found=[];R.cur.rec=null;setupWave();
+  R.cur=R.queue.shift();R.cur.found=[];setupWave();
 }
+R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
   const it=R.cur;let opts,correct,chip;
   if(it.type==='q'){opts=qOptions(it);correct=[it.answer];chip='Shoot the correct answer';}
@@ -503,9 +505,9 @@ function setupWave(){
     for(const x of shuffle(it.decoys||[])){if(opts.length>=4)break;if(!opts.includes(x)&&!it.seq.includes(x))opts.push(x);}
     if(opts.length<4)for(const x of shuffle(ALL_LIST.concat(ALL_ANS).filter(a=>a.room!==it.room).map(a=>a.t))){if(opts.length>=4)break;if(!opts.includes(x)&&!it.seq.includes(x))opts.push(x);}
     opts=shuffle(opts);correct=it.type==='l'?[c]:rem;
-    chip=it.type==='l'?'Procedure · shoot step '+(it.found.length+1)+' of '+it.seq.length+' in order':'List · any order · '+rem.length+' of '+it.seq.length+' left';
+    chip=it.type==='l'?(Object.keys(it.clues||{}).length?'Mnemonic · shoot meaning ':'Procedure · shoot step ')+(it.found.length+1)+' of '+it.seq.length+' in order':'List · any order · '+rem.length+' of '+it.seq.length+' left';
   }
-  const len=it.prompt.length+opts.join('').length,dur=Math.max(14,Math.min(28,11+len/16));
+  const len=it.prompt.length+opts.map(R.optionLabel).join('').length,dur=Math.max(14,Math.min(28,11+len/16));
   const r0=Math.max(220,Math.min($.cw,$.ch)*.44);
   R.wave={opts,correct,chip,t:0,r0,speed:(r0-60)/(dur*60)};
   $.carriers.length=0;$.aimLock=null;R.hover=null;
@@ -514,61 +516,12 @@ function setupWave(){
   opts.forEach((text,i)=>{const a=a0+i*$.twopi/opts.length;$.carriers.push(new $.Carrier({text,num:i+1,x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0*.85}));});
   if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
   if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
-  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt;
+  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
-  it.recallUsed=it.recallUsed||needRecall(it);
-  if(needRecall(it)){R.phase='recall';Q('#qChip').textContent='Recall first, then '+(R.modeName()==='race'?'drive':'shoot');showRecall();}else R.phase='fight';
+  R.phase='fight';
   if(R.modeName()==='race'){R.wave.chip=it.type==='q'?'Drive into the correct lane':chip.replace(/^Procedure · shoot/,'Procedure · drive through');if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
   synth('wave');hud();
 }
-/* ---------- recall first: produce it yourself before the options open ---------- */
-const STOP=new Set('the a an of and or to in on for with is are be by at as it its that this from than then their your you not but has have was were who what when which'.split(' '));
-function toks(x){return String(x).toLowerCase().replace(/[^a-z0-9\s-]/g,' ').split(/\s+/).filter(w=>w.length>2&&!STOP.has(w));}
-function matchScore(typed,ans){const a=toks(ans),t=toks(typed);if(!a.length||!t.length)return 0;let h=0;a.forEach(w=>{if(t.some(x=>x===w||(x.length>=5&&w.startsWith(x.slice(0,5)))||(w.length>=5&&x.startsWith(w.slice(0,5)))))h++;});return h/a.length;}
-function recallTarget(){const it=R.cur;if(it.type==='q')return[it.answer];if(it.type==='l')return[it.seq[it.found.length]];return it.seq.filter(x=>!it.found.includes(x));}
-function showRecall(){
-  const it=R.cur,box=Q('#recall');let ask;
-  if(it.type==='q')ask='What is the answer? Produce it yourself before the options open.';
-  else if(it.type==='l'){const k=it.found.length;ask=k?'What comes next? Step '+(k+1)+' of '+it.seq.length+', after: "'+it.found[k-1]+'"':'What is the FIRST step? ('+it.seq.length+' steps in total)';}
-  else{const rem=it.seq.length-it.found.length;ask='Name one item you have not hit yet ('+rem+' of '+it.seq.length+' left)';}
-  R.rv={revealed:false,typed:''};
-  R.rv.hints=0;
-  box.innerHTML='<span class="chip rec">Recall first</span><p class="rq">'+esc(ask)+'</p><p class="rhintline" id="rHint"></p><div class="rrow"><input id="recallIn" type="text" autocomplete="off" placeholder="Say it out loud, or type it"><button id="recallBtn" class="btn">Hint</button><button id="recallBtn2" class="btn primary">Reveal</button></div><p class="rhint">'+(padId?'Controller: say the answer aloud, then press <b>button 1</b> to reveal. <b>Button 4</b> gives a hint (first letters), but a hint caps your score at Partly.':'Say it aloud or type it, then press Enter to reveal. <kbd>H</kbd> gives a hint, but it caps your score at Partly.')+'</p>';
-  box.hidden=false;
-  Q('#recallBtn').onclick=recallHint;Q('#recallBtn2').onclick=revealRecall;
-  const inp=Q('#recallIn');inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();revealRecall();}else if(e.key==='h'&&!inp.value){e.preventDefault();recallHint();}};
-  if(!padId)setTimeout(()=>{try{inp.focus({preventScroll:true});}catch(e){}},50);
-}
-/* hint ladder: 1 = first letter of each word, 2 = first half of each word, 3 = everything but the last letters */
-function maskWord(w,level){const core=w.replace(/[^A-Za-z0-9]/g,'');if(core.length<=1||/^[0-9.]+$/.test(core))return level>=2?w:w.replace(/[A-Za-z0-9]/g,(c,i)=>i===0?c:'_');const keep=level===1?1:level===2?Math.ceil(core.length/2):Math.max(1,core.length-2);let n=0;return w.replace(/[A-Za-z0-9]/g,c=>(n++<keep)?c:'_');}
-function recallHint(){
-  if(!R.rv||R.rv.revealed)return;R.rv.hints=Math.min(3,(R.rv.hints||0)+1);
-  const tg=recallTarget(),t=tg[0]||'';const h=String(t).split(/\s+/).map(w=>maskWord(w,R.rv.hints)).join(' ');
-  const el=Q('#rHint');if(el)el.innerHTML='Hint '+R.rv.hints+'/3: <b>'+esc(h)+'</b>'+(tg.length>1?' <span class="muted">(one of '+tg.length+')</span>':'');
-  synth('lock');
-}
-R.recallHint=recallHint;
-function revealRecall(){
-  if(!R.rv||R.rv.revealed)return;
-  const typed=(Q('#recallIn')||{value:''}).value.trim(),tg=recallTarget();R.rv.revealed=true;R.rv.typed=typed;
-  let best=0,bestT=tg[0];tg.forEach(t=>{const m=matchScore(typed,t);if(m>best){best=m;bestT=t;}});
-  const verdict=!typed?'<span class="v">Not typed. Compare it in your head and be honest.</span>':best>=.6?'<span class="v good">Your answer matches</span>':best>=.3?'<span class="v mid">Close: some key words match</span>':'<span class="v bad">Your answer does not match</span>';
-  const sug=!typed?null:best>=.6?'got':best>=.3?'partly':'missed';
-  const it=R.cur,ansHTML=it.type==='s'?'<span class="lbl">Any of these</span><ul>'+tg.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<span class="lbl">'+(it.type==='l'?'Step '+(it.found.length+1):'Answer')+'</span><b>'+esc(bestT)+'</b>';
-  Q('#recall').innerHTML='<span class="chip rec">Recall check</span>'+(typed?'<p class="typed">You said: '+esc(typed)+'</p>':'')+'<div class="ra">'+ansHTML+'</div>'+verdict+
-    '<div class="rate"><button data-r="got" class="btn'+(sug==='got'?' sug':'')+'"><kbd>1</kbd> Got it</button><button data-r="partly" class="btn'+(sug==='partly'?' sug':'')+'"><kbd>2</kbd> Partly</button><button data-r="missed" class="btn'+(sug==='missed'?' sug':'')+'"><kbd>3</kbd> Missed</button></div><p class="rhint">'+(R.rv.hints?'You used a hint, so "Got it" counts as Partly. ':'')+'Only "Got it" counts towards mastery. Controller: <b>button 1</b> Got it, <b>2</b> Partly, <b>3</b> Missed.</p>';
-  Q('#recall').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>rateRecall(b.dataset.r));
-  synth('card');
-}
-function rateRecall(r){
-  if(!R.rv||!R.rv.revealed||R.phase!=='recall')return;
-  const it=R.cur,order={got:0,partly:1,missed:2};
-  if(r==='got'&&R.rv.hints)r='partly';
-  it.rec=it.rec&&order[it.rec]>order[r]?it.rec:r;
-  Q('#recall').hidden=true;R.rv=null;R.phase='fight';if(R.wave)Q('#qChip').textContent=R.wave.chip;
-  R.toast(r==='got'?'Recalled. Now shoot it.':r==='partly'?'Partly recalled. Now find it.':'Missed. Find it and learn it.',r==='got');
-}
-
 R.carrierDown=function(c){
   const it=R.cur,ok=R.wave.correct.includes(c.text);R.answered++;R.wasMastered=mastered(it);
   if(ok){
@@ -576,9 +529,9 @@ R.carrierDown=function(c){
     c.explode(190,true);$.textPops.push(new $.TextPop({x:c.x,y:c.y,value:pts,hue:190,saturation:100,lightness:70}));
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
-    if(it.type==='q'){gradeRecall(it);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
+    if(it.type==='q'){grade(it.id,true);R.cleared++;reinforce(it);R.lastWave=R.wave;R.phase='resolve';R.timer=.9;R.after='q';newlyMastered(it);}
     else{it.found.push(c.text);
-      if(it.found.length===it.seq.length){gradeRecall(it);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
+      if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
@@ -594,7 +547,6 @@ function reinforce(it){
   R.queue.splice(pos,0,it);R.total++;
   setTimeout(()=>R.toast('Got it. It comes back once more after '+pos+' more question'+(pos===1?'':'s')+' to lock it in.',true),1100);
 }
-function gradeRecall(it){const r=it.recallUsed?(it.rec||'missed'):'got';it.recallUsed=false;if(r==='got')grade(it.id,true);else if(r==='partly')grade(it.id,true,true);else grade(it.id,false);}
 function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
   const it=R.cur;
@@ -604,7 +556,7 @@ function afterCorrect(){
   if(teachAll){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
-  let body='<p class="cq">'+esc(it.prompt)+'</p>'+(it.rec?'<p class="meta">Your recall: <b>'+({got:'Got it',partly:'Partly',missed:'Missed'}[it.rec])+'</b>'+(it.rec==='got'?' (counts towards mastery)':' (does not count towards mastery yet)')+'</p>':'');
+  let body='<p class="cq">'+esc(it.prompt)+'</p>';
   if(it.type==='q'){
     body+='<div class="ans good"><span class="lbl">Answer</span><b>'+esc(it.answer)+'</b></div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
@@ -619,7 +571,6 @@ function learnCard(it){
   card('learn',it.type==='q'?'Correct':it.type==='l'?'Procedure complete':'List complete',body,R.queue.length?'Next':'Finish station',nextQuestion,700);
 }
 R.die=function(picked){
-  Q('#recall').hidden=true;
   const it=R.cur;R.phase='dead';R.deaths++;R.streak=0;grade(it.id,false);
   const prev=R.misses.get(it.id);R.misses.set(it.id,{item:it,pick:picked||(prev&&prev.pick)||null,n:(prev?prev.n:0)+1});
   R.deadInfo={picked,opts:R.wave?R.wave.opts.slice():[],found:(it.found||[]).slice()};
@@ -929,9 +880,8 @@ let keyFire=0;
 document.addEventListener('keydown',e=>{
   if(Q('#play').hidden)return;
   if(!Q('#cardWrap').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();closeCard();}return;}
-  if(R.active&&R.phase==='recall'){if(R.rv&&!R.rv.revealed&&(e.key==='h'||e.key==='H')){e.preventDefault();recallHint();}else if(R.rv&&!R.rv.revealed&&e.key==='Enter'){e.preventDefault();revealRecall();}else if(R.rv&&R.rv.revealed&&['1','2','3'].includes(e.key)){e.preventDefault();rateRecall({1:'got',2:'partly',3:'missed'}[e.key]);}return;}
   if(!R.active||R.phase!=='fight')return;
-  if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){R.lockOn(c);synth('lock');R.toast('Locked on '+c.num+' · '+c.text,true);}e.preventDefault();}
+  if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){R.lockOn(c);synth('lock');R.toast('Locked on '+c.num+' · '+R.optionLabel(c.text),true);}e.preventDefault();}
   else if(e.key==='Tab'){cycleLock(1);e.preventDefault();}
   else if(e.key===' '){keyFire=1;e.preventDefault();}
 });
@@ -939,7 +889,7 @@ document.addEventListener('keyup',e=>{if(e.key===' ')keyFire=0;});
 function cycleLock(dir){
   padCur.on=false;
   const live=$.carriers.filter(c=>c.alive).sort((a,b)=>a.num-b.num);if(!live.length)return;
-  const i=live.indexOf($.aimLock);R.lockOn(live[(i+dir+live.length)%live.length]);synth('lock');R.toast('Locked on '+$.aimLock.num+' · '+$.aimLock.text,true);
+  const i=live.indexOf($.aimLock);R.lockOn(live[(i+dir+live.length)%live.length]);synth('lock');R.toast('Locked on '+$.aimLock.num+' · '+R.optionLabel($.aimLock.text),true);
 }
 R.input=function(){ $.keyFire=keyFire; };
 let padPrev=[],padId='',padBase=null;const padCur={on:false,x:0,y:0};let padSens=store.get('padSens',1);
@@ -987,7 +937,6 @@ R.pollPad=function(){
      else if(anyPauseEdge){if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
-  if(R.active&&R.phase==='recall'&&R.rv){if(!R.rv.revealed){if(edge(3))recallHint();else if(anyFireEdge)revealRecall();}else{if(edge(0))rateRecall('got');else if(edge(1))rateRecall('partly');else if(edge(2))rateRecall('missed');}$.pad.fire=0;padPrev=cur;return;}
   // drive
   let mx=0,my=0;
   if(M){mx=dev(M.drive.x)*M.drive.sx;my=dev(M.drive.y)*M.drive.sy;}
@@ -1091,7 +1040,6 @@ function renderHome(){
   Q('#bTimer').textContent='Par-time clock: '+(timerOn?'on':'off');
   Q('#bOrder').textContent='Full raid order: '+ORDER_LABEL[routeOrder];
   {const nd=dueItems().length;const b=Q('#bReview');b.textContent=nd?'Daily review ('+Math.min(nd,30)+(nd>30?' of '+nd:'')+' due)':'Daily review (nothing due)';b.disabled=!nd;}
-  Q('#bRecall').textContent='Recall first: '+({always:'every question',smart:'new and weak questions',off:'off'}[recallMode]);
   Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
   {const g=globalBar();Q('#homeSegs').innerHTML=g.html;Q('#homeGLabel').textContent=g.label;gKey='';}
   if(!mapCanvas)buildMap();
@@ -1114,7 +1062,6 @@ Q('#padReset').addEventListener('click',()=>{padMap=null;store.set('padMap2',nul
 Q('#bSens').addEventListener('click',()=>{padSens=padSens===0.6?1:padSens===1?1.5:0.6;store.set('padSens',padSens);renderHome();});
 Q('#bOrder').addEventListener('click',()=>{routeOrder={map:'plan',plan:'weak',weak:'due',due:'map'}[routeOrder]||'map';store.set('routeOrder',routeOrder);renderHome();});
 Q('#bReview').addEventListener('click',()=>{ac();const rv=reviewRoom();if(rv)R.start([rv],0);});
-Q('#bRecall').addEventListener('click',()=>{recallMode={smart:'always',always:'off',off:'smart'}[recallMode]||'smart';store.set('recallMode',recallMode);renderHome();});
 Q('#bTimer').addEventListener('click',()=>{timerOn=!timerOn;store.set('timer',timerOn);renderHome();});
 Q('#bReset').addEventListener('click',()=>{captured.clear();store.set('captured',[]);renderHome();});
 Q('#bStudy').addEventListener('click',()=>openWalk(0));

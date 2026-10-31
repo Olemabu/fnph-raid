@@ -54,7 +54,7 @@ function ensureCanvas(){
 }
 function lockOn(i){const t=run.t[i];if(!t||!t.alive)return;run.lock=t;run.keyAim=true;mouse.on=false;}
 function resize(){const w=cv.clientWidth|0,h=cv.clientHeight|0;if(w!==W||h!==H){W=cv.width=w;H=cv.height=h;}}
-function visible(){return R.active&&R.modeName&&R.modeName()==='fps'&&['recall','fight','resolve','dead','swarmdead'].includes(R.phase);}
+function visible(){return R.active&&R.modeName&&R.modeName()==='fps'&&['fight','resolve','dead','swarmdead'].includes(R.phase);}
 const wrapA=a=>{while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;};
 
 function start(wave){
@@ -198,7 +198,7 @@ function draw(){
     c.fillStyle='#060a10';c.font='800 '+(br*1.3|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(t.i+1),px+br*1.4,py+br*1.5);
     for(let h=0;h<HP;h++){c.fillStyle=h<t.hp?COL[t.i]:'rgba(255,255,255,.15)';c.fillRect(px+pw-(HP-h)*pw*.09-pw*.04,py+ph*.06,pw*.07,Math.max(2,ph*.03));}
     c.textAlign='left';c.textBaseline='alphabetic';
-    if(pw>120){c.fillStyle='#eef2ff';wrapText(c,t.text,px+pw*.06,py+br*3.2,pw*.88,ph-br*3.4,Math.min(22,size*.13|0));}
+    if(pw>120){c.fillStyle='#eef2ff';wrapText(c,R.optionLabel(t.text),px+pw*.06,py+br*3.2,pw*.88,ph-br*3.4,Math.min(22,size*.13|0));}
     // holo stand
     c.fillStyle=COL[t.i];c.globalAlpha=.35;c.fillRect(sxp-size*.02,py+ph,size*.04,hz+size*.5-(py+ph));c.globalAlpha=1;
   }
@@ -227,7 +227,7 @@ function draw(){
   // answer cards
   const narrow=W<700,n=r.n,cols=narrow?2:n,rows=Math.ceil(n/cols),cardH=narrow?70:Math.max(78,H*.11),pad=10,cardsTop=H-rows*(cardH+pad);
   cardRects=[];
-  if(R.phase!=='recall'){const cw=(W-pad*(cols+1))/cols;
+  {const cw=(W-pad*(cols+1))/cols;
     for(let i=0;i<n;i++){const t=r.t[i],colI=i%cols,row=Math.floor(i/cols),x=pad+colI*(cw+pad),top=cardsTop+row*(cardH+pad),res=r.result&&r.result.i===i;
       cardRects.push({i,x,y:top,w:cw,h:cardH});
       c.globalAlpha=t.alive||res?1:.4;
@@ -235,11 +235,11 @@ function draw(){
       c.strokeStyle=res?(r.result.ok?'#9dff7a':'#ff3355'):COL[i];c.lineWidth=res||r.lock===t?3:1.5;c.strokeRect(x+1,top+1,cw-2,cardH-2);
       c.fillStyle=COL[i];c.beginPath();c.arc(x+18,top+18,12,0,Math.PI*2);c.fill();
       c.fillStyle='#060a10';c.font='800 14px "Chakra Petch", sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(i+1),x+18,top+19);
-      c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle='#eef2ff';wrapText(c,t.text,x+36,top+22,cw-44,cardH-20,17);
+      c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle='#eef2ff';wrapText(c,R.optionLabel(t.text),x+36,top+22,cw-44,cardH-20,17);
       c.globalAlpha=1;}
     c.fillStyle='rgba(255,255,255,.7)';c.font='600 12px "JetBrains Mono", monospace';
     c.fillText(W<1100?'mouse/←→ aim · click/Space fire · 1-4 lock':'Mouse aim (edges turn) or ←/→ · click, Space or F fire · 1-4 or tap a card to lock on',14,cardsTop-10);
-  }else{c.fillStyle='rgba(255,255,255,.7)';c.font='600 12px "JetBrains Mono", monospace';c.fillText('Recall first · the panels unseal after you rate yourself',14,H-14);}
+  }
   if(r.recoil>.5){c.fillStyle='rgba(255,230,170,'+(r.recoil*.07)+')';c.fillRect(-20,-20,W+40,H+40);}
   {const vg=c.createRadialGradient(W/2,H*.48,Math.min(W,H)*.35,W/2,H*.5,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=vg;c.fillRect(-20,-20,W+40,H+40);}
   if(r.flash>0&&r.result){c.fillStyle=r.result.ok?'rgba(98,255,160,'+(r.flash*.3)+')':'rgba(255,30,60,'+(r.flash*.45)+')';c.fillRect(-20,-20,W+40,H+40);}

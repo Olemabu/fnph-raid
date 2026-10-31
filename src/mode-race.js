@@ -33,7 +33,7 @@ function ensureCanvas(){
 function resize(){const w=cv.clientWidth|0,h=cv.clientHeight|0;if(w!==W||h!==H){W=cv.width=w;H=cv.height=h;}}
 const laneX=(i,n)=>-1+(2*i+1)/n;
 const laneOf=(x,n)=>Math.max(0,Math.min(n-1,Math.floor((x+1)/2*n)));
-function visible(){return R.active&&R.modeName&&R.modeName()==='race'&&['recall','fight','resolve','dead','swarmdead'].includes(R.phase);}
+function visible(){return R.active&&R.modeName&&R.modeName()==='race'&&['fight','resolve','dead','swarmdead'].includes(R.phase);}
 
 /* called by setupWave() for race stations */
 function start(wave){
@@ -144,7 +144,7 @@ function draw(){
       c.fillStyle='rgba(255,220,150,.9)';c.beginPath();c.arc(p.x,p.y-hgt,Math.max(1.5,p.half*.05),0,Math.PI*2);c.fill();
       if(k%4===0&&side===1){c.fillStyle='#d01f3c';const sw=p.half*.35;c.fillRect(p.x-sw/2,p.y-hgt*1.25,sw,sw*.55);c.fillStyle='#fff';c.fillRect(p.x-sw*.06,p.y-hgt*1.25+sw*.08,sw*.12,sw*.4);c.fillRect(p.x-sw*.2,p.y-hgt*1.25+sw*.22,sw*.4,sw*.12);}}}
   // answer gantry
-  if(R.phase!=='recall'&&r.z>0){
+  if(r.z>0){
     const zz=Math.max(8,15+r.z*.4),pl=proj(-1.1,zz),pr=proj(1.1,zz),gh=pl.half*1.15;
     c.fillStyle='#3a3f4c';c.fillRect(pl.x-pl.half*.04,pl.y-gh,pl.half*.08,gh);c.fillRect(pr.x-pr.half*.04,pr.y-gh,pr.half*.08,gh);
     c.fillRect(pl.x,pl.y-gh,pr.x-pl.x,Math.max(2,gh*.06));
@@ -183,7 +183,7 @@ function draw(){
   c.fillStyle=LANE_COL[lane];c.font='800 14px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText('LANE '+(lane+1),ax,ay-chh*.75);
   // answer cards along the bottom, in lane order
   cardRects=[];
-  if(R.phase!=='recall'){
+  {
     const pad=10,cwid=(W-pad*(cols+1))/cols;
     for(let i=0;i<n;i++){const col=i%cols,row=Math.floor(i/cols),x=pad+col*(cwid+pad),top=cardsTop+row*(cardH+pad),on=i===lane,res=r.result&&r.result.lane===i;
       cardRects.push({i,x,y:top,w:cwid,h:cardH});
@@ -192,11 +192,11 @@ function draw(){
       c.fillStyle=LANE_COL[i];c.beginPath();c.arc(x+18,top+18,12,0,Math.PI*2);c.fill();
       c.fillStyle='#060a10';c.font='800 14px "Chakra Petch", sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(i+1),x+18,top+19);
       c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle='#eef2ff';
-      wrapText(c,r.opts[i],x+36,top+22,cwid-44,cardH-20);}
+      wrapText(c,R.optionLabel(r.opts[i]),x+36,top+22,cwid-44,cardH-20);}
   }
   // speed / hint strip
   c.fillStyle='rgba(255,255,255,.7)';c.font='600 12px "JetBrains Mono", monospace';c.textAlign='left';
-  c.fillText(R.phase==='recall'?'Recall first · the gantry opens after you rate yourself':W<1100?'←/→ steer · 1-4 lane · ↑ boost · ↓ brake':'←/→ or stick steer · 1-4 jump lane · ↑ boost (more points) · ↓ brake (more reading time)',14,cardsTop-10);
+  c.fillText(W<1100?'←/→ steer · 1-4 lane · ↑ boost · ↓ brake':'←/→ or stick steer · 1-4 jump lane · ↑ boost (more points) · ↓ brake (more reading time)',14,cardsTop-10);
   c.textAlign='left';
   // result flash
   if(r.flash>0&&r.result){c.fillStyle=r.result.ok?'rgba(98,255,160,'+(r.flash*.35)+')':'rgba(255,30,60,'+(r.flash*.5)+')';c.fillRect(-20,-20,W+40,H+40);}

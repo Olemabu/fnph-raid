@@ -110,3 +110,7 @@ The game is feature-complete for daily use (latest commit `38985a1`). Work these
 ## 6. Handoff discipline
 
 When you stop, update section 2 (what you finished, with commit hashes) and section 4 (what remains) in this file. Commit and push it, so the next AI can carry on.
+
+## Gameplay update (31 Oct 2026)
+
+User requested removal of unaided recall from gameplay. Removed reveal/rate gate and its controls across all three modes; successful gameplay choices now grade mastery directly. Existing saved recall preferences are ignored; progress is preserved. Seven mnemonic drills use `Term => description` labels, with current-letter cues and terms revealed after choosing. Includes CAGE, SAD PERSONS, ASEPTIC, SIG E CAPS, five Cs, SPIKES and the four As. Miss/reinforcement and scheduled practice remain automatic. This supersedes the recall-first descriptions above.
