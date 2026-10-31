@@ -31,6 +31,8 @@ const MAP=[
  '1111111331111111'];
 const MW=MAP[0].length,MH=MAP.length,cell=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?1:+MAP[y|0][x|0];
 const PX=8,PY=13.2,START=9;          // player position and how far the panels start
+let fc=null,fctx=null,fimg=null;
+const BEDS=[];for(let y=2.2;y<12.5;y+=2.6){BEDS.push({x:1.6,y,side:-1});BEDS.push({x:14.4,y,side:1});}
 let cv=null,cx=null,W=0,H=0,last=0,run=null,mouse={x:0,y:0,on:false,down:false},cardRects=[],zbuf=[];
 
 function ensureCanvas(){
@@ -106,10 +108,13 @@ function shoot(){
   if(!best)return;
   const dmg=($.hero&&$.hero.weapon&&$.hero.weapon.bullet&&$.hero.weapon.bullet.damage)||1;
   best.hp-=dmg;best.flash=8;$.audio&&$.audio.play('hit');
+  burst(ch.x,ch.y,COL[best.i],14,6);
   if(best.hp<=0)pick(best);
 }
+function burst(x,y,col,n,v){const r=run;r.parts=r.parts||[];for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*v;r.parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,l:25+Math.random()*25,s:2+Math.random()*3,c:i%3?col:'#ffffff'});}}
 function pick(t){
   const r=run;t.alive=false;r.done=true;
+  if(t.rect){const q=t.rect;for(let k=0;k<4;k++)burst(q.x+q.w*Math.random(),q.y+q.h*Math.random(),COL[t.i],22,9);}
   const ok=r.correct.includes(t.text);r.result={i:t.i,ok};r.flash=1;r.shake=ok?8:20;
   if(R.wave)R.wave.t=Math.min(1,r.el/r.dur);
   R.carrierDown({text:t.text,num:t.i+1,x:$.hero.x,y:$.hero.y,alive:true,rammed:false,explode(){this.alive=false;}});
@@ -124,9 +129,21 @@ function draw(){
   // ceiling and floor
   let g=c.createLinearGradient(0,0,0,hz);g.addColorStop(0,'#1a2230');g.addColorStop(1,'#2c3644');c.fillStyle=g;c.fillRect(-20,-20,W+40,hz+20);
   g=c.createLinearGradient(0,hz,0,H);g.addColorStop(0,'#2a2f2a');g.addColorStop(1,'#4b5246');c.fillStyle=g;c.fillRect(-20,hz,W+40,H-hz+20);
-  // ceiling light strips
-  c.fillStyle='rgba(230,245,255,.08)';for(let i=0;i<5;i++){const y=hz*(.15+i*.16);c.fillRect(W*.3-i*W*.03,y,W*.4+i*W*.06,3+i);}
   if(!r){c.restore();return;}
+  // tiled ward floor and ceiling with light panels (floor casting at quarter resolution)
+  {const fw=Math.max(80,W>>2),fh=Math.max(60,H>>2);
+   if(!fc||fc.width!==fw||fc.height!==fh){fc=document.createElement('canvas');fc.width=fw;fc.height=fh;fctx=fc.getContext('2d');fimg=fctx.createImageData(fw,fh);}
+   const d=fimg.data,ca=Math.cos(r.ang),sa=Math.sin(r.ang),hzq=fh/2,fq=focal/4;
+   for(let y=0;y<fh;y++){const dy=y-hzq;if(Math.abs(dy)<1){for(let x=0;x<fw;x++){d[(y*fw+x)*4+3]=0;}continue;}
+     const dist=(fq*.5)/Math.abs(dy),floor=dy>0,shade=Math.max(.18,1-dist/11);
+     for(let x=0;x<fw;x++){const u=(x-fw/2)/fq,wx=PX+dist*(ca-sa*u),wy=PY+dist*(sa+ca*u),i=(y*fw+x)*4;
+       let R0,G0,B0;
+       if(floor){const chk=((Math.floor(wx*2)+Math.floor(wy*2))&1);const edge=(wx*2%1<.05||wy*2%1<.05);R0=chk?150:136;G0=chk?160:148;B0=chk?146:134;if(edge){R0*=.82;G0*=.82;B0*=.82;}
+         // mirror-like sheen near the centre line
+         const sheen=Math.max(0,1-Math.abs(u)*2)*.12;R0+=255*sheen;G0+=255*sheen;B0+=255*sheen;}
+       else{const lamp=(Math.floor(wx)%4===1)&&(wx%1>.3&&wx%1<.7)&&(wy%3>.6&&wy%3<2.0);R0=lamp?235:78;G0=lamp?245:86;B0=lamp?255:98;if(!lamp&&(wx%1<.04||wy%1<.04)){R0*=.75;G0*=.75;B0*=.75;}}
+       d[i]=R0*shade;d[i+1]=G0*shade;d[i+2]=B0*shade;d[i+3]=255;}}
+   fctx.putImageData(fimg,0,0);c.imageSmoothingEnabled=false;c.drawImage(fc,0,0,W,H);c.imageSmoothingEnabled=true;}
   // walls (DDA raycast, 2px columns)
   const step=2;zbuf=new Array(Math.ceil(W/step));
   for(let col=0;col<W;col+=step){
@@ -150,6 +167,15 @@ function draw(){
     if(hit===3&&(u<.08||u>.92)){c.fillStyle=cl(.5);c.fillRect(col,top,step,hgt);}
     if(u<.03){c.fillStyle='rgba(0,0,0,.25)';c.fillRect(col,top,step,hgt);}
   }
+  // hospital beds along the walls
+  BEDS.map(b=>{const a=wrapA(Math.atan2(b.y-PY,b.x-PX)-r.ang);return{b,a,d:Math.hypot(b.x-PX,b.y-PY)};}).filter(o=>Math.abs(o.a)<FOV*.6&&o.d>.8).sort((a,b)=>b.d-a.d).forEach(o=>{
+    const pd=o.d*Math.cos(o.a),sxp=W/2+Math.tan(o.a)*focal,size=focal/pd,zc=zbuf[Math.max(0,Math.min(zbuf.length-1,sxp/2|0))];if(zc!==undefined&&zc<pd-.4)return;
+    const bw=size*1.1,bh=size*.32,by=hz+size*.5-bh,bx=sxp-bw/2,sh2=Math.max(.35,1-pd/14);
+    c.globalAlpha=1;c.fillStyle='rgba(0,0,0,.3)';c.fillRect(bx,hz+size*.5-size*.03,bw,size*.05);
+    c.fillStyle='rgb('+(200*sh2|0)+','+(205*sh2|0)+','+(210*sh2|0)+')';c.fillRect(bx,by,bw,bh*.75);
+    c.fillStyle='rgb('+(60*sh2|0)+','+(120*sh2|0)+','+(170*sh2|0)+')';c.fillRect(bx+bw*.05,by-bh*.12,bw*.9,bh*.4);
+    c.fillStyle='rgb('+(235*sh2|0)+','+(235*sh2|0)+','+(240*sh2|0)+')';c.fillRect(o.b.side<0?bx+bw*.05:bx+bw*.72,by-bh*.2,bw*.23,bh*.25);
+    c.fillStyle='rgb('+(90*sh2|0)+','+(95*sh2|0)+','+(105*sh2|0)+')';c.fillRect(bx,by-bh*.5,bw*.03,bh*1.25);c.fillRect(bx+bw*.97,by-bh*.5,bw*.03,bh*1.25);});
   // sprites: answer panels, far to near
   const vis=r.t.filter(t=>t.alive||t===r.lastHit).map(t=>{const a=wrapA(Math.atan2(t.y-PY,t.x-PX)-r.ang);return{t,a,d:Math.hypot(t.x-PX,t.y-PY)};})
     .filter(o=>Math.abs(o.a)<FOV)
@@ -176,6 +202,8 @@ function draw(){
     // holo stand
     c.fillStyle=COL[t.i];c.globalAlpha=.35;c.fillRect(sxp-size*.02,py+ph,size*.04,hz+size*.5-(py+ph));c.globalAlpha=1;
   }
+  // particles
+  if(r.parts){r.parts=r.parts.filter(q=>(q.l-=1)>0);r.parts.forEach(q=>{q.x+=q.vx;q.y+=q.vy;q.vy+=.22;c.globalAlpha=Math.min(1,q.l/20);c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s,q.s);});c.globalAlpha=1;}
   // tracers
   r.tracers.forEach(q=>{c.strokeStyle=q.col;c.globalAlpha=q.life/6;c.lineWidth=3;c.beginPath();c.moveTo(q.x0,q.y0);c.lineTo(q.x1,q.y1);c.stroke();c.globalAlpha=1;});
   // gun
@@ -212,6 +240,8 @@ function draw(){
     c.fillStyle='rgba(255,255,255,.7)';c.font='600 12px "JetBrains Mono", monospace';
     c.fillText(W<1100?'mouse/←→ aim · click/Space fire · 1-4 lock':'Mouse aim (edges turn) or ←/→ · click, Space or F fire · 1-4 or tap a card to lock on',14,cardsTop-10);
   }else{c.fillStyle='rgba(255,255,255,.7)';c.font='600 12px "JetBrains Mono", monospace';c.fillText('Recall first · the panels unseal after you rate yourself',14,H-14);}
+  if(r.recoil>.5){c.fillStyle='rgba(255,230,170,'+(r.recoil*.07)+')';c.fillRect(-20,-20,W+40,H+40);}
+  {const vg=c.createRadialGradient(W/2,H*.48,Math.min(W,H)*.35,W/2,H*.5,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=vg;c.fillRect(-20,-20,W+40,H+40);}
   if(r.flash>0&&r.result){c.fillStyle=r.result.ok?'rgba(98,255,160,'+(r.flash*.3)+')':'rgba(255,30,60,'+(r.flash*.45)+')';c.fillRect(-20,-20,W+40,H+40);}
   c.restore();
 }

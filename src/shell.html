@@ -57,6 +57,8 @@ h1,h2,h3{margin:0;text-wrap:balance}
 .how div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
 .how b{display:block;margin-bottom:4px;color:var(--gold);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .how p{margin:0;color:#cfd6e4;font-size:14px}
+.padf{outline:3px solid #62e6ff!important;outline-offset:3px;box-shadow:0 0 18px rgba(98,230,255,.55)!important}
+.rhintline{margin:4px 0 8px;font-family:var(--mono);font-size:15px;letter-spacing:.06em;color:#ffd27a;min-height:1em}
 kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--panel2)}
 .padStatus{margin:0;font-family:var(--mono);font-size:12px;color:var(--muted)}
 .padStatus.on{color:var(--good)}
@@ -238,8 +240,8 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
       <p class="eyebrow">Psychiatry exam raid · FNPH Barnawa</p>
       <h1>FNPH <span>Raid</span></h1>
       <p class="lede">A fork of the arcade shooter Radius Raid, rebuilt around your exam. Fly in from the Zaire Road gate and take FNPH station by station. At each station, the answers come at you as gunships. Destroy the right one and the rest go down with it. Hit a wrong one and you're killed. Either way, a teaching card shows you what it means and why the other options were wrong.</p>
-      <div class="actions"><button id="bStart" class="btn primary">Start the raid</button><button id="bStudy" class="btn">Study the stations</button><button id="bEdit" class="btn ghost">Edit questions</button></div>
-      <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bRecall" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
+      <div class="actions"><button id="bStart" class="btn primary">Start the raid</button><button id="bReview" class="btn">Daily review</button><button id="bStudy" class="btn">Study the stations</button><button id="bEdit" class="btn ghost">Edit questions</button></div>
+      <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bOrder" class="chipbtn"></button><button id="bRecall" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
       <div class="homeG"><div class="segs" id="homeSegs"></div><span id="homeGLabel" class="muted"></span></div>
       <p id="progLine" class="muted" style="margin:0;font-size:13px"></p>
       <p id="padStatus" class="padStatus"></p>

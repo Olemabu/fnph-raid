@@ -60,8 +60,19 @@ function conceptsDone(r){const cs=(r.concepts||[]).filter(c=>c.items.length);ret
 let timerOn=store.get('timer',true);const MASTER_AT=3;
 let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode2','drill');
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
-function grade(id,ok,neutral){const s=st(id);s.seen++;if(neutral){}else if(ok){s.right++;s.box=Math.min(5,s.box+1);}else{s.wrong++;s.box=0;}store.set('stats',stats);}
-let recallOn=store.get('recall2',false);
+/* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
+const SRS_DAYS=[0,1,3,7,16,35];
+function grade(id,ok,neutral){const s=st(id);s.seen++;if(neutral){s.due=Date.now()+12*3600e3;}else if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}store.set('stats',stats);}
+function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
+function reviewRoom(){
+  const items=dueItems(30);if(!items.length)return null;
+  const cnt={};items.forEach(it=>cnt[it.room.idx]=(cnt[it.room.idx]||0)+1);
+  const idx=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+  return{review:true,locus:'Daily review',topic:'Daily review · spaced repetition',mode:'',idx:Math.min(idx,SLOTS.length-1),concepts:[],
+    note:['These are the items due today across every station, mixed together. Recall each one before the options open.','- Right: it comes back in 1, 3, 7, 16, then 35 days.','- Wrong: it comes back within the hour.'],items};
+}
+let recallMode=store.get('recallMode',store.get('recall2',false)?'always':'smart');
+const needRecall=it=>recallMode==='always'||(recallMode==='smart'&&!(stats[it.id]&&stats[it.id].box>=2));
 function mastered(it){return !!stats[it.id]&&stats[it.id].box>=MASTER_AT;}
 function masteredCount(room){return room.items.filter(mastered).length;}
 function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=(stats[it.id]?stats[it.id].box:0));return t/(room.items.length*5);}
@@ -81,7 +92,16 @@ function applyArsenal(announce){
   if(announce&&prev!=null&&t>prev)setTimeout(()=>{R.toast('Arsenal upgraded: '+ARSENAL[t].name+'. Answer gunships are armoured up too.',true);synth('mastered');},1300);
 }
 function arsenalLine(){const t=arsenalTier(),m=totalMastered(),nx=ARSENAL[t+1];return 'Arsenal: <b>'+ARSENAL[t].name+'</b>'+(nx?' · next, '+nx.name+', at '+nx.at+' mastered (you have '+m+')':' · fully upgraded');}
-const routeRooms=()=>mapRooms().filter(r=>!skipped.has(r.topic)&&r.items.length);
+let routeOrder=store.get('routeOrder','map');
+const PLAN_ORDER=['Mood disorders','Schizophrenia','Personality disorders','Phenomenology & psychopathology','Psychiatric interview','Substance use disorders','Biological treatments','Emergency psychiatry','Perinatal psychiatry','Genetics','Old age psychiatry','Psychiatry of later life','Neurology I','Neurology II','Forensic I — Mental health law','Forensic II — Assessment & services','Community & social psychiatry','Telepsychiatry','History of psychiatry','Basic statistics'];
+const ORDER_LABEL={map:'map order (gate inwards)',plan:'study plan (mood first)',weak:'weakest station first',due:'most reviews due first'};
+function routeRooms(){
+  const rr=mapRooms().filter(r=>!skipped.has(r.topic)&&r.items.length);
+  if(routeOrder==='plan'){const k=r=>{const i=PLAN_ORDER.indexOf(r.topic);return i<0?99:i;};return rr.slice().sort((a,b)=>k(a)-k(b));}
+  if(routeOrder==='weak')return rr.slice().sort((a,b)=>mastery(a)-mastery(b));
+  if(routeOrder==='due'){const now=Date.now(),d=r=>r.items.filter(it=>stats[it.id]&&stats[it.id].seen&&(stats[it.id].due||0)<=now).length;return rr.slice().sort((a,b)=>d(b)-d(a));}
+  return rr;
+}
 function noteHTML(lines){
   if(!lines||!lines.length)return '';let h='',ul=false;
   lines.forEach(l=>{if(l.startsWith('- ')){if(!ul){h+='<ul>';ul=true;}h+='<li>'+esc(l.slice(2))+'</li>';}else{if(ul){h+='</ul>';ul=false;}h+='<p>'+esc(l)+'</p>';}});
@@ -408,7 +428,7 @@ R.leadPoint=function(c,fx,fy){
 R.lockOn=function(c){$.aimLock=c;R.lockAnchor={x:$.mouse.sx||0,y:$.mouse.sy||0};};
 
 R.start=function(rooms,si){
-  rooms=rooms.filter(r=>r.idx<SLOTS.length&&r.items.length);
+  rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
   Object.assign(R,{active:true,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
@@ -446,11 +466,11 @@ function openBriefing(){
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
   R.phase='briefing';R.queue=mixQueue(fresh.concat(review));R.total=R.queue.length;R.cleared=0;
-  R.par=Math.max(60,fresh.length*(recallOn?55:30)+review.length*(recallOn?30:15));R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
+  R.par=Math.max(60,fresh.length*(recallMode!=='off'?55:30)+review.length*(recallMode!=='off'?30:15));R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
   const head=C?'<p class="meta">'+esc(r.topic)+' · concept '+(cs.indexOf(C)+1)+' of '+cs.length+' · '+conceptsDone(r)+' secured so far</p><h2>'+esc(C.title)+'</h2>'+(C.note.length?'<div class="note">'+noteHTML(C.note)+'</div>':''):'<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'');
-  card('brief','Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
+  card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
     '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
@@ -496,7 +516,8 @@ function setupWave(){
   if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
   Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt;
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
-  if(recallOn){R.phase='recall';Q('#qChip').textContent='Recall first, then shoot';showRecall();}else R.phase='fight';
+  it.recallUsed=it.recallUsed||needRecall(it);
+  if(needRecall(it)){R.phase='recall';Q('#qChip').textContent='Recall first, then '+(R.modeName()==='race'?'drive':'shoot');showRecall();}else R.phase='fight';
   if(R.modeName()==='race'){R.wave.chip=it.type==='q'?'Drive into the correct lane':chip.replace(/^Procedure · shoot/,'Procedure · drive through');if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
   synth('wave');hud();
 }
@@ -511,12 +532,22 @@ function showRecall(){
   else if(it.type==='l'){const k=it.found.length;ask=k?'What comes next? Step '+(k+1)+' of '+it.seq.length+', after: "'+it.found[k-1]+'"':'What is the FIRST step? ('+it.seq.length+' steps in total)';}
   else{const rem=it.seq.length-it.found.length;ask='Name one item you have not hit yet ('+rem+' of '+it.seq.length+' left)';}
   R.rv={revealed:false,typed:''};
-  box.innerHTML='<span class="chip rec">Recall first</span><p class="rq">'+esc(ask)+'</p><div class="rrow"><input id="recallIn" type="text" autocomplete="off" placeholder="Type it, or say it out loud"><button id="recallBtn" class="btn primary">Reveal</button></div><p class="rhint">Enter or any fire button reveals the answer. The gunships stay sealed until you rate yourself.</p>';
+  R.rv.hints=0;
+  box.innerHTML='<span class="chip rec">Recall first</span><p class="rq">'+esc(ask)+'</p><p class="rhintline" id="rHint"></p><div class="rrow"><input id="recallIn" type="text" autocomplete="off" placeholder="Say it out loud, or type it"><button id="recallBtn" class="btn">Hint</button><button id="recallBtn2" class="btn primary">Reveal</button></div><p class="rhint">'+(padId?'Controller: say the answer aloud, then press <b>button 1</b> to reveal. <b>Button 4</b> gives a hint (first letters), but a hint caps your score at Partly.':'Say it aloud or type it, then press Enter to reveal. <kbd>H</kbd> gives a hint, but it caps your score at Partly.')+'</p>';
   box.hidden=false;
-  Q('#recallBtn').onclick=revealRecall;
-  const inp=Q('#recallIn');inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();revealRecall();}};
+  Q('#recallBtn').onclick=recallHint;Q('#recallBtn2').onclick=revealRecall;
+  const inp=Q('#recallIn');inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();revealRecall();}else if(e.key==='h'&&!inp.value){e.preventDefault();recallHint();}};
   if(!padId)setTimeout(()=>{try{inp.focus({preventScroll:true});}catch(e){}},50);
 }
+/* hint ladder: 1 = first letter of each word, 2 = first half of each word, 3 = everything but the last letters */
+function maskWord(w,level){const core=w.replace(/[^A-Za-z0-9]/g,'');if(core.length<=1||/^[0-9.]+$/.test(core))return level>=2?w:w.replace(/[A-Za-z0-9]/g,(c,i)=>i===0?c:'_');const keep=level===1?1:level===2?Math.ceil(core.length/2):Math.max(1,core.length-2);let n=0;return w.replace(/[A-Za-z0-9]/g,c=>(n++<keep)?c:'_');}
+function recallHint(){
+  if(!R.rv||R.rv.revealed)return;R.rv.hints=Math.min(3,(R.rv.hints||0)+1);
+  const tg=recallTarget(),t=tg[0]||'';const h=String(t).split(/\s+/).map(w=>maskWord(w,R.rv.hints)).join(' ');
+  const el=Q('#rHint');if(el)el.innerHTML='Hint '+R.rv.hints+'/3: <b>'+esc(h)+'</b>'+(tg.length>1?' <span class="muted">(one of '+tg.length+')</span>':'');
+  synth('lock');
+}
+R.recallHint=recallHint;
 function revealRecall(){
   if(!R.rv||R.rv.revealed)return;
   const typed=(Q('#recallIn')||{value:''}).value.trim(),tg=recallTarget();R.rv.revealed=true;R.rv.typed=typed;
@@ -525,13 +556,14 @@ function revealRecall(){
   const sug=!typed?null:best>=.6?'got':best>=.3?'partly':'missed';
   const it=R.cur,ansHTML=it.type==='s'?'<span class="lbl">Any of these</span><ul>'+tg.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<span class="lbl">'+(it.type==='l'?'Step '+(it.found.length+1):'Answer')+'</span><b>'+esc(bestT)+'</b>';
   Q('#recall').innerHTML='<span class="chip rec">Recall check</span>'+(typed?'<p class="typed">You said: '+esc(typed)+'</p>':'')+'<div class="ra">'+ansHTML+'</div>'+verdict+
-    '<div class="rate"><button data-r="got" class="btn'+(sug==='got'?' sug':'')+'"><kbd>1</kbd> Got it</button><button data-r="partly" class="btn'+(sug==='partly'?' sug':'')+'"><kbd>2</kbd> Partly</button><button data-r="missed" class="btn'+(sug==='missed'?' sug':'')+'"><kbd>3</kbd> Missed</button></div><p class="rhint">Only "Got it" counts towards mastery. Controller: button 1, 2 or 3.</p>';
+    '<div class="rate"><button data-r="got" class="btn'+(sug==='got'?' sug':'')+'"><kbd>1</kbd> Got it</button><button data-r="partly" class="btn'+(sug==='partly'?' sug':'')+'"><kbd>2</kbd> Partly</button><button data-r="missed" class="btn'+(sug==='missed'?' sug':'')+'"><kbd>3</kbd> Missed</button></div><p class="rhint">'+(R.rv.hints?'You used a hint, so "Got it" counts as Partly. ':'')+'Only "Got it" counts towards mastery. Controller: <b>button 1</b> Got it, <b>2</b> Partly, <b>3</b> Missed.</p>';
   Q('#recall').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>rateRecall(b.dataset.r));
   synth('card');
 }
 function rateRecall(r){
   if(!R.rv||!R.rv.revealed||R.phase!=='recall')return;
   const it=R.cur,order={got:0,partly:1,missed:2};
+  if(r==='got'&&R.rv.hints)r='partly';
   it.rec=it.rec&&order[it.rec]>order[r]?it.rec:r;
   Q('#recall').hidden=true;R.rv=null;R.phase='fight';if(R.wave)Q('#qChip').textContent=R.wave.chip;
   R.toast(r==='got'?'Recalled. Now shoot it.':r==='partly'?'Partly recalled. Now find it.':'Missed. Find it and learn it.',r==='got');
@@ -562,7 +594,7 @@ function reinforce(it){
   R.queue.splice(pos,0,it);R.total++;
   setTimeout(()=>R.toast('Got it. It comes back once more after '+pos+' more question'+(pos===1?'':'s')+' to lock it in.',true),1100);
 }
-function gradeRecall(it){const r=recallOn?(it.rec||'missed'):'got';if(r==='got')grade(it.id,true);else if(r==='partly')grade(it.id,true,true);else grade(it.id,false);}
+function gradeRecall(it){const r=it.recallUsed?(it.rec||'missed'):'got';it.recallUsed=false;if(r==='got')grade(it.id,true);else if(r==='partly')grade(it.id,true,true);else grade(it.id,false);}
 function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
   const it=R.cur;
@@ -572,7 +604,7 @@ function afterCorrect(){
   if(teachAll){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
-  let body='<p class="cq">'+esc(it.prompt)+'</p>'+(recallOn&&it.rec?'<p class="meta">Your recall: <b>'+({got:'Got it',partly:'Partly',missed:'Missed'}[it.rec])+'</b>'+(it.rec==='got'?' (counts towards mastery)':' (does not count towards mastery yet)')+'</p>':'');
+  let body='<p class="cq">'+esc(it.prompt)+'</p>'+(it.rec?'<p class="meta">Your recall: <b>'+({got:'Got it',partly:'Partly',missed:'Missed'}[it.rec])+'</b>'+(it.rec==='got'?' (counts towards mastery)':' (does not count towards mastery yet)')+'</p>':'');
   if(it.type==='q'){
     body+='<div class="ans good"><span class="lbl">Answer</span><b>'+esc(it.answer)+'</b></div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
@@ -644,7 +676,7 @@ function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
   const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
-  if(allC){captured.add(r.topic);store.set('captured',[...captured]);}R.taken++;
+  if(allC&&!r.review){captured.add(r.topic);store.set('captured',[...captured]);}R.taken++;
   $.score+=1000;synth('captured');$.rumble.level=14;
   for(let k=0;k<6;k++)setTimeout(()=>{$.explosions.push(new $.Explosion({x:s.x+rand(-60,60),y:s.y+rand(-60,60),radius:rand(30,70),hue:190,saturation:100}));$.audio.play('explosionAlt');},k*160);
   $.levelPops.push(new $.LevelPop({level:r.idx+1}));
@@ -897,7 +929,7 @@ let keyFire=0;
 document.addEventListener('keydown',e=>{
   if(Q('#play').hidden)return;
   if(!Q('#cardWrap').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();closeCard();}return;}
-  if(R.active&&R.phase==='recall'){if(R.rv&&!R.rv.revealed&&e.key==='Enter'){e.preventDefault();revealRecall();}else if(R.rv&&R.rv.revealed&&['1','2','3'].includes(e.key)){e.preventDefault();rateRecall({1:'got',2:'partly',3:'missed'}[e.key]);}return;}
+  if(R.active&&R.phase==='recall'){if(R.rv&&!R.rv.revealed&&(e.key==='h'||e.key==='H')){e.preventDefault();recallHint();}else if(R.rv&&!R.rv.revealed&&e.key==='Enter'){e.preventDefault();revealRecall();}else if(R.rv&&R.rv.revealed&&['1','2','3'].includes(e.key)){e.preventDefault();rateRecall({1:'got',2:'partly',3:'missed'}[e.key]);}return;}
   if(!R.active||R.phase!=='fight')return;
   if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){R.lockOn(c);synth('lock');R.toast('Locked on '+c.num+' · '+c.text,true);}e.preventDefault();}
   else if(e.key==='Tab'){cycleLock(1);e.preventDefault();}
@@ -914,6 +946,17 @@ let padPrev=[],padId='',padBase=null;const padCur={on:false,x:0,y:0};let padSens
 let padMap=store.get('padMap2',null);
 let wiz=null; // controller setup wizard state
 function readPad(){let p=null;try{const ps=navigator.getGamepads?navigator.getGamepads():[];for(const g of ps)if(g&&g.connected!==false&&g.buttons&&g.buttons.length){p=g;break;}}catch(e){}return p;}
+let navLast='',navT=0,navRep=false;
+function padNav(scr,dir){
+  const els=[...scr.querySelectorAll('button:not([disabled]),a.btn,input[type=checkbox],select')].filter(e=>e.offsetParent!==null);if(!els.length)return;
+  let cur=document.querySelector('.padf');if(!cur||!scr.contains(cur)){cur=null;}
+  if(!cur){const first=scr.querySelector('#bStart')||els[0];first.classList.add('padf');first.focus({preventScroll:true});first.scrollIntoView({block:'nearest'});return;}
+  const a=cur.getBoundingClientRect(),ax=a.left+a.width/2,ay=a.top+a.height/2;let best=null,bs=1e9;
+  els.forEach(e=>{if(e===cur)return;const b=e.getBoundingClientRect(),bx=b.left+b.width/2,by=b.top+b.height/2,dx=bx-ax,dy=by-ay;
+    const main=dir==='r'?dx:dir==='l'?-dx:dir==='d'?dy:-dy,off=dir==='r'||dir==='l'?Math.abs(dy):Math.abs(dx);
+    if(main<=4)return;const sc=main+off*2.2;if(sc<bs){bs=sc;best=e;}});
+  if(best){cur.classList.remove('padf');best.classList.add('padf');best.focus({preventScroll:true});best.scrollIntoView({block:'nearest',behavior:'smooth'});synth('lock');}
+}
 R.pollPad=function(){
   const p=readPad();
   if(!p){if(padId){padId='';padStatus();}$.pad.mx=$.pad.my=0;$.pad.fire=0;padPrev=[];if(wiz)renderWiz(null);return;}
@@ -931,10 +974,20 @@ R.pollPad=function(){
   const anyFireEdge=fireBtns.some(edge)||[0,1,2,3].some(edge),anyPauseEdge=pauseBtns.some(edge);
   // overlays and menus: any fire or pause button presses the main button
   if(!Q('#cardWrap').hidden){if(anyFireEdge||anyPauseEdge)closeCard();padPrev=cur;return;}
-  if(!Q('#home').hidden){if(anyFireEdge||anyPauseEdge)Q('#bStart').click();padPrev=cur;return;}
-  if(!Q('#debrief').hidden){if(anyFireEdge||anyPauseEdge)Q('#dAgain').click();padPrev=cur;return;}
+  {const scr=['home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
+   if(scr){let nx=0,ny=0;if(M){nx=dev(M.drive.x)*M.drive.sx;ny=dev(M.drive.y)*M.drive.sy;}else{nx=dev(0);ny=dev(1);}
+     if(cur[14])nx=-1;if(cur[15])nx=1;if(cur[12])ny=-1;if(cur[13])ny=1;
+     {const hi=M&&M.hat!=null?M.hat:(p.axes.length>9?9:null);if(hi!=null){const h=p.axes[hi];const H=[[-1,0,-1],[-.71,1,-1],[-.43,1,0],[-.14,1,1],[.14,0,1],[.43,-1,1],[.71,-1,0],[1,-1,-1]];for(const [v,hx,hy] of H)if(Math.abs(h-v)<.08){nx=hx;ny=hy;}}}
+     const dir=Math.abs(nx)>.5||Math.abs(ny)>.5?(Math.abs(nx)>Math.abs(ny)?(nx>0?'r':'l'):(ny>0?'d':'u')):'';
+     const now=performance.now();
+     if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
+     if(!dir){navLast='';navRep=false;}
+     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
+     else if(anyPauseEdge){if(scr.id==='home')Q('#bStart').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
-  if(R.active&&R.phase==='recall'&&R.rv){if(!R.rv.revealed){if(anyFireEdge)revealRecall();}else{if(edge(0))rateRecall('got');else if(edge(1))rateRecall('partly');else if(edge(2))rateRecall('missed');}$.pad.fire=0;padPrev=cur;return;}
+  if(R.active&&R.phase==='recall'&&R.rv){if(!R.rv.revealed){if(edge(3))recallHint();else if(anyFireEdge)revealRecall();}else{if(edge(0))rateRecall('got');else if(edge(1))rateRecall('partly');else if(edge(2))rateRecall('missed');}$.pad.fire=0;padPrev=cur;return;}
   // drive
   let mx=0,my=0;
   if(M){mx=dev(M.drive.x)*M.drive.sx;my=dev(M.drive.y)*M.drive.sy;}
@@ -1036,7 +1089,9 @@ function renderHome(){
   Q('#bMode').textContent='When I die: '+({drill:'repeat it until right, then again 2 to 3 later',shuffle:'question goes back into the queue',restart:'station restarts'}[deathMode]||'repeat it until right');
   Q('#bReset').hidden=nT===0;padStatus();
   Q('#bTimer').textContent='Par-time clock: '+(timerOn?'on':'off');
-  Q('#bRecall').textContent='Recall first: '+(recallOn?'on (options stay sealed until you recall)':'off');
+  Q('#bOrder').textContent='Full raid order: '+ORDER_LABEL[routeOrder];
+  {const nd=dueItems().length;const b=Q('#bReview');b.textContent=nd?'Daily review ('+Math.min(nd,30)+(nd>30?' of '+nd:'')+' due)':'Daily review (nothing due)';b.disabled=!nd;}
+  Q('#bRecall').textContent='Recall first: '+({always:'every question',smart:'new and weak questions',off:'off'}[recallMode]);
   Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
   {const g=globalBar();Q('#homeSegs').innerHTML=g.html;Q('#homeGLabel').textContent=g.label;gKey='';}
   if(!mapCanvas)buildMap();
@@ -1057,7 +1112,9 @@ Q('#bPad').addEventListener('click',()=>{ac();openWiz();});
 Q('#padDone').addEventListener('click',closeWiz);
 Q('#padReset').addEventListener('click',()=>{padMap=null;store.set('padMap2',null);wiz=null;Q('#padModal').hidden=true;renderHome();});
 Q('#bSens').addEventListener('click',()=>{padSens=padSens===0.6?1:padSens===1?1.5:0.6;store.set('padSens',padSens);renderHome();});
-Q('#bRecall').addEventListener('click',()=>{recallOn=!recallOn;store.set('recall2',recallOn);renderHome();});
+Q('#bOrder').addEventListener('click',()=>{routeOrder={map:'plan',plan:'weak',weak:'due',due:'map'}[routeOrder]||'map';store.set('routeOrder',routeOrder);renderHome();});
+Q('#bReview').addEventListener('click',()=>{ac();const rv=reviewRoom();if(rv)R.start([rv],0);});
+Q('#bRecall').addEventListener('click',()=>{recallMode={smart:'always',always:'off',off:'smart'}[recallMode]||'smart';store.set('recallMode',recallMode);renderHome();});
 Q('#bTimer').addEventListener('click',()=>{timerOn=!timerOn;store.set('timer',timerOn);renderHome();});
 Q('#bReset').addEventListener('click',()=>{captured.clear();store.set('captured',[]);renderHome();});
 Q('#bStudy').addEventListener('click',()=>openWalk(0));

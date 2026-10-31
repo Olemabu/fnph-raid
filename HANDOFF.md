@@ -63,6 +63,9 @@ The player wants some stages played differently:
 
 The engine is a **2D top-down canvas** shooter. Build each mode as a separate self-contained mini-mode in its own file (for example `src/mode-race.js`), entered from specific stations (OSCE or emergency stages are a natural fit). Use the same deck item format (`Q:`, `L:`, `S:`). Use pseudo-3D (raycast or Mode-7 style) on canvas: no WebGL libraries from a CDN, because of the self-contained rule. Add each new file to the load order in **both** `build.py` and `build.ps1`.
 
+### Recall upgrade: DONE (Oct 31)
+Smart recall-first (default), hint ladder, spaced-repetition due dates (`SRS_DAYS`, `grade()`), the Daily review run (`reviewRoom()`), the route-order chip (`routeRooms()`, `PLAN_ORDER`) and full gamepad menu navigation (`padNav()` in `R.pollPad`). Graphics pass on both modes: race scenery, roll, headlights, boost streaks and bursts; ward-round floor and ceiling casting, beds, sparks and shards, vignette.
+
 ### Task 5: Finish syllabus ingestion: DONE (Oct 31)
 The whole of nebula-study is in the game: 20 topic stations, 339 concepts, 2,740 items (1,783 MCQs, 59 OSCE scripts as 803 items, plus the bonus drills). See "Syllabus coverage" in README. Still to do: rename the 5 placeholder loci; optionally use nebula `why/` and `lectures/` for richer teaching notes; set the route order to the nebula 8-week plan.
 
