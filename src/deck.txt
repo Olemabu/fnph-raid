@@ -293,11 +293,12 @@ Q: Psychological treatment of choice for OCD = CBT with exposure and response pr
 L: Exposure and response prevention for OCD = Psychoeducation | Build an exposure hierarchy | Graded exposure, starting low | Response prevention: resist the compulsion | Relapse prevention ~~ Reassurance seeking :: Reassurance is a compulsion that keeps OCD going | Start with the most feared situation :: Exposure is graded, starting low | Thought stopping :: Not part of ERP
 > The hierarchy ranks triggers from least to most distressing (rated, for example, 0-100) and works upwards.
 
-## Pink Quad | Schizophrenia & psychosis
+## Pink Quad | Schizophrenia: Diagnosis & Treatment Resistance
 > ICD-11 schizophrenia (6A20): at least TWO of the following, at least one from a-d, for at least 1 month:
 > - a. Persistent delusions. b. Persistent hallucinations. c. Disorganised thinking. d. Experiences of influence, passivity or control.
 > - e. Negative symptoms. f. Grossly disorganised behaviour. g. Psychomotor disturbances, including catatonia.
-> ICD-11 dropped the old subtypes (paranoid, hebephrenic, catatonic...). It uses symptom specifiers (positive, negative, depressive, manic, psychomotor, cognitive) and course specifiers instead. Always exclude a substance or medical cause.
+> ICD-11 dropped the old subtypes (paranoid, hebephrenic, catatonic). It uses symptom specifiers (positive, negative, depressive, manic, psychomotor, cognitive).
+> Treatment-resistant schizophrenia (TRS): non-response to at least TWO different antipsychotics (at least one second-generation) at adequate therapeutic dose for 6–8 weeks each. TRS is the primary indication for Clozapine.
 
 Q: Minimum duration for schizophrenia (ICD-11) = 1 month | 6 months :: Six months is the DSM-5 total duration, not ICD-11 | 2 weeks :: Two weeks is the depressive episode duration | 3 months :: Not an ICD-11 threshold; it is 1 month
 > Shorter psychotic presentations fit acute and transient psychotic disorder (6A23), which starts suddenly and typically resolves within 3 months.
@@ -305,34 +306,43 @@ Q: Minimum duration for schizophrenia (ICD-11) = 1 month | 6 months :: Six month
 Q: Symptom requirement for schizophrenia (ICD-11) = At least 2 symptoms, at least one from the core group | At least 2 symptoms from any of the groups :: At least one must come from the core group | At least 1 core symptom for 1 month :: Two symptoms are needed | At least 2 core symptoms :: Only one must be core; the second can be from any group
 > Core group = delusions, hallucinations, thought disorder, and passivity experiences.
 
-Q: ICD-11 code for schizophrenia = 6A20 | 6A21 :: 6A21 is schizoaffective disorder | 6A70 :: 6A70 is single episode depressive disorder | 6A60 :: 6A60 is bipolar type I disorder
-> The psychosis block: 6A20 schizophrenia, 6A21 schizoaffective, 6A22 schizotypal, 6A23 acute and transient psychotic disorder, 6A24 delusional disorder.
-
-Q: What did ICD-11 remove from schizophrenia? = The subtypes (paranoid, hebephrenic, catatonic and others) | The 1-month duration :: Still 1 month | Negative symptoms from the criteria :: Still counted (symptom e) | Catatonia as a symptom :: Psychomotor disturbance, including catatonia, is still symptom g
-> The subtypes were unreliable and unstable over time, so ICD-11 replaced them with symptom specifiers.
+Q: How is Treatment-Resistant Schizophrenia (TRS) defined? = Failure of at least 2 antipsychotics (≥1 SGA) at adequate dose for 6–8 weeks each | Failure of 1 antipsychotic for 2 weeks :: 2 weeks is too short to evaluate clinical response | Failure of typical antipsychotics only :: Current guidelines require at least one trial of a second-generation atypical | High dose depot for 6 months :: Resistance requires documented non-response to two distinct trials, not prolonged depot monotherapy
+> Kane (1988) and McEvoy (2006): TRS requires failure of at least two antipsychotics at therapeutic doses for at least 6–8 weeks. It affects ~30% of patients and warrants Clozapine evaluation.
 
 S: ICD-11 schizophrenia core symptoms = Persistent delusions | Persistent hallucinations | Disorganised thinking (formal thought disorder) | Experiences of influence, passivity or control ~~ Negative symptoms :: They count towards the diagnosis, but they are not in the core group | Grossly disorganised behaviour :: It counts towards the diagnosis, but it is not in the core group | Psychomotor disturbance (catatonia) :: It counts towards the diagnosis, but it is not in the core group
 > At least one of these four must be present.
 
-S: ICD-11 schizophrenia symptoms outside the core group = Negative symptoms | Grossly disorganised behaviour | Psychomotor disturbances (including catatonia) ~~ Persistent delusions :: That is a core symptom (a) | Thought insertion :: That is a passivity experience, which is core (d) | Persistent hallucinations :: That is a core symptom (b)
-> These count towards the "at least two", but cannot be the only symptoms.
-
 S: Schneider's first-rank symptoms = Audible thoughts (thought echo) | Voices arguing or discussing | Voices giving a running commentary | Somatic passivity | Thought insertion | Thought withdrawal | Thought broadcasting | Delusional perception | Made feelings, impulses or actions ~~ Visual hallucinations :: Not a first-rank symptom | Persecutory delusions :: Not a first-rank symptom; delusional perception is | Negative symptoms :: Not a first-rank symptom | Second-person command voices :: Not first-rank; the voices are third-person (arguing or commenting)
-> Group them to remember: 3 auditory hallucinations, 3 thought alienations (insertion, withdrawal, broadcasting), passivity (made feelings, impulses, actions, somatic), and delusional perception.
-> They are suggestive of schizophrenia but not specific; they also occur in mania and organic states.
+> Group them: 3 auditory hallucinations, 3 thought alienations (insertion, withdrawal, broadcasting), passivity (made feelings, impulses, actions, somatic), and delusional perception.
 
-S: Bleuler's 4 As = Associations (loosening) | Affect (blunted or incongruous) | Ambivalence | Autism ~~ Auditory hallucinations :: Bleuler called these accessory symptoms, not fundamental | Alogia :: A negative symptom from Andreasen's list, not Bleuler's 4 As | Avolition :: A negative symptom from Andreasen's list, not Bleuler's 4 As
-> Eugen Bleuler coined "schizophrenia" (1911) and called the 4 As the fundamental symptoms. Hallucinations and delusions were accessory.
+Q: Which antipsychotic is uniquely proven to reduce suicide in schizophrenia? = Clozapine | Olanzapine :: Olanzapine has strong metabolic effects but no unique anti-suicide licence | Haloperidol :: First-generation antipsychotic with high EPS; does not reduce suicide risk | Risperidone :: High EPS and prolactin; does not share clozapine's anti-suicide evidence
+> Clozapine is the only antipsychotic with FDA and international approval for reducing suicidal behaviour in schizophrenia and schizoaffective disorder.
 
-Q: Who described first-rank symptoms? = Kurt Schneider | Eugen Bleuler :: Bleuler coined "schizophrenia" and described the 4 As | Emil Kraepelin :: Kraepelin described dementia praecox | Karl Jaspers :: Jaspers wrote General Psychopathology (form vs content, understandability)
-> Schneider wanted practical symptoms that would help non-specialists recognise schizophrenia.
+## Clozapine Clinic | OSCE: Clozapine Initiation & Blood Monitoring
+> CANDIDATE BRIEF: A 28-year-old patient with treatment-resistant schizophrenia is referred after failing olanzapine and risperidone. Counsel the patient and their sister, explain the CPMS monitoring traffic lights, outline baseline tests, and take informed consent.
+> CRITICAL FAIL: Failing to explain that fever or sore throat requires an immediate emergency hospital check; or combining clozapine with carbamazepine.
 
-Q: Kraepelin's name for schizophrenia = Dementia praecox | Manic-depressive insanity :: That was Kraepelin's other group, now bipolar disorder | Paraphrenia :: Late-onset paranoid psychosis, not the main term | Hebephrenia :: Hecker's term for a subtype
-> Kraepelin's "great divide": dementia praecox (a deteriorating course) versus manic-depressive insanity (episodic, with recovery).
+L: Clozapine Counselling Protocol (OSCE) = 1. Validate distress over past medication failures and define treatment resistance | 2. Explain Clozapine's superior efficacy and proven suicide-reduction evidence | 3. Explain mandatory blood monitoring: Weekly for 18 weeks, 2-weekly to 1 year, then monthly | 4. Explain the Traffic Light system: Green (continue), Amber (re-test 2x/wk), Red (stop immediately) | 5. Warn about emergency red flags: Fever, sore throat, severe constipation, and chest pain | 6. Address smoking impact (CYP1A2 induction: stopping smoking spikes clozapine levels) ~~ Promise blood tests will stop after 1 month :: Monitoring is indefinite (monthly after 1 year) | State clozapine has zero side effects :: Frank discussion of metabolic, seizure, and bowel side effects is required for valid consent | Recommend adding Carbamazepine for mood stability :: Carbamazepine is contraindicated with clozapine due to additive bone marrow suppression
 
-L: Starting clozapine = Confirm treatment resistance (2 antipsychotics tried) | Baseline FBC and register with a monitoring service | Start at 12.5 mg and titrate slowly | Weekly FBC for the first 18 weeks ~~ Start at the full dose :: Clozapine must be titrated slowly (hypotension, seizures, myocarditis) | Stop blood tests after 1 month :: Monitoring continues; weekly for 18 weeks | Combine with carbamazepine :: Adds agranulocytosis risk
-> Treatment resistance = no adequate response to at least two antipsychotics (one ideally second-generation), each at adequate dose and duration.
-> Clozapine is the only drug with clear evidence in treatment-resistant schizophrenia, and it reduces suicide risk.
+S: Mandatory Baseline Pre-Clozapine Workup = Full Blood Count with Differential (WBC > 3500, ANC > 2000) | Baseline 12-lead ECG (QTc interval) | Troponin and C-Reactive Protein (CRP) | Fasting blood glucose and lipid profile | Urea, Electrolytes and Liver Function Tests | Baseline weight, BMI and waist circumference ~~ Lumbar puncture :: Not indicated unless an infectious or autoimmune encephalitis is suspected | Therapeutic drug monitoring blood level :: TDM is performed after steady-state titration, not as a baseline test | Bone marrow biopsy :: Not indicated prior to clozapine initiation
+
+Q: CPMS Blood Monitoring Thresholds: When does a count require RED ALERT immediate cessation? = WBC < 3000/mm³ or Absolute Neutrophil Count (ANC) < 1500/mm³ | WBC < 4000/mm³ or ANC < 2500/mm³ :: These are normal safe ranges (Green category) | WBC < 3500/mm³ or ANC < 2000/mm³ :: This is the Amber category: continue treatment but increase monitoring to twice weekly | Platelets < 150,000/mm³ only :: Clozapine monitoring focuses primarily on leukocyte and absolute neutrophil counts
+> Green: WBC ≥ 3500, ANC ≥ 2000. Amber: WBC 3000–3500, ANC 1500–2000 (test twice weekly). Red: WBC < 3000, ANC < 1500 (STOP clozapine immediately; daily counts; admit). Note: In Benign Ethnic Neutropenia (BEN), Red is ANC < 1000/mm³.
+
+Q: What is the management if a patient on Clozapine misses doses for 48 hours or more? = Restart at 12.5 mg once or twice daily and re-titrate | Resume at their previous full maintenance dose :: Resuming a full dose after 48h carries high risk of fatal collapse, severe hypotension and seizures | Double the next dose to compensate :: Extremely dangerous; clozapine must be re-titrated from 12.5 mg | Switch immediately to another antipsychotic :: Missing 48 hours only requires safe re-titration, not abandonment of effective therapy
+> Because tolerance to alpha-1 adrenergic and histaminic blockade is rapidly lost, missing ≥48 hours requires restarting at 12.5 mg and re-titrating to prevent syncope and cardiac arrest.
+
+## Emergency Resus | OSCE / Emergency: Clozapine Neutropenia & Red Alert Protocol
+> CANDIDATE BRIEF: Week 8 of Clozapine therapy. The patient presents to casualty with a temperature of 38.6°C, shivering, and a sore throat. Urgent FBC reveals: WBC 2.2 × 10⁹/L, Absolute Neutrophil Count (ANC) 850/mm³.
+> CRITICAL FAIL: Reducing the clozapine dose instead of immediately stopping it; or discharging the patient with oral antipyretics.
+
+L: Clozapine Red Alert Emergency Sequence = 1. Immediately cease Clozapine permanently (do not taper or reduce dose) | 2. Immediate hospital admission under reverse barrier nursing isolation | 3. Urgent blood, throat and urine cultures followed by empirical broad-spectrum IV antibiotics | 4. Daily FBC with differential and urgent Haematology consult for G-CSF (filgrastim) | 5. Monitor vital signs for septic shock; never re-challenge clozapine without expert multidisciplinary approval ~~ Taper clozapine slowly over 2 weeks to avoid withdrawal :: In severe neutropenia (ANC < 1000) or agranulocytosis, immediate cessation is mandatory | Prescribe oral paracetamol and send patient home :: Neutropenic fever is a medical emergency with high mortality requiring inpatient admission | Re-challenge clozapine once fever clears :: Re-challenging after a Red Alert agranulocytosis carries fatal recurrence risk
+
+S: Life-Threatening Clozapine Emergencies requiring Immediate Intervention = Agranulocytosis / Severe Neutropenic Sepsis (ANC < 1000) | Acute Myocarditis (persistent resting tachycardia, chest pain, raised troponin/CRP in first 2 months) | Paralytic Ileus / Severe Gastrointestinal Hypomotility (constipation, vomiting, abdominal distension) | Dose-related generalized tonic-clonic seizures (especially at doses >600 mg/day) | Neuroleptic Malignant Syndrome (lead-pipe rigidity, hyperthermia, autonomic instability) ~~ Mild transient hypersalivation :: A common benign anticholinergic/adrenergic side effect treated with hyoscine | Benign transient tachycardia without chest pain or troponin rise :: Common during titration; managed with slow titration or a beta-blocker | Mild sedation during evening dosing :: Common histaminic effect managed by dosing adjustments
+> Severe constipation from clozapine causes paralytic ileus, bowel necrosis, and toxic megacolon, which has caused more deaths in some national registries than agranulocytosis! Always prescribe laxatives proactively.
+
+Q: Examiner Viva: Under what circumstance may Clozapine be re-challenged after a Red Alert? = Never routinely; only in exceptional treatment-refractory cases under a specialist hematology/psychiatry panel with G-CSF support | As soon as the neutrophil count returns above 2000 :: Spontaneous recovery does not remove the risk of lethal recurrence upon re-exposure | Whenever the patient's psychosis worsens :: Worsening psychosis must be managed with alternative strategies, not unmonitored clozapine re-exposure | If the patient switches from smoking cigarettes to non-smoking :: Smoking affects CYP1A2 metabolism, but has no relation to autoimmune agranulocytosis
+> Agranulocytosis re-challenge carries a mortality rate of up to 30%. Routine re-challenge is contraindicated. Formal specialist registries and haematology co-management with granulocyte colony-stimulating factor (G-CSF) are mandatory for rare off-label exceptions.
 
 ## U-Block | Substance dependence (ICD-11)
 > Walk the ICD-11 pathway for every substance, and show whether each requirement is present or absent. Don't force the diagnosis.
