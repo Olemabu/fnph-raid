@@ -40,7 +40,7 @@ Current stations (in `src/deck.txt`): Main Gate, Car Park, Main Block, NE Wing, 
 - **Include all the MCQs** from nebula-study.
 - Verify the medical content of everything you pull in (see the rules in section 0).
 
-## 4. Next tasks, in order (the player's latest request, not started)
+## 4. Earlier task list (history; see 4b for what is next)
 
 Do one task at a time. After each: build, play-test, commit and push.
 
@@ -71,6 +71,36 @@ The whole of nebula-study is in the game: 20 topic stations, 339 concepts, 2,740
 
 (Original task text follows.)
 Go through nebula-study topic by topic. Pull in the concepts from each summary plus all its MCQs, and add OSCE stations after the related syllabus station. Give the new stations map slots in `src/mapgeo.js`.
+
+## 4b. BACKLOG FOR THE NEXT AI (Codex): start here. Agreed priorities, in order
+
+The game is feature-complete for daily use (latest commit `38985a1`). Work these one at a time: build, test, commit and push after each.
+
+1. **Why each wrong option is wrong.** Nebula MCQs have one `explain` per question, so the death card can't say why *your* pick was wrong. Add `:: reason` per wrong option in `src/deck.txt`. Do this in `tools/nebula2deck.js`, or in nebula itself and regenerate. Start with the topics where the player misses most (read `fnphraid.stats` misses). Never invent facts: mark anything unsure with `[CHECK]`.
+2. **Exam simulation mode.** A home button. Timed, mixed questions from all 20 topics, in NPMCN Part I format; no teaching cards or recall gate during the run; a score breakdown by topic at the end, plus a review list. Reuse `R.start([room])` with a synthetic room like `reviewRoom()` and a flag that skips cards.
+3. **Weak-spot dashboard.** A home panel listing the worst concepts by miss rate (`stats[id].wrong/seen`) and overdue reviews, with a "Drill these" button that builds a synthetic room from those items.
+4. **Progress backup and sync.** Export and import `localStorage` keys starting with `fnphraid.` (stats, cdone, captured, settings) as a JSON file. Optional: save to a Gist or Drive. Progress currently lives only in one Chrome profile.
+5. **OSCE out-loud mode.** For `### OSCE:` concepts: show the phase cue, the player says their line aloud and presses button 1, then the game reveals the model "say" and the examiner checklist, and the player ticks what they covered (gamepad: d-pad plus button 1). Nebula's `osce/stations.js` has `phases[].say/check`, `critical` and `viva`. Use nebula's `osceRubric` if helpful.
+6. **Long-case station.** Nebula has `data/longcases-a.js`, `-b.js` and `-pocket.js`. FNPH style: clerk first, then follow the ICD-11 pathway and show whether each requirement is present or absent (for example, dependence in substance cases). Never force the diagnosis. A good fit is an `L:` sequence or a step-by-step present/absent drill.
+7. **The 12 missing OSCE stations.** The syllabus plans 71 (`syllabus.js` osce groups), but nebula has 59. Draft them in nebula's station format for the player to review; mark them as drafts.
+8. **007 stealth mode** (`src/mode-stealth.js`, `| stealth`). Sneak past guard sight-cones and enter the door showing the right answer; a wrong door is an alarm, which counts as a wrong pick through `R.carrierDown(fake)`. Copy the structure of `mode-race.js` and `mode-fps.js` (hook in `setupWave()`, `MODES` in `raid.js`, build lists in both `build.py` and `build.ps1`).
+9. **Enemy variety by arsenal tier** (shielded and splitting swarm enemies) via `$.setDifficulty` and `vendor/radius-raid/definitions.js` types (override in `src/`, never edit vendor).
+10. **Rename the 5 placeholder loci** (Admin Block, OPD Clinic, Pharmacy, Library, Records Office) in the `SLOTS` table of `tools/nebula2deck.js`. Ask the player for the real FNPH place names, since they are his memory palace.
+11. **Phone play:** GitHub Pages, or another private hosting the player approves, for `dist/fnph-raid.html`.
+12. **Nebula sync script:** one command that loads nebula-study, writes `nebula.json` and regenerates `src/deck.txt` (see the header of `tools/nebula2deck.js`).
+
+### How the previous AI worked (useful for Codex)
+- **Build:** `python build.py` (or `build.bat` on Windows). The output is `dist/fnph-raid.html`, about 1.6 MB, because the whole deck is embedded.
+- **Headless testing with Playwright:**
+  - Open `dist/fnph-raid.html` and click `button.attack` (index = station).
+  - Teleport the hero to the station with `SLOTS[$.raid.rooms[$.raid.si].idx]` × 2 to trigger the briefing.
+  - Then drive answers through `$.raid.wave.correct`. Ram by setting `$.hero.x/y` to a carrier, press keys 1 to 4, or simulate a gamepad by overriding `navigator.getGamepads`.
+  - Check `$.raid.phase`, `correct` and `deaths`, and watch for `pageerror`.
+- **Game state you will need:**
+  - `$.raid` (alias `R`): `modeName()`, `concept`, `queue`, `wave`, `carrierDown(fake)`.
+  - Stats in `localStorage['fnphraid.stats']`: `{box, right, wrong, seen, due}`.
+- **Pushing without a terminal:** double-click `push.bat`; a message in `.commitmsg` is used and then deleted.
+- **Player's controller:** a generic USB gamepad (vendor 0810, product 0001), with a profile in `R.pollPad`. Button 1 = confirm, 2 = back or partly, 3 = missed, 4 = hint; d-pad on axis 9.
 
 ## 5. Open checks
 
