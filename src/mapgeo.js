@@ -39,50 +39,193 @@ function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){co
 
 function roofRect(c,x,y,w,h,col){
   c.save();c.translate(x,y);c.rotate(ROT);
+  // 2.5D Drop shadow
+  c.fillStyle='rgba(0,0,0,.6)';c.fillRect(-w/2+3,-h/2+5,w,h);
+  // Extruded wall depth (east and south faces)
+  c.fillStyle='rgba(15,10,8,.85)';c.fillRect(-w/2,-h/2,w+2,h+3);
+  // Main roof plate
   c.fillStyle=col;c.fillRect(-w/2,-h/2,w,h);
-  c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=1;c.strokeRect(-w/2+.5,-h/2+.5,w-1,h-1);
-  c.strokeStyle='rgba(255,230,200,.18)';c.beginPath();
+  // Rooftop perimeter border trim
+  c.strokeStyle='rgba(255,235,210,.35)';c.lineWidth=1;c.strokeRect(-w/2+.5,-h/2+.5,w-1,h-1);
+  c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=1;c.strokeRect(-w/2+1.5,-h/2+1.5,w-3,h-3);
+  // Roof ridge line
+  c.strokeStyle='rgba(255,240,220,.4)';c.beginPath();
   if(w>=h){c.moveTo(-w/2+3,0);c.lineTo(w/2-3,0);}else{c.moveTo(0,-h/2+3);c.lineTo(0,h/2-3);}
-  c.stroke();c.restore();
+  c.stroke();
+  // Rooftop HVAC / vents
+  if(w>36&&h>22){
+    c.fillStyle='rgba(30,38,34,.75)';c.fillRect(-w/4,-h/4,w/3,h/3);
+    c.strokeStyle='rgba(255,255,255,.2)';c.strokeRect(-w/4,-h/4,w/3,h/3);
+  }
+  c.restore();
 }
 const HUTS=[[552,556,14],[530,546,8],[574,546,8],[540,574,8],[566,574,8],[552,534,7]];
 const SUBURB=(()=>{const R=mulberry(7),a=[];
   for(let i=0;i<520;i++){const x=R()*MAPW,y=R()*MAPH;if(inPoly(x,y,COMPOUND))continue;
-    a.push({x,y,w:8+R()*14,h:7+R()*10,rot:ROT+(R()-.5)*.1,col:['#2a2420','#2e2b26','#33261f','#242a26'][Math.floor(R()*4)],ht:.5+R()*1.1});}
+    a.push({x,y,w:8+R()*14,h:7+R()*10,rot:ROT+(R()-.5)*.1,col:['#1e1814','#221e1a','#261d18','#1c221e'][Math.floor(R()*4)],ht:.5+R()*1.1});}
   const R2=mulberry(21);
   for(let i=0;i<900;i++){const x=-420+R2()*1800,y=-360+R2()*1320;if(x>-10&&x<970&&y>-10&&y<610)continue;
-    a.push({x,y,w:9+R2()*16,h:8+R2()*12,rot:ROT+(R2()-.5)*.15,col:'#2a2420',ht:.5+R2()*1.3,far:true});}
+    a.push({x,y,w:9+R2()*16,h:8+R2()*12,rot:ROT+(R2()-.5)*.15,col:'#1a1614',ht:.5+R2()*1.3,far:true});}
   return a;})();
 const TREES=(()=>{const R=mulberry(11),a=[];
   for(let i=0;i<260;i++){const x=200+R()*700,y=40+R()*560;if(!inPoly(x,y,COMPOUND))continue;
     if(Math.hypot(x-420,y-74)<95)continue;
     if(BUILD.some(b=>Math.abs(x-b[0])<b[2]/2+6&&Math.abs(y-b[1])<b[3]/2+6))continue;
     if(SLOTS.some(s=>Math.hypot(s.x-x,s.y-y)<20)||Math.hypot(HQ.x-x,HQ.y-y)<22)continue;
-    a.push({x,y,r:3+R()*6,dark:R()<.5});}
+    a.push({x,y,r:4+R()*6,dark:R()<.5,seed:R()});}
   return a;})();
+
+// Pre-calculate street lamp positions along main roads
+const LAMPS=(()=>{
+  const pts=[];
+  for(let i=0;i<ROADS_OUT.length;i++){
+    const r=ROADS_OUT[i];
+    for(let j=0;j<r.length-1;j++){
+      const x1=r[j][0],y1=r[j][1],x2=r[j+1][0],y2=r[j+1][1],len=Math.hypot(x2-x1,y2-y1);
+      const steps=Math.max(1,Math.floor(len/64));
+      for(let s=1;s<=steps;s++){
+        const f=s/(steps+1);
+        pts.push({x:x1+(x2-x1)*f,y:y1+(y2-y1)*f,r:38,warm:true});
+      }
+    }
+  }
+  for(let i=0;i<ROADS_IN.length;i+=2){
+    const r=ROADS_IN[i];
+    if(r.length>1){
+      const x1=r[0][0],y1=r[0][1],x2=r[1][0],y2=r[1][1];
+      pts.push({x:(x1+x2)/2,y:(y1+y2)/2,r:32,warm:false});
+    }
+  }
+  return pts;
+})();
+
 function drawMapBase(c,opt){
   opt=opt||{};
-  c.fillStyle='#0f1512';c.fillRect(0,0,MAPW,MAPH);
-  // suburbs
-  for(const s of SUBURB){if(s.far)continue;c.save();c.translate(s.x,s.y);c.rotate(s.rot);c.fillStyle=opt.ground?'#151a17':s.col;c.fillRect(-s.w/2,-s.h/2,s.w,s.h);c.restore();}
-  // east-side street grid
-  c.strokeStyle='#1d2420';c.lineWidth=5;
+  // Midnight tactical ground
+  c.fillStyle='#090d0b';c.fillRect(0,0,MAPW,MAPH);
+
+  // Suburb district (outer city fabric)
+  for(const s of SUBURB){
+    if(s.far)continue;
+    c.save();c.translate(s.x,s.y);c.rotate(s.rot);
+    // Subtle building shadow
+    c.fillStyle='rgba(0,0,0,.45)';c.fillRect(-s.w/2+1,-s.h/2+2,s.w,s.h);
+    c.fillStyle=opt.ground?'#111613':s.col;c.fillRect(-s.w/2,-s.h/2,s.w,s.h);
+    c.strokeStyle='rgba(255,255,255,.05)';c.lineWidth=0.5;c.strokeRect(-s.w/2,-s.h/2,s.w,s.h);
+    c.restore();
+  }
+
+  // East-side suburb access street grid
+  c.strokeStyle='#141b17';c.lineWidth=6;
   for(let y=60;y<620;y+=42){c.beginPath();c.moveTo(905-y*.12,y);c.lineTo(960,y+12);c.stroke();}
-  // outer roads
+
+  // Outer highway tarmac foundations
   c.lineCap='round';c.lineJoin='round';
-  for(const r of ROADS_OUT){c.strokeStyle='#28302b';c.lineWidth=13;line(c,r);c.strokeStyle='#323c36';c.lineWidth=9;line(c,r);}
-  // compound ground
-  c.fillStyle='#16201a';poly(c,COMPOUND);c.fill();
-  c.strokeStyle='#3d4d40';c.lineWidth=2;c.setLineDash([6,4]);poly(c,COMPOUND);c.stroke();c.setLineDash([]);
-  // sports field
+  for(const r of ROADS_OUT){
+    c.strokeStyle='#18201a';c.lineWidth=17;line(c,r); // Gravel shoulder
+    c.strokeStyle='#2a352e';c.lineWidth=11;line(c,r); // Asphalt surface
+  }
+
+  // Outer highway dashed centerlines
+  c.save();c.setLineDash([7,8]);c.strokeStyle='rgba(240,210,130,.4)';c.lineWidth=1.2;
+  for(const r of ROADS_OUT){line(c,r);}
+  c.restore();
+
+  // Hospital Compound Grounds (Secured perimeter)
+  c.save();
+  // Compound drop shadow
+  c.fillStyle='rgba(0,0,0,.5)';poly(c,COMPOUND);c.fill();
+  // Main compound soil/turf
+  c.fillStyle='#121a15';poly(c,COMPOUND);c.fill();
+  // Inner compound perimeter security fence with warning dash
+  c.strokeStyle='#35483a';c.lineWidth=2.5;poly(c,COMPOUND);c.stroke();
+  c.setLineDash([8,6]);c.strokeStyle='rgba(242,184,75,.45)';c.lineWidth=1.2;poly(c,COMPOUND);c.stroke();
+  c.restore();
+
+  // Sports Field (Lush pitch with mowing striping & regulation lines)
   c.save();c.translate(420,74);c.rotate(ROT*.4);
-  c.fillStyle=opt.ground?'#3f4a2a':'#3a3426';c.fillRect(-82,-46,164,92);
-  c.strokeStyle='rgba(240,230,200,.3)';c.lineWidth=1.2;c.strokeRect(-70,-36,140,72);
-  c.beginPath();c.moveTo(0,-36);c.lineTo(0,36);c.stroke();c.beginPath();c.arc(0,0,12,0,Math.PI*2);c.stroke();c.restore();
-  // trees
-  if(!opt.ground)for(const t of TREES){c.fillStyle=t.dark?'#1f3324':'#243b29';c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.fill();}
-  // inner roads
-  for(const r of ROADS_IN){c.strokeStyle='#26302a';c.lineWidth=9;line(c,r);c.strokeStyle=opt.ground?'#4a554e':'#38443d';c.lineWidth=6;line(c,r);}
+  // Pitch grass base
+  c.fillStyle='#1c2617';c.fillRect(-84,-48,168,96);
+  // Alternating lawn stripes
+  for(let sx=-80;sx<80;sx+=16){
+    c.fillStyle=((sx/16)&1)?'#22301c':'#1c2817';
+    c.fillRect(sx,-44,16,88);
+  }
+  // Field white lines
+  c.strokeStyle='rgba(235,245,230,.55)';c.lineWidth=1.2;
+  c.strokeRect(-72,-38,144,76);
+  // Halfway line & center circle
+  c.beginPath();c.moveTo(0,-38);c.lineTo(0,38);c.stroke();
+  c.beginPath();c.arc(0,0,13,0,Math.PI*2);c.stroke();
+  c.beginPath();c.arc(0,0,1.5,0,Math.PI*2);c.fillStyle='rgba(235,245,230,.6)';c.fill();
+  // Goal penalty areas
+  c.strokeRect(-72,-20,18,40);
+  c.strokeRect(54,-20,18,40);
+  // Floodlight poles at 4 corners
+  const floodPoles=[[-76,-42],[76,-42],[-76,42],[76,42]];
+  for(const [px,py] of floodPoles){
+    c.fillStyle='#4a5d50';c.beginPath();c.arc(px,py,3,0,Math.PI*2);c.fill();
+    // Floodlight glow onto pitch
+    const fg=c.createRadialGradient(px,py,1,px,py,32);
+    fg.addColorStop(0,'rgba(210,240,255,.22)');
+    fg.addColorStop(1,'rgba(210,240,255,0)');
+    c.fillStyle=fg;c.beginPath();c.arc(px,py,32,0,Math.PI*2);c.fill();
+  }
+  c.restore();
+
+  // Trees (Layered foliage with cast shadows)
+  if(!opt.ground)for(const t of TREES){
+    // Tree drop shadow
+    c.fillStyle='rgba(0,0,0,.5)';c.beginPath();c.arc(t.x+2.5,t.y+3.5,t.r,0,Math.PI*2);c.fill();
+    // Base dark canopy
+    c.fillStyle=t.dark?'#17261a':'#1e3323';c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.fill();
+    // Highlight inner foliage cluster
+    c.fillStyle=t.dark?'#213825':'#2b4a32';c.beginPath();c.arc(t.x-t.r*.25,t.y-t.r*.25,t.r*.68,0,Math.PI*2);c.fill();
+    // Foliage rim highlight
+    c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=0.8;c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.stroke();
+  }
+
+  // Inner hospital roads & lanes
+  for(const r of ROADS_IN){
+    c.strokeStyle='#1b241e';c.lineWidth=11;line(c,r);
+    c.strokeStyle=opt.ground?'#4a554e':'#2f3c34';c.lineWidth=7;line(c,r);
+  }
+
+  // Streetlamps along roadways (Warm luminous pools on tarmac)
+  for(const lp of LAMPS){
+    const lg=c.createRadialGradient(lp.x,lp.y,1,lp.x,lp.y,lp.r);
+    lg.addColorStop(0,lp.warm?'rgba(255,215,130,.32)':'rgba(160,220,255,.25)');
+    lg.addColorStop(0.4,lp.warm?'rgba(255,200,110,.12)':'rgba(130,200,255,.08)');
+    lg.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle=lg;c.beginPath();c.arc(lp.x,lp.y,lp.r,0,Math.PI*2);c.fill();
+    // Bright lamp bulb center
+    c.fillStyle=lp.warm?'#ffe6a8':'#d6f2ff';c.beginPath();c.arc(lp.x,lp.y,1.8,0,Math.PI*2);c.fill();
+  }
+
+  // Station Landing Pads (The 13 exam stations on the battlefield)
+  for(let i=0;i<SLOTS.length;i++){
+    const s=SLOTS[i];
+    c.save();c.translate(s.x,s.y);
+    // Tarmac pad circle
+    c.fillStyle='rgba(14,20,17,.9)';c.beginPath();c.arc(0,0,26,0,Math.PI*2);c.fill();
+    c.strokeStyle='rgba(242,184,75,.4)';c.lineWidth=1.5;
+    c.setLineDash([5,4]);c.beginPath();c.arc(0,0,26,0,Math.PI*2);c.stroke();c.setLineDash([]);
+    // Inner cross / alignment marks
+    c.strokeStyle='rgba(98,230,255,.3)';c.lineWidth=1;
+    c.beginPath();
+    c.moveTo(-16,0);c.lineTo(-6,0);c.moveTo(6,0);c.lineTo(16,0);
+    c.moveTo(0,-16);c.lineTo(0,-6);c.moveTo(0,6);c.lineTo(0,16);
+    c.stroke();
+    // 4 Corner Chevron Taxiway Lights
+    const chevrons=[[-20,-20],[20,-20],[20,20],[-20,20]];
+    for(const [cx,cy] of chevrons){
+      c.fillStyle='rgba(98,230,255,.9)';c.beginPath();c.arc(cx,cy,2,0,Math.PI*2);c.fill();
+      const cg=c.createRadialGradient(cx,cy,1,cx,cy,8);
+      cg.addColorStop(0,'rgba(98,230,255,.5)');cg.addColorStop(1,'rgba(98,230,255,0)');
+      c.fillStyle=cg;c.beginPath();c.arc(cx,cy,8,0,Math.PI*2);c.fill();
+    }
+    c.restore();
+  }
   // buildings (footprint shadows only on the 3D ground)
   for(const b of BUILD){
     const [x,y,w,h,col,k]=b;

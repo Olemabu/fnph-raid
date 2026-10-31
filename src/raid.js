@@ -159,13 +159,31 @@ function wrapText(ctx,text,maxW,maxLines){
   return lines;
 }
 function makeLabel(text,num){
-  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=230;
-  g.font='600 14px "Chakra Petch", "Segoe UI", sans-serif';
-  const lines=wrapText(g,text,W0-46,4),H0=16+lines.length*17;
+  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=240;
+  g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
+  const lines=wrapText(g,text,W0-50,4),H0=20+lines.length*17;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
-  g.fillStyle='rgba(12,8,22,.9)';g.beginPath();if(g.roundRect)g.roundRect(1,1,W0-2,H0-2,9);else g.rect(1,1,W0-2,H0-2);g.fill();
-  g.font='600 14px "Chakra Petch", "Segoe UI", sans-serif';g.fillStyle='#fdeaf4';g.textBaseline='middle';
-  lines.forEach((l,i)=>g.fillText(l,38,H0/2-(lines.length-1)*8.5+i*17));
+
+  // Frosted cyber plate body
+  g.fillStyle='rgba(8,12,20,.95)';
+  g.beginPath();
+  if(g.roundRect)g.roundRect(1,1,W0-2,H0-2,8);else g.rect(1,1,W0-2,H0-2);
+  g.fill();
+
+  // Subtle interior scanlines
+  g.fillStyle='rgba(255,255,255,.03)';
+  for(let y=4;y<H0-4;y+=3){g.fillRect(4,y,W0-8,1);}
+
+  // Top header accent line
+  g.fillStyle='rgba(255,79,168,.4)';
+  g.fillRect(10,1,W0-20,2);
+
+  // Text
+  g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
+  g.fillStyle='#f0f6ff';
+  g.textBaseline='middle';
+  lines.forEach((l,i)=>g.fillText(l,42,H0/2-(lines.length-1)*8.5+i*17));
+
   return{canvas:c,w:W0,h:H0};
 }
 $.Carrier=function(o){
@@ -191,30 +209,138 @@ $.Carrier.prototype.hit=function(dmg){
 };
 $.Carrier.prototype.render=function(){
   if(!this.alive)return;
-  const ctx=$.ctxmg,aim=R.aimTarget()===this,mod=$.enemyOffsetMod/8,hue=aim?190:322;
-  $.util.fillCircle(ctx,this.x,this.y,this.radius+10,'hsla('+hue+',100%,60%,'+(.1+.06*Math.sin(this.t*3))+')');
-  $.util.fillCircle(ctx,this.x,this.y,this.radius,'hsla('+hue+',90%,18%,.85)');
-  $.util.strokeCircle(ctx,this.x,this.y,this.radius,'hsla('+hue+',100%,62%,1)',2);
-  ctx.strokeStyle='hsla('+hue+',100%,70%,1)';ctx.lineWidth=4;
-  ctx.beginPath();ctx.arc(this.x,this.y,this.radius+5,mod,mod+1.2);ctx.stroke();
-  ctx.beginPath();ctx.arc(this.x,this.y,this.radius+5,mod+$.pi,mod+$.pi+1.2);ctx.stroke();
-  for(let k=0;k<this.lifeMax;k++){ctx.fillStyle=k<this.life?'hsla('+hue+',100%,70%,1)':'rgba(255,255,255,.15)';ctx.fillRect(this.x-13+k*10,this.y+this.radius+7,8,3);}
-  ctx.fillStyle='#fff';ctx.font='700 20px "Chakra Petch", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(this.num),this.x,this.y+1);
-  if(this.hitFlag>0){this.hitFlag-=$.dt;$.util.fillCircle(ctx,this.x,this.y,this.radius,'hsla('+hue+',100%,80%,'+this.hitFlag/12+')');}
-  // label plate, kept on screen and clear of the question bar
-  const L=R.phase==='recall'?(this.sealedL||(this.sealedL=makeLabel('? Sealed. Recall the answer first',this.num))):this.label,minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-8;
-  let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-14;
+  const ctx=$.ctxmg,aim=R.aimTarget()===this,t=this.t,hue=aim?190:322;
+  const hCol=aim?'98,230,255':'255,79,168';
+
+  // 1. Drop shadow on tarmac
+  ctx.save();
+  ctx.translate(this.x+5,this.y+7);
+  ctx.fillStyle='rgba(0,0,0,.5)';
+  ctx.beginPath();ctx.ellipse(0,0,this.radius+6,this.radius*.65,0,0,$.twopi);ctx.fill();
+  ctx.restore();
+
+  // 2. VTOL Hover Thruster Pods (4 corners)
+  const pods=[[-20,-16],[20,-16],[-20,16],[20,16]];
+  for(let k=0;k<pods.length;k++){
+    const px=this.x+pods[k][0],py=this.y+pods[k][1];
+    ctx.fillStyle='#1e2632';ctx.fillRect(px-3.5,py-4,7,8);
+    ctx.strokeStyle='rgba('+hCol+',.6)';ctx.lineWidth=1;
+    ctx.strokeRect(px-3.5,py-4,7,8);
+
+    // Flickering hover exhaust plume
+    const pFlame=6+Math.sin(t*12+k*1.6)*3.5;
+    const pGrad=ctx.createLinearGradient(px,py+4,px,py+4+pFlame);
+    pGrad.addColorStop(0,'#ffffff');
+    pGrad.addColorStop(0.3,'rgba('+hCol+',.8)');
+    pGrad.addColorStop(1,'rgba('+hCol+',0)');
+    ctx.fillStyle=pGrad;
+    ctx.beginPath();
+    ctx.moveTo(px-2.5,py+4);ctx.lineTo(px,py+4+pFlame);ctx.lineTo(px+2.5,py+4);
+    ctx.closePath();ctx.fill();
+  }
+
+  // 3. Heavy Armored Gunship Hull (Octagonal)
+  ctx.save();
+  ctx.translate(this.x,this.y);
+  const r0=this.radius;
+
+  ctx.beginPath();
+  for(let a=0;a<8;a++){
+    const ang=a*$.twopi/8+$.pi/8;
+    const ax=Math.cos(ang)*r0,ay=Math.sin(ang)*(r0*.88);
+    if(a===0)ctx.moveTo(ax,ay);else ctx.lineTo(ax,ay);
+  }
+  ctx.closePath();
+
+  // Dark gunmetal chassis gradient
+  const hullG=ctx.createLinearGradient(-r0,-r0,r0,r0);
+  hullG.addColorStop(0,'#161e28');
+  hullG.addColorStop(0.5,'#232f3e');
+  hullG.addColorStop(1,'#121820');
+  ctx.fillStyle=hullG;ctx.fill();
+
+  // Outer glowing hull stroke
+  ctx.strokeStyle='hsla('+hue+',100%,65%,1)';
+  ctx.lineWidth=aim?2.5:1.5;ctx.stroke();
+
+  // Inner reactor core ring
+  const rotMod=$.enemyOffsetMod/8;
+  ctx.strokeStyle='hsla('+hue+',100%,75%,.85)';
+  ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod,rotMod+1.4);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod+$.pi,rotMod+$.pi+1.4);ctx.stroke();
+
+  // Target lock brackets when aimed/locked
+  if(aim){
+    ctx.strokeStyle='rgba(98,230,255,.9)';ctx.lineWidth=2;
+    const brR=r0+8,bRot=t*3;
+    for(let b=0;b<4;b++){
+      ctx.save();ctx.rotate(b*$.pi/2+bRot);
+      ctx.beginPath();
+      ctx.moveTo(brR-5,-brR);ctx.lineTo(brR,-brR);ctx.lineTo(brR,-brR+5);
+      ctx.stroke();ctx.restore();
+    }
+  }
+
+  // Segmented Energy Health Pips
+  for(let k=0;k<this.lifeMax;k++){
+    ctx.fillStyle=k<this.life?'hsla('+hue+',100%,70%,1)':'rgba(255,255,255,.15)';
+    ctx.fillRect(-13+k*10,r0+7,8,3);
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=0.8;
+    ctx.strokeRect(-13+k*10,r0+7,8,3);
+  }
+
+  // Answer Number Callout
+  ctx.fillStyle='#ffffff';
+  ctx.font='700 20px "Chakra Petch", sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(String(this.num),0,1);
+
+  // Hit damage flash
+  if(this.hitFlag>0){
+    this.hitFlag-=$.dt;
+    ctx.fillStyle='hsla('+hue+',100%,80%,'+this.hitFlag/10+')';
+    ctx.beginPath();ctx.arc(0,0,r0,0,$.twopi);ctx.fill();
+  }
+  ctx.restore();
+
+  // 4. Holographic Answer Plate (Positioned above gunship)
+  const L=R.phase==='recall'?(this.sealedL||(this.sealedL=makeLabel('? Sealed. Recall the answer first',this.num))):this.label;
+  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-8;
+  let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
+
+  // Cyber plate canvas
   ctx.drawImage(L.canvas,lx,ly,L.w,L.h);
-  ctx.strokeStyle=aim?'hsla(190,100%,65%,1)':'hsla(322,100%,62%,.9)';ctx.lineWidth=aim?2.5:1.5;
-  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(lx+1,ly+1,L.w-2,L.h-2,9);else ctx.rect(lx+1,ly+1,L.w-2,L.h-2);ctx.stroke();
-  ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';ctx.beginPath();ctx.arc(lx+19,ly+L.h/2,12,0,$.twopi);ctx.fill();
-  ctx.fillStyle='#0b0612';ctx.font='700 14px "Chakra Petch", sans-serif';ctx.fillText(String(this.num),lx+19,ly+L.h/2+1);
+
+  // Plate border with glowing neon edge
+  ctx.strokeStyle=aim?'hsla(190,100%,65%,1)':'hsla(322,100%,62%,.85)';
+  ctx.lineWidth=aim?2.5:1.5;
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(lx+1,ly+1,L.w-2,L.h-2,8);else ctx.rect(lx+1,ly+1,L.w-2,L.h-2);
+  ctx.stroke();
+
+  // Option Number Badge on Plate
+  ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';
+  ctx.beginPath();ctx.arc(lx+20,ly+L.h/2,13,0,$.twopi);ctx.fill();
+  ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(String(this.num),lx+20,ly+L.h/2+1);
   ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  if(Math.abs(ly+L.h-(this.y-this.radius))>18){ctx.strokeStyle='hsla('+hue+',100%,62%,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(this.x,this.y-this.radius);ctx.lineTo(Math.max(lx+10,Math.min(lx+L.w-10,this.x)),ly+L.h);ctx.stroke();}
+
+  // Energy Tether connecting plate to gunship
+  ctx.save();
+  ctx.strokeStyle='hsla('+hue+',100%,65%,'+(aim?'.6':'.3')+')';
+  ctx.lineWidth=aim?1.5:1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(this.x,this.y-this.radius);
+  ctx.lineTo(Math.max(lx+20,Math.min(lx+L.w-20,this.x)),ly+L.h);
+  ctx.stroke();
+  ctx.restore();
 };
 $.Carrier.prototype.explode=function(hue,big){
   this.alive=false;
+  R.addShockwave(this.x,this.y,hue,big?160:95);
   $.explosions.push(new $.Explosion({x:this.x,y:this.y,radius:big?70:45,hue:hue,saturation:100}));
   $.particleEmitters.push(new $.ParticleEmitter({x:this.x,y:this.y,count:big?40:22,spawnRange:this.radius,friction:.88,minSpeed:4,maxSpeed:22,minDirection:0,maxDirection:$.twopi,hue:hue,saturation:100}));
   $.audio.play(big?'explosionAlt':'explosion');
@@ -526,7 +652,36 @@ function hud(){
   Q('#hPar').textContent=timerOn&&R.par?'par '+fmt(R.par):timerOn?'par --':'clock off';if(!timerOn||!R.par){Q('#hTime').textContent=timerOn?'0:00':'--';Q('#hTimeBar').style.transform='scaleX(0)';}Q('#hLife').style.background='hsl('+Math.max(0,$.hero.life)*120+',90%,50%)';
 }
 
-/* ---------- world drawing ---------- */
+/* ---------- shockwaves & world drawing ---------- */
+R.shockwaves=[];
+R.addShockwave=function(x,y,hue,maxR){
+  R.shockwaves.push({x:x,y:y,r:8,maxR:maxR||100,hue:hue||195,alpha:1,w:4});
+};
+function updateShockwaves(){
+  for(let i=R.shockwaves.length-1;i>=0;i--){
+    const sw=R.shockwaves[i];
+    sw.r+=(sw.maxR-sw.r)*0.16*$.dt+2.5*$.dt;
+    sw.alpha=Math.max(0,1-sw.r/sw.maxR);
+    sw.w=Math.max(1,4*sw.alpha);
+    if(sw.r>=sw.maxR-2||sw.alpha<=0.02)R.shockwaves.splice(i,1);
+  }
+}
+function drawShockwaves(c){
+  for(let i=0;i<R.shockwaves.length;i++){
+    const sw=R.shockwaves[i];
+    c.save();
+    // Primary shockwave ring
+    c.beginPath();c.arc(sw.x,sw.y,sw.r,0,$.twopi);
+    c.strokeStyle='hsla('+sw.hue+',100%,75%,'+(sw.alpha*.85)+')';
+    c.lineWidth=sw.w;c.stroke();
+    // Inner bright energy refraction
+    c.beginPath();c.arc(sw.x,sw.y,Math.max(1,sw.r-3),0,$.twopi);
+    c.strokeStyle='rgba(255,255,255,'+(sw.alpha*.65)+')';
+    c.lineWidth=Math.max(1,sw.w*.5);c.stroke();
+    c.restore();
+  }
+}
+
 R.renderMap=function(){
   const c=$.ctxmg;c.fillStyle='#05080d';c.fillRect(0,0,$.cw,$.ch);
   if(mapCanvas)c.drawImage(mapCanvas,Math.round($.screen.x-$.rumble.x),Math.round($.screen.y-$.rumble.y));
@@ -534,12 +689,30 @@ R.renderMap=function(){
 R.renderWorld=function(){
   const c=$.ctxmg,t=$.tick/60;
   updateCasings();drawCasings(c);
-  // route
+  updateShockwaves();drawShockwaves(c);
+
+  // route path
   c.save();c.setLineDash([10,10]);c.lineDashOffset=-t*30;c.strokeStyle='rgba(242,184,75,.45)';c.lineWidth=2;c.beginPath();
   R.rooms.forEach((r,i)=>{const p=SP(r.idx);if(i===0)c.moveTo(p.x,p.y);else c.lineTo(p.x,p.y);});c.stroke();c.restore();
+
   R.rooms.forEach((r,i)=>{
     const p=SP(r.idx),cap=captured.has(r.topic),cur=i===R.si,col=cap?'98,230,255':cur?'255,90,60':'242,184,75';
     const pulse=cur?1+.15*Math.sin(t*5):1;
+
+    // Active station glowing beacon pillar rising upwards
+    if(cur){
+      c.save();
+      const bg=c.createLinearGradient(p.x,p.y,p.x,p.y-240);
+      bg.addColorStop(0,'rgba(255,90,60,.45)');
+      bg.addColorStop(0.5,'rgba(255,140,80,.14)');
+      bg.addColorStop(1,'rgba(255,90,60,0)');
+      c.fillStyle=bg;
+      c.beginPath();
+      c.moveTo(p.x-30,p.y);c.lineTo(p.x-8,p.y-240);c.lineTo(p.x+8,p.y-240);c.lineTo(p.x+30,p.y);
+      c.closePath();c.fill();
+      c.restore();
+    }
+
     c.fillStyle='rgba('+col+',.08)';c.beginPath();c.arc(p.x,p.y,90*pulse,0,$.twopi);c.fill();
     c.strokeStyle='rgba('+col+','+(cur?.9:.55)+')';c.lineWidth=cur?3:2;c.beginPath();c.arc(p.x,p.y,34,0,$.twopi);c.stroke();
     c.beginPath();c.arc(p.x,p.y,90*pulse,t,t+1.4);c.stroke();c.beginPath();c.arc(p.x,p.y,90*pulse,t+$.pi,t+$.pi+1.4);c.stroke();

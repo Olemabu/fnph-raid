@@ -94,11 +94,39 @@ Render
 ==============================================================================*/
 $.Bullet.prototype.render = function( i ) {
 	if( this.inView ) {
-		$.ctxmg.beginPath();
-		$.ctxmg.moveTo( this.x, this.y );
-		$.ctxmg.lineTo( this.ex, this.ey );
-		$.ctxmg.lineWidth = this.lineWidth;		
-		$.ctxmg.strokeStyle = this.strokeStyle;
-		$.ctxmg.stroke();
+		var c = $.ctxmg;
+		// 1. Outer Neon Plasma Glow
+		c.beginPath();
+		c.moveTo( this.x, this.y );
+		c.lineTo( this.ex, this.ey );
+		c.lineWidth = this.lineWidth * 2.6;
+		c.strokeStyle = this.strokeStyle;
+		c.globalAlpha = 0.4;
+		c.stroke();
+
+		// 2. Mid Plasma Beam
+		c.beginPath();
+		c.moveTo( this.x, this.y );
+		c.lineTo( this.ex, this.ey );
+		c.lineWidth = this.lineWidth * 1.5;
+		c.strokeStyle = this.strokeStyle;
+		c.globalAlpha = 0.85;
+		c.stroke();
+
+		// 3. Superheated White Energy Core
+		c.beginPath();
+		c.moveTo( this.x, this.y );
+		c.lineTo( this.ex, this.ey );
+		c.lineWidth = Math.max( 1.2, this.lineWidth * 0.7 );
+		c.strokeStyle = '#ffffff';
+		c.globalAlpha = 0.95;
+		c.stroke();
+		c.globalAlpha = 1;
+
+		// 4. Glowing Plasma Bullet Head
+		c.fillStyle = '#ffffff';
+		c.beginPath();
+		c.arc( this.x, this.y, Math.max( 1.8, this.lineWidth * 0.75 ), 0, $.twopi );
+		c.fill();
 	}
 };
