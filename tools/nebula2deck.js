@@ -10,6 +10,14 @@ function noteLines(text){const out=[];String(text||'').split(/\r?\n/).forEach(l=
 // ---- old deck: stations become bonus concepts
 const old={};let cur=null;
 OLD.split(/\r?\n/).forEach(l=>{if(l.startsWith('## ')){const p=l.slice(3).split('|').map(s=>s.trim());cur={locus:p[0],topic:p[1],mode:p[2]||'',lines:[]};old[p[0]]=cur;return;}if(!cur||l.startsWith('# ')||l==='#')return;cur.lines.push(l);});
+// Preserve authored process mnemonics from the supplied previous deck.
+const savedProcesses=new Map();let savedProcess=null;
+OLD.split(/\r?\n/).forEach(line=>{
+  if(line.startsWith('L: ')&&line.includes(': the phases of the station, in order = ')&&line.includes(' => ')){
+    const prompt=line.slice(3,line.indexOf(' = '));savedProcess={line,notes:[]};savedProcesses.set(prompt,savedProcess);
+  }else if(savedProcess&&line.startsWith('> ')){savedProcess.notes.push(line);}
+  else if(line.trim())savedProcess=null;
+});
 // ---- map: slot -> locus, topic, old bonus stations
 const SLOTS=[
  ['Main Gate','phenomenology',['Main Gate']],
@@ -80,7 +88,17 @@ for(const [locus,tid,olds,mode] of SLOTS){
     (s.notes&&s.notes.items||[]).forEach(n=>out.push('> - '+clean(n)));
     if(s.critical)out.push('> Critical fail: '+clean(s.critical));
     const ph=(s.phases||[]).filter(p=>p.h);
-    if(ph.length>=2){out.push('L: '+clean(s.title)+': the phases of the station, in order = '+ph.map(p=>cut(clean(p.h),70)).join(' | '));stats.osceItems++;}
+    if(ph.length>=2){
+      const prompt=clean(s.title)+': the phases of the station, in order',saved=savedProcesses.get(prompt);
+      const expected=ph.map(p=>cut(clean(p.h),70));
+      const oldTerms=saved?saved.line.split(' = ')[1].split(' | ').map(x=>x.split(' => ')[0]):[];
+      // Reuse only while phase names and order still match the upstream station.
+      if(saved&&JSON.stringify(expected)===JSON.stringify(oldTerms)){
+        const route=saved.notes.find(x=>x.startsWith('> Process memory route: '));if(route)out.push(route);
+        out.push(saved.line,...saved.notes);
+      }else out.push('L: '+prompt+' = '+expected.join(' | '));
+      stats.osceItems++;
+    }
     ph.forEach((p,i)=>{
       const others=ph.filter(o=>o!==p).map(o=>cut(clean(o.h),70));
       if(p.say&&others.length>=3){out.push('Q: '+clean(s.title)+'. Which phase is this line from? '+cut(clean(p.say),170)+' = '+[cut(clean(p.h),70)].concat(others).join(' | '));out.push('> What to say: '+clean(p.say));if(p.check)out.push('> Examiner checks: '+clean(p.check));stats.osceItems++;}

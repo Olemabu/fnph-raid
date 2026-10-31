@@ -58,6 +58,14 @@ Rules: exactly 4 options per `Q:` (the first is correct). Every wrong option and
 - Daily review plays due questions with the same direct gameplay. Correct answers are scheduled in 1, 3, 7, 16, then 35 days; misses are due within 30 minutes.
 - Full raid order supports map order, study plan, weakest station first or most reviews due first.
 
+## OSCE process memory routes
+
+All 59 imported OSCE stations have short action-word cues for their 352 existing phases. Long routes are chunked into runs of up to four cues in the briefing. These are new learning aids, not official or validated scoring mnemonics; the original order, checklists and critical-fail notes remain authoritative.
+
+The ordered process drill shows a cue, offers action descriptions from that station, then splashes the original phase name after a correct choice. Completed phases stay in the strip. No recall rating is required. For example, the suicide-risk route is **Trigger → Plan → Act → After / Mind → Risks and supports → Safe plan**. Read each cue's full mapping in Study the stations.
+
+Deck syntax: place `> Process cues: cue 1 | cue 2 | cue 3` immediately after an `L:` item whose phases use `Phase => action description`. There must be one cue per phase. `tools/nebula2deck.js` preserves these additions from its previous-deck input when upstream phase names and order still match; changed sequences are regenerated for review.
+
 ## Controller
 
 **Menus with only a gamepad:** use the d-pad or left stick to move the highlight, **button 1** to press, **button 2** to go back, and **Start** to start the raid. On cards, any button continues.

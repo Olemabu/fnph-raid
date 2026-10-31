@@ -102,6 +102,7 @@ details.credits pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5p
 #hurt.on{opacity:1}
 .answerSplash{position:absolute;inset:0;z-index:6;display:grid;place-items:center;pointer-events:none;padding:24px;background:radial-gradient(ellipse,rgba(32,230,190,.16),transparent 65%)}
 .answerSplash strong{max-width:100%;text-align:center;overflow-wrap:anywhere;font-family:var(--display);font-size:clamp(30px,6vw,76px);font-weight:700;line-height:1.08;color:#eafff4;text-transform:uppercase;text-shadow:0 0 14px #39e6b4,0 0 42px rgba(57,230,180,.65),0 3px 8px #000;animation:answerImpact 1.1s ease-out both}
+.answerSplash strong.long{font-size:clamp(22px,4vw,48px)}
 @keyframes answerImpact{0%{opacity:0;transform:scale(1.35)}14%{opacity:1;transform:scale(1)}75%{opacity:1;transform:scale(1.025)}100%{opacity:0;transform:scale(1.07)}}
 @media(prefers-reduced-motion:reduce){.answerSplash strong{animation:none}}
 
@@ -309,7 +310,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     <p><code>&gt; text</code> lines under a station are its briefing. Under a question they are its teaching note. Start a line with <code>&gt; - </code> for a bullet.</p>
     <p><code>Q: question = right answer | wrong :: why it's wrong | wrong :: why</code></p>
     <p><code>L: procedure = step 1 | step 2 | step 3 ~~ decoy :: why</code> must be shot in order · <code>S: list = item | item ~~ decoy :: why</code> any order</p>
-    <p>Mnemonic options: <code>Term =&gt; description</code> shows only the description during play and reveals the term after your choice.</p>
+    <p>Mnemonic options: <code>Term =&gt; description</code> shows only the description during play and reveals the term after your choice. For a process list, add <code>&gt; Process cues: Meet | Explore | Plan</code> underneath, with one cue for each step.</p>
   </div>
   <textarea id="deckText" spellcheck="false" aria-label="Question deck"></textarea>
   <p class="errs" id="deckErr"></p>

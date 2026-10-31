@@ -19,7 +19,7 @@ function parseDeck(text){
   const rooms=[],errors=[];let cur=null,target=null,curC=null;
   text.split(/\r?\n/).forEach((raw,i)=>{
     const line=raw.trim();if(!line)return;
-    if(line.startsWith('>')){const t=line.slice(1).trim();if(target){(target.note=target.note||[]).push(t);}return;}
+    if(line.startsWith('>')){const t=line.slice(1).trim();if(target){if(t.startsWith('Process cues: ')&&target.type==='l'){target.cues=t.slice(14).split('|').map(x=>x.trim());if(target.cues.length!==target.seq.length)errors.push('Line '+(i+1)+': process cues must match the number of steps');}else (target.note=target.note||[]).push(t);}return;}
     if(line.startsWith('###')){const p=line.slice(3).split('|').map(s=>s.trim());if(!cur){cur={locus:'Station 1',topic:'General',mode:'',items:[],note:[],concepts:[]};rooms.push(cur);}curC={title:p[0]||'Concept',mode:(p[1]||'').toLowerCase(),note:[],items:[]};cur.concepts.push(curC);target=curC;return;}
     if(line.startsWith('##')){curC=null;const p=line.slice(2).split('|').map(s=>s.trim());cur={concepts:[],locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',mode:(p[2]||'').toLowerCase(),items:[],note:[]};rooms.push(cur);target=cur;return;}
     if(line.startsWith('#'))return;
@@ -406,7 +406,8 @@ R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRec
 function clearAnswerSplash(){R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#answerSplashText').textContent='';}
 function showAnswerSplash(term){
   const el=Q('#answerSplash');el.hidden=true;
-  Q('#answerSplashText').textContent=term.charAt(0).toUpperCase()+' — '+term.toUpperCase();
+  Q('#answerSplashText').textContent=(R.cur&&R.cur.cues?'':term.charAt(0).toUpperCase()+' — ')+term.toUpperCase();
+  Q('#answerSplashText').className=term.length>36?'long':'';
   void el.offsetWidth; // restart the impact animation for consecutive correct terms
   el.hidden=false;R.answerSplash=true;R.timer=Math.max(R.timer,1.1);
 }
@@ -514,8 +515,9 @@ function setupWave(){
     if(it.type==='l'){const k=it.found.length;[it.seq[k+1],it.seq[k+2],it.seq[k+3]].forEach(x=>{if(x&&opts.length<3&&!opts.includes(x))opts.push(x);});}
     for(const x of shuffle(it.decoys||[])){if(opts.length>=4)break;if(!opts.includes(x)&&!it.seq.includes(x))opts.push(x);}
     if(opts.length<4)for(const x of shuffle(ALL_LIST.concat(ALL_ANS).filter(a=>a.room!==it.room).map(a=>a.t))){if(opts.length>=4)break;if(!opts.includes(x)&&!it.seq.includes(x))opts.push(x);}
+    if(it.cues)opts=[c].concat(shuffle(it.seq.filter(x=>x!==c)).slice(0,3));
     opts=shuffle(opts);correct=it.type==='l'?[c]:rem;
-    chip=it.type==='l'?(Object.keys(it.clues||{}).length?'Mnemonic · shoot meaning ':'Procedure · shoot step ')+(it.found.length+1)+' of '+it.seq.length+' in order':'List · any order · '+rem.length+' of '+it.seq.length+' left';
+    chip=it.type==='l'?(it.cues?'Process · choose action ':Object.keys(it.clues||{}).length?'Mnemonic · shoot meaning ':'Procedure · shoot step ')+(it.found.length+1)+' of '+it.seq.length+' in order':'List · any order · '+rem.length+' of '+it.seq.length+' left';
   }
   const len=it.prompt.length+opts.map(R.optionLabel).join('').length,dur=Math.max(14,Math.min(28,11+len/16));
   const r0=Math.max(220,Math.min($.cw,$.ch)*.44);
@@ -526,7 +528,7 @@ function setupWave(){
   opts.forEach((text,i)=>{const a=a0+i*$.twopi/opts.length;$.carriers.push(new $.Carrier({text,num:i+1,x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0*.85}));});
   if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
   if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
-  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
+  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.cues?it.prompt.replace(': the phases of the station, in order','')+' · '+it.cues[it.found.length]+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose the action':it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
   R.phase='fight';
   if(R.modeName()==='race'){R.wave.chip=it.type==='q'?'Drive into the correct lane':chip.replace(/^Procedure · shoot/,'Procedure · drive through');if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
