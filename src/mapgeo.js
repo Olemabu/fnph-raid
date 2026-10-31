@@ -99,19 +99,59 @@ const LAMPS=(()=>{
   return pts;
 })();
 
+function drawHazardStripes(c,x,y,w,h,rot){
+  c.save();c.translate(x,y);if(rot)c.rotate(rot);
+  c.beginPath();c.rect(-w/2,-h/2,w,h);c.clip();
+  c.fillStyle='#f2b84b';c.fillRect(-w/2,-h/2,w,h);
+  c.fillStyle='#14171a';c.lineWidth=4;
+  const step=10,diag=w+h;
+  for(let p=-diag;p<diag;p+=step){
+    c.beginPath();
+    c.moveTo(p,-h/2-4);c.lineTo(p+step*.6,-h/2-4);
+    c.lineTo(p+step*.6-h-8,h/2+4);c.lineTo(p-h-8,h/2+4);
+    c.closePath();c.fill();
+  }
+  c.strokeStyle='rgba(0,0,0,.6)';c.lineWidth=1;c.strokeRect(-w/2+.5,-h/2+.5,w-1,h-1);
+  c.restore();
+}
+
 function drawMapBase(c,opt){
   opt=opt||{};
   // Midnight tactical ground
-  c.fillStyle='#090d0b';c.fillRect(0,0,MAPW,MAPH);
+  c.fillStyle='#060908';c.fillRect(0,0,MAPW,MAPH);
 
-  // Suburb district (outer city fabric)
+  // 1. Tactical Holographic Coordinate Grid & Crosshairs
+  c.save();
+  c.strokeStyle='rgba(98,230,255,.055)';c.lineWidth=0.8;
+  for(let x=0;x<MAPW;x+=48){c.beginPath();c.moveTo(x,0);c.lineTo(x,MAPH);c.stroke();}
+  for(let y=0;y<MAPH;y+=48){c.beginPath();c.moveTo(0,y);c.lineTo(MAPW,y);c.stroke();}
+
+  // Tactical intersection crosshairs '+'
+  c.strokeStyle='rgba(98,230,255,.18)';c.lineWidth=1;
+  for(let x=48;x<MAPW;x+=96){
+    for(let y=48;y<MAPH;y+=96){
+      c.beginPath();
+      c.moveTo(x-4,y);c.lineTo(x+4,y);
+      c.moveTo(x,y-4);c.lineTo(x,y+4);
+      c.stroke();
+    }
+  }
+
+  // Tactical Sector Stamps
+  c.fillStyle='rgba(98,230,255,.16)';c.font='700 8.5px "JetBrains Mono", monospace';
+  c.fillText('SEC-01 // BARNAWA TACTICAL',18,22);
+  c.fillText('SEC-02 // PERIMETER BASTION',700,24);
+  c.fillText('DEFENSE SECTOR // ACTIVE',18,MAPH-12);
+  c.fillText('GRID REF: 10.482 N / 07.441 E',760,MAPH-12);
+  c.restore();
+
+  // Suburb district (outer city fabric with blast shadows)
   for(const s of SUBURB){
     if(s.far)continue;
     c.save();c.translate(s.x,s.y);c.rotate(s.rot);
-    // Subtle building shadow
-    c.fillStyle='rgba(0,0,0,.45)';c.fillRect(-s.w/2+1,-s.h/2+2,s.w,s.h);
+    c.fillStyle='rgba(0,0,0,.55)';c.fillRect(-s.w/2+1,-s.h/2+2,s.w,s.h);
     c.fillStyle=opt.ground?'#111613':s.col;c.fillRect(-s.w/2,-s.h/2,s.w,s.h);
-    c.strokeStyle='rgba(255,255,255,.05)';c.lineWidth=0.5;c.strokeRect(-s.w/2,-s.h/2,s.w,s.h);
+    c.strokeStyle='rgba(255,255,255,.06)';c.lineWidth=0.5;c.strokeRect(-s.w/2,-s.h/2,s.w,s.h);
     c.restore();
   }
 
@@ -122,8 +162,8 @@ function drawMapBase(c,opt){
   // Outer highway tarmac foundations
   c.lineCap='round';c.lineJoin='round';
   for(const r of ROADS_OUT){
-    c.strokeStyle='#18201a';c.lineWidth=17;line(c,r); // Gravel shoulder
-    c.strokeStyle='#2a352e';c.lineWidth=11;line(c,r); // Asphalt surface
+    c.strokeStyle='#131a15';c.lineWidth=18;line(c,r); // Gravel shoulder
+    c.strokeStyle='#242e28';c.lineWidth=12;line(c,r); // Reinforced asphalt
   }
 
   // Outer highway dashed centerlines
@@ -134,95 +174,104 @@ function drawMapBase(c,opt){
   // Hospital Compound Grounds (Secured perimeter)
   c.save();
   // Compound drop shadow
-  c.fillStyle='rgba(0,0,0,.5)';poly(c,COMPOUND);c.fill();
+  c.fillStyle='rgba(0,0,0,.6)';poly(c,COMPOUND);c.fill();
   // Main compound soil/turf
-  c.fillStyle='#121a15';poly(c,COMPOUND);c.fill();
+  c.fillStyle='#0f1612';poly(c,COMPOUND);c.fill();
   // Inner compound perimeter security fence with warning dash
-  c.strokeStyle='#35483a';c.lineWidth=2.5;poly(c,COMPOUND);c.stroke();
-  c.setLineDash([8,6]);c.strokeStyle='rgba(242,184,75,.45)';c.lineWidth=1.2;poly(c,COMPOUND);c.stroke();
+  c.strokeStyle='#2c3d31';c.lineWidth=3;poly(c,COMPOUND);c.stroke();
+  c.setLineDash([8,6]);c.strokeStyle='rgba(242,184,75,.5)';c.lineWidth=1.4;poly(c,COMPOUND);c.stroke();
   c.restore();
 
-  // Sports Field (Lush pitch with mowing striping & regulation lines)
+  // Entrance Hazard Barriers at Gates
+  drawHazardStripes(c,232,86,30,6,ROT);
+  drawHazardStripes(c,914,64,30,6,ROT);
+
+  // Sports Field (Mecha Training Grounds / Pitch)
   c.save();c.translate(420,74);c.rotate(ROT*.4);
-  // Pitch grass base
-  c.fillStyle='#1c2617';c.fillRect(-84,-48,168,96);
+  c.fillStyle='#182214';c.fillRect(-84,-48,168,96);
   // Alternating lawn stripes
   for(let sx=-80;sx<80;sx+=16){
-    c.fillStyle=((sx/16)&1)?'#22301c':'#1c2817';
+    c.fillStyle=((sx/16)&1)?'#1e2a18':'#172213';
     c.fillRect(sx,-44,16,88);
   }
-  // Field white lines
-  c.strokeStyle='rgba(235,245,230,.55)';c.lineWidth=1.2;
+  c.strokeStyle='rgba(235,245,230,.5)';c.lineWidth=1.2;
   c.strokeRect(-72,-38,144,76);
-  // Halfway line & center circle
   c.beginPath();c.moveTo(0,-38);c.lineTo(0,38);c.stroke();
   c.beginPath();c.arc(0,0,13,0,Math.PI*2);c.stroke();
   c.beginPath();c.arc(0,0,1.5,0,Math.PI*2);c.fillStyle='rgba(235,245,230,.6)';c.fill();
-  // Goal penalty areas
-  c.strokeRect(-72,-20,18,40);
-  c.strokeRect(54,-20,18,40);
+  c.strokeRect(-72,-20,18,40);c.strokeRect(54,-20,18,40);
+
   // Floodlight poles at 4 corners
   const floodPoles=[[-76,-42],[76,-42],[-76,42],[76,42]];
   for(const [px,py] of floodPoles){
-    c.fillStyle='#4a5d50';c.beginPath();c.arc(px,py,3,0,Math.PI*2);c.fill();
-    // Floodlight glow onto pitch
-    const fg=c.createRadialGradient(px,py,1,px,py,32);
-    fg.addColorStop(0,'rgba(210,240,255,.22)');
+    c.fillStyle='#3d4d42';c.beginPath();c.arc(px,py,3.2,0,Math.PI*2);c.fill();
+    const fg=c.createRadialGradient(px,py,1,px,py,34);
+    fg.addColorStop(0,'rgba(210,240,255,.24)');
     fg.addColorStop(1,'rgba(210,240,255,0)');
-    c.fillStyle=fg;c.beginPath();c.arc(px,py,32,0,Math.PI*2);c.fill();
+    c.fillStyle=fg;c.beginPath();c.arc(px,py,34,0,Math.PI*2);c.fill();
   }
   c.restore();
 
   // Trees (Layered foliage with cast shadows)
   if(!opt.ground)for(const t of TREES){
-    // Tree drop shadow
-    c.fillStyle='rgba(0,0,0,.5)';c.beginPath();c.arc(t.x+2.5,t.y+3.5,t.r,0,Math.PI*2);c.fill();
-    // Base dark canopy
-    c.fillStyle=t.dark?'#17261a':'#1e3323';c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.fill();
-    // Highlight inner foliage cluster
-    c.fillStyle=t.dark?'#213825':'#2b4a32';c.beginPath();c.arc(t.x-t.r*.25,t.y-t.r*.25,t.r*.68,0,Math.PI*2);c.fill();
-    // Foliage rim highlight
-    c.strokeStyle='rgba(255,255,255,.08)';c.lineWidth=0.8;c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.stroke();
+    c.fillStyle='rgba(0,0,0,.55)';c.beginPath();c.arc(t.x+2.5,t.y+3.5,t.r,0,Math.PI*2);c.fill();
+    c.fillStyle=t.dark?'#142016':'#1a2d1f';c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.fill();
+    c.fillStyle=t.dark?'#1c3020':'#24402a';c.beginPath();c.arc(t.x-t.r*.25,t.y-t.r*.25,t.r*.68,0,Math.PI*2);c.fill();
+    c.strokeStyle='rgba(255,255,255,.07)';c.lineWidth=0.8;c.beginPath();c.arc(t.x,t.y,t.r,0,Math.PI*2);c.stroke();
   }
 
   // Inner hospital roads & lanes
   for(const r of ROADS_IN){
-    c.strokeStyle='#1b241e';c.lineWidth=11;line(c,r);
-    c.strokeStyle=opt.ground?'#4a554e':'#2f3c34';c.lineWidth=7;line(c,r);
+    c.strokeStyle='#17201a';c.lineWidth=12;line(c,r);
+    c.strokeStyle=opt.ground?'#4a554e':'#28342c';c.lineWidth=7.5;line(c,r);
   }
 
   // Streetlamps along roadways (Warm luminous pools on tarmac)
   for(const lp of LAMPS){
     const lg=c.createRadialGradient(lp.x,lp.y,1,lp.x,lp.y,lp.r);
-    lg.addColorStop(0,lp.warm?'rgba(255,215,130,.32)':'rgba(160,220,255,.25)');
-    lg.addColorStop(0.4,lp.warm?'rgba(255,200,110,.12)':'rgba(130,200,255,.08)');
+    lg.addColorStop(0,lp.warm?'rgba(255,215,130,.34)':'rgba(160,220,255,.26)');
+    lg.addColorStop(0.4,lp.warm?'rgba(255,200,110,.13)':'rgba(130,200,255,.09)');
     lg.addColorStop(1,'rgba(0,0,0,0)');
     c.fillStyle=lg;c.beginPath();c.arc(lp.x,lp.y,lp.r,0,Math.PI*2);c.fill();
-    // Bright lamp bulb center
     c.fillStyle=lp.warm?'#ffe6a8':'#d6f2ff';c.beginPath();c.arc(lp.x,lp.y,1.8,0,Math.PI*2);c.fill();
   }
 
-  // Station Landing Pads (The 13 exam stations on the battlefield)
+  // 13 Industrial Mecha Station Landing Gantries
   for(let i=0;i<SLOTS.length;i++){
     const s=SLOTS[i];
     c.save();c.translate(s.x,s.y);
-    // Tarmac pad circle
-    c.fillStyle='rgba(14,20,17,.9)';c.beginPath();c.arc(0,0,26,0,Math.PI*2);c.fill();
-    c.strokeStyle='rgba(242,184,75,.4)';c.lineWidth=1.5;
-    c.setLineDash([5,4]);c.beginPath();c.arc(0,0,26,0,Math.PI*2);c.stroke();c.setLineDash([]);
-    // Inner cross / alignment marks
-    c.strokeStyle='rgba(98,230,255,.3)';c.lineWidth=1;
+
+    // Reinforced octagonal steel blast plate
     c.beginPath();
-    c.moveTo(-16,0);c.lineTo(-6,0);c.moveTo(6,0);c.lineTo(16,0);
-    c.moveTo(0,-16);c.lineTo(0,-6);c.moveTo(0,6);c.lineTo(0,16);
-    c.stroke();
-    // 4 Corner Chevron Taxiway Lights
-    const chevrons=[[-20,-20],[20,-20],[20,20],[-20,20]];
+    for(let a=0;a<8;a++){
+      const ang=a*Math.PI/4+Math.PI/8;
+      const ax=Math.cos(ang)*28,ay=Math.sin(ang)*28;
+      if(a===0)c.moveTo(ax,ay);else c.lineTo(ax,ay);
+    }
+    c.closePath();
+    c.fillStyle='#111815';c.fill();
+    c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=1.5;c.stroke();
+
+    // Hazard warning ring perimeter
+    c.strokeStyle='rgba(242,184,75,.45)';c.lineWidth=1.5;
+    c.setLineDash([5,4]);c.beginPath();c.arc(0,0,25,0,Math.PI*2);c.stroke();c.setLineDash([]);
+
+    // Industrial steel grating lines
+    c.strokeStyle='rgba(255,255,255,.05)';c.lineWidth=1;
+    for(let gx=-18;gx<=18;gx+=6){c.beginPath();c.moveTo(gx,-18);c.lineTo(gx,18);c.stroke();}
+
+    // Stenciled Station ID ("01" - "13")
+    c.fillStyle='rgba(98,230,255,.35)';c.font='700 11px "JetBrains Mono", monospace';
+    c.textAlign='center';c.textBaseline='middle';
+    c.fillText(String(i+1).padStart(2,'0'),0,1);
+
+    // 4 Corner Runway Chevrons & Marker Floodlights
+    const chevrons=[[-22,-22],[22,-22],[22,22],[-22,22]];
     for(const [cx,cy] of chevrons){
-      c.fillStyle='rgba(98,230,255,.9)';c.beginPath();c.arc(cx,cy,2,0,Math.PI*2);c.fill();
-      const cg=c.createRadialGradient(cx,cy,1,cx,cy,8);
-      cg.addColorStop(0,'rgba(98,230,255,.5)');cg.addColorStop(1,'rgba(98,230,255,0)');
-      c.fillStyle=cg;c.beginPath();c.arc(cx,cy,8,0,Math.PI*2);c.fill();
+      c.fillStyle='rgba(98,230,255,.95)';c.beginPath();c.arc(cx,cy,2.2,0,Math.PI*2);c.fill();
+      const cg=c.createRadialGradient(cx,cy,1,cx,cy,10);
+      cg.addColorStop(0,'rgba(98,230,255,.55)');cg.addColorStop(1,'rgba(98,230,255,0)');
+      c.fillStyle=cg;c.beginPath();c.arc(cx,cy,10,0,Math.PI*2);c.fill();
     }
     c.restore();
   }

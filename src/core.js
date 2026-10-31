@@ -273,6 +273,7 @@ $.setupStates = function() {
 		i = $.carriers.length; while( i-- ) { $.carriers[ i ].render( i ); }
 		$.hero.render();
 		if( $.raid ) { $.raid.renderAim(); }
+		if( $.raid && $.raid.renderLighting ) { $.raid.renderLighting(); }
 		$.ctxmg.restore();
 		i = $.levelPops.length; while( i-- ) { $.levelPops[ i ].render( i ); }
 		$.renderInterface();

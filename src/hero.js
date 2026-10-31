@@ -89,7 +89,7 @@ $.Hero.prototype.update = function() {
 		}
 
 		/*==============================================================================
-		Update Direction
+		Update Direction & Turn Rate for Mecha RCS
 		==============================================================================*/
 		var lock = ( $.aimLock && $.aimLock.alive ) ? $.aimLock : null;
 		if( lock ) {
@@ -101,6 +101,12 @@ $.Hero.prototype.update = function() {
 				dy = $.mouse.y - this.y;
 			this.direction = Math.atan2( dy, dx );
 		}
+
+		var dDir = this.direction - ( this.prevDirection !== undefined ? this.prevDirection : this.direction );
+		while( dDir > Math.PI ) dDir -= Math.PI * 2;
+		while( dDir < -Math.PI ) dDir += Math.PI * 2;
+		this.turnRate = ( this.turnRate || 0 ) * 0.7 + dDir * 0.3;
+		this.prevDirection = this.direction;
 
 		/*==============================================================================
 		Fire Weapon
@@ -187,317 +193,362 @@ $.Hero.prototype.update = function() {
 };
 
 /*==============================================================================
-Render
+Render: Heavy Mecha Combat Interceptor (Mobile Frame)
 ==============================================================================*/
 $.Hero.prototype.render = function() {
 	if( this.life <= 0 ) { return; }
 	var c = $.ctxmg, t = $.tick / 60;
 	var speed = Math.hypot( this.vx, this.vy );
-	var isThrusting = ( speed > 0.4 || $.keys.state.up || $.keys.state.down || $.keys.state.left || $.keys.state.right || $.pad.mx || $.pad.my );
+	var isThrusting = ( speed > 0.35 || $.keys.state.up || $.keys.state.down || $.keys.state.left || $.keys.state.right || $.pad.mx || $.pad.my );
+	var turnRate = this.turnRate || 0;
 
 	/*==============================================================================
-	1. Headlight Cone (cast onto terrain ahead of ship)
+	1. Dual High-Intensity Mecha Searchlight Projectors
 	==============================================================================*/
 	c.save();
 	c.translate( this.x, this.y );
 	c.rotate( this.direction );
 
-	var beamDist = 260;
-	var beamGrad = c.createRadialGradient( 10, 0, 12, 130, 0, beamDist );
-	beamGrad.addColorStop( 0, 'rgba(180, 235, 255, 0.24)' );
-	beamGrad.addColorStop( 0.45, 'rgba(110, 210, 255, 0.10)' );
-	beamGrad.addColorStop( 1, 'rgba(90, 180, 255, 0)' );
-	c.fillStyle = beamGrad;
-	c.beginPath();
-	c.moveTo( 14, -8 );
-	c.lineTo( beamDist, -80 );
-	c.arc( 0, 0, beamDist, -0.32, 0.32 );
-	c.lineTo( 14, 8 );
-	c.closePath();
-	c.fill();
-
-	/* Central tighter bright beam */
-	var coreGrad = c.createRadialGradient( 14, 0, 6, 80, 0, 160 );
-	coreGrad.addColorStop( 0, 'rgba(230, 250, 255, 0.35)' );
-	coreGrad.addColorStop( 0.5, 'rgba(160, 230, 255, 0.12)' );
-	coreGrad.addColorStop( 1, 'rgba(160, 230, 255, 0)' );
-	c.fillStyle = coreGrad;
-	c.beginPath();
-	c.moveTo( 16, -4 );
-	c.lineTo( 160, -32 );
-	c.arc( 0, 0, 160, -0.20, 0.20 );
-	c.lineTo( 16, 4 );
-	c.closePath();
-	c.fill();
+	// Projector beams from wing hardpoints
+	var searchBeams = [ -14, 14 ];
+	for( var b = 0; b < searchBeams.length; b++ ) {
+		var by = searchBeams[ b ];
+		var beamDist = 280;
+		var beamGrad = c.createRadialGradient( 16, by, 8, 120, by, beamDist );
+		beamGrad.addColorStop( 0, 'rgba(180, 240, 255, 0.28)' );
+		beamGrad.addColorStop( 0.45, 'rgba(100, 210, 255, 0.12)' );
+		beamGrad.addColorStop( 1, 'rgba(80, 180, 255, 0)' );
+		c.fillStyle = beamGrad;
+		c.beginPath();
+		c.moveTo( 18, by - 4 );
+		c.lineTo( beamDist, by - 70 );
+		c.arc( 0, by, beamDist, -0.26, 0.26 );
+		c.lineTo( 18, by + 4 );
+		c.closePath();
+		c.fill();
+	}
 	c.restore();
 
 	/*==============================================================================
-	2. Thruster Plasma Plumes (behind the ship)
+	2. RCS Maneuvering Vernier Thrusters (Reaction Control System)
+	==============================================================================*/
+	c.save();
+	c.translate( this.x, this.y );
+	c.rotate( this.direction );
+
+	// When turning right: fire Port-Front (outwards) & Starboard-Rear (outwards)
+	// When turning left: fire Starboard-Front & Port-Rear
+	var rcsPuff = Math.min( 1, Math.abs( turnRate ) * 18 );
+	if( rcsPuff > 0.08 || speed > 1.8 ) {
+		var rcsJets = [];
+		if( turnRate > 0.015 ) {
+			rcsJets.push( { x: 12, y: -13, dx: 0, dy: -1 } ); // Port-Front
+			rcsJets.push( { x: -12, y: 13, dx: 0, dy: 1 } );  // Starboard-Rear
+		} else if( turnRate < -0.015 ) {
+			rcsJets.push( { x: 12, y: 13, dx: 0, dy: 1 } );   // Starboard-Front
+			rcsJets.push( { x: -12, y: -13, dx: 0, dy: -1 } ); // Port-Rear
+		}
+		for( var r = 0; r < rcsJets.length; r++ ) {
+			var rj = rcsJets[ r ], jLen = 6 + rcsPuff * 14 + Math.random() * 4;
+			c.strokeStyle = 'rgba(190, 245, 255, 0.9)';
+			c.lineWidth = 1.6;
+			c.beginPath();
+			c.moveTo( rj.x, rj.y );
+			c.lineTo( rj.x + rj.dx * jLen, rj.y + rj.dy * jLen );
+			c.stroke();
+			c.strokeStyle = 'rgba(98, 230, 255, 0.4)';
+			c.lineWidth = 3.5;
+			c.beginPath();
+			c.moveTo( rj.x, rj.y );
+			c.lineTo( rj.x + rj.dx * ( jLen * 0.7 ), rj.y + rj.dy * ( jLen * 0.7 ) );
+			c.stroke();
+		}
+	}
+
+	/*==============================================================================
+	3. Heavy Dual Plasma Rocket Engines & Shock Diamonds
 	==============================================================================*/
 	if( isThrusting ) {
-		c.save();
-		c.translate( this.x, this.y );
-		c.rotate( this.direction );
-
-		var plumeLen = 14 + ( speed / this.vmax ) * 22 + Math.random() * 6;
-		var nozzles = [ -6.5, 6.5 ];
+		var plumeLen = 16 + ( speed / this.vmax ) * 26 + Math.random() * 7;
+		var nozzles = [ -7, 7 ];
 
 		for( var n = 0; n < nozzles.length; n++ ) {
 			var ny = nozzles[ n ];
-			// Outer flame
-			var flameGrad = c.createLinearGradient( -14, ny, -14 - plumeLen, ny );
-			flameGrad.addColorStop( 0, 'rgba(255, 255, 255, 0.95)' );
-			flameGrad.addColorStop( 0.25, 'rgba(98, 230, 255, 0.85)' );
-			flameGrad.addColorStop( 0.7, 'rgba(255, 130, 40, 0.55)' );
+			// Supersonic shock diamond flame
+			var flameGrad = c.createLinearGradient( -15, ny, -15 - plumeLen, ny );
+			flameGrad.addColorStop( 0, '#ffffff' );
+			flameGrad.addColorStop( 0.2, '#62e6ff' );
+			flameGrad.addColorStop( 0.65, '#ff6a20' );
 			flameGrad.addColorStop( 1, 'rgba(255, 60, 20, 0)' );
 			c.fillStyle = flameGrad;
 			c.beginPath();
-			c.moveTo( -14, ny - 3.5 );
-			c.lineTo( -14 - plumeLen, ny );
-			c.lineTo( -14, ny + 3.5 );
+			c.moveTo( -15, ny - 4.5 );
+			c.lineTo( -15 - plumeLen, ny );
+			c.lineTo( -15, ny + 4.5 );
 			c.closePath();
 			c.fill();
 
-			// Bright inner needle
-			c.fillStyle = 'rgba(240, 255, 255, 0.95)';
+			// Supersonic Shock Diamond node
+			c.fillStyle = '#ffffff';
 			c.beginPath();
-			c.moveTo( -14, ny - 1.5 );
-			c.lineTo( -14 - plumeLen * 0.5, ny );
-			c.lineTo( -14, ny + 1.5 );
+			c.moveTo( -15 - plumeLen * 0.28, ny - 1.8 );
+			c.lineTo( -15 - plumeLen * 0.42, ny );
+			c.lineTo( -15 - plumeLen * 0.28, ny + 1.8 );
+			c.lineTo( -15 - plumeLen * 0.14, ny );
 			c.closePath();
 			c.fill();
 		}
-		c.restore();
 
-		// Spawn occasional ember particle
-		if( Math.random() < 0.35 && $.particleEmitters ) {
-			var rx = this.x - Math.cos( this.direction ) * 16 + ( Math.random() - 0.5 ) * 8;
-			var ry = this.y - Math.sin( this.direction ) * 16 + ( Math.random() - 0.5 ) * 8;
+		// Trailing ember sparks
+		if( Math.random() < 0.45 && $.particleEmitters ) {
+			var rx = this.x - Math.cos( this.direction ) * 18 + ( Math.random() - 0.5 ) * 10;
+			var ry = this.y - Math.sin( this.direction ) * 18 + ( Math.random() - 0.5 ) * 10;
 			$.particleEmitters.push( new $.ParticleEmitter( {
-				x: rx,
-				y: ry,
-				count: 1,
-				spawnRange: 2,
-				friction: 0.88,
-				minSpeed: 1,
-				maxSpeed: 4,
-				minDirection: this.direction + $.pi - 0.3,
-				maxDirection: this.direction + $.pi + 0.3,
-				hue: Math.random() < 0.6 ? 195 : 30,
-				saturation: 100
+				x: rx, y: ry, count: 1, spawnRange: 2, friction: 0.86, minSpeed: 2, maxSpeed: 5,
+				minDirection: this.direction + $.pi - 0.25, maxDirection: this.direction + $.pi + 0.25,
+				hue: Math.random() < 0.7 ? 195 : 28, saturation: 100
 			} ) );
 		}
 	}
 
 	/*==============================================================================
-	3. Interceptor Ship Hull
+	4. Heavy Armored Mecha Frame Body
 	==============================================================================*/
+	// Ground drop shadow (chassis elevation)
 	c.save();
-	c.translate( this.x, this.y );
-	c.rotate( this.direction );
-
-	// Drop shadow under ship for elevation
-	c.save();
-	c.translate( 3, 5 );
-	c.fillStyle = 'rgba(0, 0, 0, 0.45)';
+	c.translate( 4, 6 );
+	c.fillStyle = 'rgba(0, 0, 0, 0.52)';
 	c.beginPath();
-	c.moveTo( 22, 0 );
-	c.lineTo( 6, -7 );
-	c.lineTo( -4, -18 );
-	c.lineTo( -13, -17 );
-	c.lineTo( -9, -9 );
-	c.lineTo( -14, -7 );
-	c.lineTo( -14, 7 );
-	c.lineTo( -9, 9 );
-	c.lineTo( -13, 17 );
-	c.lineTo( -4, 18 );
-	c.lineTo( 6, 7 );
+	c.moveTo( 24, 0 );
+	c.lineTo( 10, -9 );
+	c.lineTo( -6, -20 );
+	c.lineTo( -16, -18 );
+	c.lineTo( -11, -10 );
+	c.lineTo( -16, -7 );
+	c.lineTo( -16, 7 );
+	c.lineTo( -11, 10 );
+	c.lineTo( -16, 18 );
+	c.lineTo( -6, 20 );
+	c.lineTo( 10, 9 );
 	c.closePath();
 	c.fill();
 	c.restore();
 
-	// Main Wings & Fuselage Outer Silhouette
+	// Main Armored Outer Silhouette
 	c.beginPath();
-	c.moveTo( 22, 0 );
-	c.lineTo( 6, -7 );
-	c.lineTo( -4, -18 );
-	c.lineTo( -13, -17 );
-	c.lineTo( -9, -9 );
-	c.lineTo( -14, -7 );
-	c.lineTo( -14, -2 );
-	c.lineTo( -11, 0 );
-	c.lineTo( -14, 2 );
-	c.lineTo( -14, 7 );
-	c.lineTo( -9, 9 );
-	c.lineTo( -13, 17 );
-	c.lineTo( -4, 18 );
-	c.lineTo( 6, 7 );
+	c.moveTo( 24, 0 );
+	c.lineTo( 10, -9 );
+	c.lineTo( -6, -20 );
+	c.lineTo( -16, -18 );
+	c.lineTo( -11, -10 );
+	c.lineTo( -16, -7 );
+	c.lineTo( -16, -3 );
+	c.lineTo( -13, 0 );
+	c.lineTo( -16, 3 );
+	c.lineTo( -16, 7 );
+	c.lineTo( -11, 10 );
+	c.lineTo( -16, 18 );
+	c.lineTo( -6, 20 );
+	c.lineTo( 10, 9 );
 	c.closePath();
 
-	// Hull gradient (dark interceptor armor with edge sheen)
-	var hullGrad = c.createLinearGradient( -14, 0, 22, 0 );
-	hullGrad.addColorStop( 0, '#151c24' );
-	hullGrad.addColorStop( 0.45, '#222d38' );
-	hullGrad.addColorStop( 0.8, '#2e3d4c' );
-	hullGrad.addColorStop( 1, '#485d72' );
-	c.fillStyle = hullGrad;
+	// Dark composite titanium armor
+	var armorGrad = c.createLinearGradient( -16, -16, 24, 16 );
+	armorGrad.addColorStop( 0, '#101720' );
+	armorGrad.addColorStop( 0.4, '#1b2532' );
+	armorGrad.addColorStop( 0.75, '#283648' );
+	armorGrad.addColorStop( 1, '#3e5066' );
+	c.fillStyle = armorGrad;
 	c.fill();
 
-	// Glowing hull perimeter outline
+	// Outer chassis armor bevel stroke
 	c.strokeStyle = this.takingDamage ? '#ff5468' : '#62e6ff';
-	c.lineWidth = 1.6;
+	c.lineWidth = 1.8;
 	c.stroke();
 
-	// Wing Plating & Inset Details
-	c.fillStyle = '#2d3b49';
-	// Port wing panel
+	// Secondary Titanium Plating & Panel Lines
+	c.fillStyle = '#263445';
+	// Port wing armor plate
 	c.beginPath();
-	c.moveTo( 4, -6 );
-	c.lineTo( -3, -15 );
-	c.lineTo( -10, -14 );
-	c.lineTo( -7, -8 );
+	c.moveTo( 6, -8 );
+	c.lineTo( -4, -18 );
+	c.lineTo( -12, -16 );
+	c.lineTo( -8, -9 );
 	c.closePath();
 	c.fill();
-	c.strokeStyle = 'rgba(98, 230, 255, 0.4)';
+	c.strokeStyle = 'rgba(98, 230, 255, 0.45)';
 	c.lineWidth = 1;
 	c.stroke();
 
-	// Starboard wing panel
+	// Starboard wing armor plate
 	c.beginPath();
-	c.moveTo( 4, 6 );
-	c.lineTo( -3, 15 );
-	c.lineTo( -10, 14 );
-	c.lineTo( -7, 8 );
+	c.moveTo( 6, 8 );
+	c.lineTo( -4, 18 );
+	c.lineTo( -12, 16 );
+	c.lineTo( -8, 9 );
 	c.closePath();
 	c.fill();
 	c.stroke();
 
-	// Wingtip Navigation Strobe Lights
-	// Port (Red)
-	c.fillStyle = '#ff3344';
-	c.beginPath();
-	c.arc( -9, -17, 1.8, 0, $.twopi );
-	c.fill();
-	c.fillStyle = 'rgba(255, 50, 70, 0.45)';
-	c.beginPath();
-	c.arc( -9, -17, 4, 0, $.twopi );
-	c.fill();
+	// Hazard Warning Chevrons on Wing Shoulder (Yellow / Black stripes)
+	var hx = -2, hy = -12;
+	c.save();
+	c.translate( hx, hy );
+	c.rotate( -0.3 );
+	c.fillStyle = '#f2b84b';
+	c.fillRect( 0, 0, 7, 2 );
+	c.fillStyle = '#111';
+	c.fillRect( 2, 0, 2, 2 );
+	c.restore();
 
-	// Starboard (Green)
-	c.fillStyle = '#33ff77';
-	c.beginPath();
-	c.arc( -9, 17, 1.8, 0, $.twopi );
-	c.fill();
-	c.fillStyle = 'rgba(50, 255, 120, 0.45)';
-	c.beginPath();
-	c.arc( -9, 17, 4, 0, $.twopi );
-	c.fill();
+	c.save();
+	c.translate( hx, -hy );
+	c.rotate( 0.3 );
+	c.fillStyle = '#f2b84b';
+	c.fillRect( 0, -2, 7, 2 );
+	c.fillStyle = '#111';
+	c.fillRect( 2, -2, 2, 2 );
+	c.restore();
 
-	// Engine Nozzle Rings (Glow)
-	c.fillStyle = isThrusting ? '#62e6ff' : '#2a3542';
-	c.fillRect( -14, -8, 2, 4 );
-	c.fillRect( -14, 4, 2, 4 );
-
-	// Central Fuselage Ridge Spine
-	c.strokeStyle = 'rgba(242, 184, 75, 0.7)';
-	c.lineWidth = 1.2;
+	// Exposed Hydraulic Piston Struts (Chrome cylinder connecting fuselage to wings)
+	c.strokeStyle = '#9eb2c6';
+	c.lineWidth = 1.5;
 	c.beginPath();
-	c.moveTo( 15, 0 );
-	c.lineTo( -8, 0 );
+	c.moveTo( -2, -6 ); c.lineTo( -9, -12 );
+	c.moveTo( -2, 6 ); c.lineTo( -9, 12 );
 	c.stroke();
 
-	// Cockpit Canopy (Glowing Cyan Gem / Glass)
-	var canopyGrad = c.createLinearGradient( -2, 0, 13, 0 );
-	canopyGrad.addColorStop( 0, '#093644' );
-	canopyGrad.addColorStop( 0.45, '#127a96' );
-	canopyGrad.addColorStop( 0.85, '#62e6ff' );
-	canopyGrad.addColorStop( 1, '#d8f8ff' );
+	// Twin Heavy Kinetic Railgun Barrels (Mounted on outer wing pylons)
+	var isFiring = this.weapon.fireFlag > 0;
+	var railguns = [ -15, 15 ];
+	for( var g = 0; g < railguns.length; g++ ) {
+		var gy = railguns[ g ];
+		// Barrel tube
+		c.fillStyle = '#151e28';
+		c.fillRect( -4, gy - 1.5, 30, 3 );
+		c.strokeStyle = '#485c72';
+		c.lineWidth = 1;
+		c.strokeRect( -4, gy - 1.5, 30, 3 );
+
+		// Ventilated heat-sink slots (Glow red/orange under sustained fire!)
+		c.fillStyle = isFiring ? '#ff6014' : '#28384a';
+		c.fillRect( 2, gy - 1, 4, 2 );
+		c.fillRect( 9, gy - 1, 4, 2 );
+		c.fillRect( 16, gy - 1, 4, 2 );
+
+		// Barrel muzzle brake compensator
+		c.fillStyle = isFiring ? '#ffd880' : '#304254';
+		c.fillRect( 26, gy - 2, 2, 4 );
+	}
+
+	// Armored Engine Bells
+	c.fillStyle = isThrusting ? '#62e6ff' : '#222f3e';
+	c.fillRect( -16, -9, 3, 4 );
+	c.fillRect( -16, 5, 3, 4 );
+
+	// Wingtip Navigation Strobe Lights
+	c.fillStyle = '#ff3344'; // Port
+	c.beginPath(); c.arc( -11, -17, 1.8, 0, $.twopi ); c.fill();
+	c.fillStyle = '#33ff77'; // Starboard
+	c.beginPath(); c.arc( -11, 17, 1.8, 0, $.twopi ); c.fill();
+
+	// Central Armored Fuselage Spine & Stencil Marking
+	c.strokeStyle = 'rgba(242, 184, 75, 0.8)';
+	c.lineWidth = 1.2;
+	c.beginPath();
+	c.moveTo( 17, 0 ); c.lineTo( -9, 0 );
+	c.stroke();
+
+	// Mecha Cockpit Canopy with Tactical HUD Reticle
+	var canopyGrad = c.createLinearGradient( -2, 0, 14, 0 );
+	canopyGrad.addColorStop( 0, '#062630' );
+	canopyGrad.addColorStop( 0.45, '#0e6d85' );
+	canopyGrad.addColorStop( 0.85, '#5be0fa' );
+	canopyGrad.addColorStop( 1, '#d0f6ff' );
 
 	c.beginPath();
-	c.moveTo( 13, 0 );
-	c.lineTo( 4, -3.5 );
-	c.lineTo( -2, -3 );
+	c.moveTo( 15, 0 );
+	c.lineTo( 5, -3.8 );
+	c.lineTo( -2, -3.2 );
 	c.lineTo( -4, 0 );
-	c.lineTo( -2, 3 );
-	c.lineTo( 4, 3.5 );
+	c.lineTo( -2, 3.2 );
+	c.lineTo( 5, 3.8 );
 	c.closePath();
 	c.fillStyle = canopyGrad;
 	c.fill();
-	c.strokeStyle = '#c4f6ff';
+	c.strokeStyle = '#b8f2ff';
 	c.lineWidth = 1;
+	c.stroke();
+
+	// Internal HUD Targeting Crosshair inside Canopy
+	c.strokeStyle = 'rgba(93, 255, 160, 0.85)';
+	c.lineWidth = 0.8;
+	c.beginPath();
+	c.moveTo( 4, -2 ); c.lineTo( 8, -2 );
+	c.moveTo( 6, -3 ); c.lineTo( 6, -1 );
 	c.stroke();
 
 	// Canopy Glare Highlight
-	c.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+	c.strokeStyle = 'rgba(255, 255, 255, 0.9)';
 	c.lineWidth = 1;
 	c.beginPath();
-	c.moveTo( 10, -1 );
-	c.lineTo( 2, -2.5 );
+	c.moveTo( 12, -0.8 ); c.lineTo( 3, -2.5 );
 	c.stroke();
 
 	/*==============================================================================
-	4. Muzzle Flash (When firing)
+	5. Railgun Muzzle Flashes & Starburst Spikes
 	==============================================================================*/
-	if( this.weapon.fireFlag > 0 ) {
+	if( isFiring ) {
 		this.weapon.fireFlag -= $.dt;
-		var flashRadius = 7 + Math.random() * 5;
-		var fGrad = c.createRadialGradient( 24, 0, 1, 24, 0, flashRadius );
-		fGrad.addColorStop( 0, '#ffffff' );
-		fGrad.addColorStop( 0.35, '#ffe27a' );
-		fGrad.addColorStop( 0.8, 'rgba(255, 120, 40, 0.6)' );
-		fGrad.addColorStop( 1, 'rgba(255, 80, 20, 0)' );
-		c.fillStyle = fGrad;
-		c.beginPath();
-		c.arc( 24, 0, flashRadius, 0, $.twopi );
-		c.fill();
+		for( var f = 0; f < railguns.length; f++ ) {
+			var fy = railguns[ f ];
+			var fRad = 8 + Math.random() * 5;
+			var fGrad = c.createRadialGradient( 27, fy, 1, 27, fy, fRad );
+			fGrad.addColorStop( 0, '#ffffff' );
+			fGrad.addColorStop( 0.4, '#ffe07a' );
+			fGrad.addColorStop( 0.85, 'rgba(255, 100, 30, 0.65)' );
+			fGrad.addColorStop( 1, 'rgba(255, 60, 10, 0)' );
+			c.fillStyle = fGrad;
+			c.beginPath(); c.arc( 27, fy, fRad, 0, $.twopi ); c.fill();
 
-		// Star spikes
-		c.strokeStyle = 'rgba(255, 245, 200, 0.9)';
-		c.lineWidth = 1.2;
-		c.beginPath();
-		c.moveTo( 24 - flashRadius * 1.3, 0 );
-		c.lineTo( 24 + flashRadius * 1.3, 0 );
-		c.moveTo( 24, -flashRadius * 0.9 );
-		c.lineTo( 24, flashRadius * 0.9 );
-		c.stroke();
+			c.strokeStyle = 'rgba(255, 245, 200, 0.95)';
+			c.lineWidth = 1.2;
+			c.beginPath();
+			c.moveTo( 27 - fRad * 1.4, fy ); c.lineTo( 27 + fRad * 1.4, fy );
+			c.moveTo( 27, fy - fRad * 0.9 ); c.lineTo( 27, fy + fRad * 0.9 );
+			c.stroke();
+		}
 	}
 
 	c.restore();
 
 	/*==============================================================================
-	5. Shield Barrier Flare (when taking damage)
+	6. Heavy Energy Shield Matrix (On damage)
 	==============================================================================*/
 	if( this.takingDamage ) {
 		c.save();
 		c.translate( this.x, this.y );
-		var shieldR = 26 + Math.random() * 3;
+		var shieldR = 28 + Math.random() * 4;
 		var shHue = Math.random() < 0.5 ? 195 : 350;
-		c.strokeStyle = 'hsla(' + shHue + ', 100%, 75%, ' + ( 0.6 + Math.random() * 0.4 ) + ')';
+		c.strokeStyle = 'hsla(' + shHue + ', 100%, 75%, ' + ( 0.65 + Math.random() * 0.35 ) + ')';
 		c.lineWidth = 2.5;
 
-		// Hexagonal shield lattice
+		// Hexagonal armor lattice
 		c.beginPath();
 		for( var h = 0; h < 6; h++ ) {
 			var ang = h * ( $.twopi / 6 ) + t * 4;
-			var hx = Math.cos( ang ) * shieldR;
-			var hy = Math.sin( ang ) * shieldR;
-			if( h === 0 ) c.moveTo( hx, hy );
-			else c.lineTo( hx, hy );
+			var hx = Math.cos( ang ) * shieldR, hy = Math.sin( ang ) * shieldR;
+			if( h === 0 ) c.moveTo( hx, hy ); else c.lineTo( hx, hy );
 		}
 		c.closePath();
-		c.fillStyle = 'hsla(' + shHue + ', 100%, 50%, 0.12)';
+		c.fillStyle = 'hsla(' + shHue + ', 100%, 50%, 0.14)';
 		c.fill();
 		c.stroke();
 
-		// Shield hit ripple arcs
-		c.lineWidth = 1.5;
-		c.beginPath();
-		c.arc( 0, 0, shieldR + 6, t * 8, t * 8 + 1.8 );
-		c.stroke();
-		c.beginPath();
-		c.arc( 0, 0, shieldR + 6, t * 8 + $.pi, t * 8 + $.pi + 1.8 );
-		c.stroke();
-
+		// Deflection quadrant arcs
+		c.lineWidth = 1.8;
+		c.beginPath(); c.arc( 0, 0, shieldR + 6, t * 8, t * 8 + 1.6 ); c.stroke();
+		c.beginPath(); c.arc( 0, 0, shieldR + 6, t * 8 + $.pi, t * 8 + $.pi + 1.6 ); c.stroke();
 		c.restore();
 	}
 };

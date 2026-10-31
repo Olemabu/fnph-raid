@@ -734,6 +734,74 @@ R.renderAim=function(){
   if(tg&&h.life>0){c.save();c.setLineDash([4,6]);c.strokeStyle='rgba(98,230,255,.5)';c.lineWidth=1.5;c.beginPath();c.moveTo(h.x,h.y);c.lineTo(tg.x,tg.y);c.stroke();c.restore();
   }
 };
+R.renderLighting=function(){
+  const c=$.ctxmg,h=$.hero;
+  if(h.life<=0)return;
+
+  c.save();
+  c.globalCompositeOperation='lighter';
+
+  // 1. Player Engine & Chassis Bloom
+  const engGrad=c.createRadialGradient(h.x,h.y,4,h.x,h.y,60);
+  engGrad.addColorStop(0,'rgba(98,230,255,.24)');
+  engGrad.addColorStop(0.5,'rgba(98,230,255,.08)');
+  engGrad.addColorStop(1,'rgba(0,0,0,0)');
+  c.fillStyle=engGrad;
+  c.beginPath();c.arc(h.x,h.y,60,0,$.twopi);c.fill();
+
+  // 2. Active Station Pad Beacon Glow
+  if(R.rooms&&R.rooms[R.si]){
+    const sp=SP(R.rooms[R.si].idx);
+    const sg=c.createRadialGradient(sp.x,sp.y,10,sp.x,sp.y,150);
+    sg.addColorStop(0,'rgba(255,90,60,.28)');
+    sg.addColorStop(0.5,'rgba(255,140,80,.09)');
+    sg.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle=sg;
+    c.beginPath();c.arc(sp.x,sp.y,150,0,$.twopi);c.fill();
+  }
+
+  // 3. Bullet Plasma Blooms
+  const nb=Math.min(25,$.bullets.length);
+  for(let i=0;i<nb;i++){
+    const b=$.bullets[i];
+    if(b.inView){
+      const bg=c.createRadialGradient(b.x,b.y,1,b.x,b.y,22);
+      bg.addColorStop(0,'rgba(255,235,170,.4)');
+      bg.addColorStop(0.5,'rgba(255,160,60,.12)');
+      bg.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=bg;
+      c.beginPath();c.arc(b.x,b.y,22,0,$.twopi);c.fill();
+    }
+  }
+
+  // 4. Explosion Blasts Bloom
+  for(let i=0;i<$.explosions.length;i++){
+    const ex=$.explosions[i];
+    const er=ex.radius*2.2;
+    const eg=c.createRadialGradient(ex.x,ex.y,2,ex.x,ex.y,er);
+    eg.addColorStop(0,'rgba(255,255,255,.55)');
+    eg.addColorStop(0.35,'hsla('+ex.hue+',100%,70%,.35)');
+    eg.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle=eg;
+    c.beginPath();c.arc(ex.x,ex.y,er,0,$.twopi);c.fill();
+  }
+
+  // 5. Living Carrier Gunship Core Energy Fields
+  for(let i=0;i<$.carriers.length;i++){
+    const cr=$.carriers[i];
+    if(cr.alive){
+      const aim=R.aimTarget()===cr;
+      const cg=c.createRadialGradient(cr.x,cr.y,6,cr.x,cr.y,75);
+      cg.addColorStop(0,aim?'rgba(98,230,255,.32)':'rgba(255,79,168,.28)');
+      cg.addColorStop(0.5,aim?'rgba(98,230,255,.1)':'rgba(255,79,168,.08)');
+      cg.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=cg;
+      c.beginPath();c.arc(cr.x,cr.y,75,0,$.twopi);c.fill();
+    }
+  }
+
+  c.restore();
+};
 R.minimap=function(m){
   R.rooms.forEach((r,i)=>{const p=SP(r.idx);$.ctxmg.fillStyle=captured.has(r.topic)?'#62e6ff':i===R.si?'#ff5a3c':'#f2b84b';$.ctxmg.fillRect(m.x+p.x*m.scale-2,m.y+p.y*m.scale-2,4,4);});
   $.carriers.forEach(cr=>{if(cr.alive){$.ctxmg.fillStyle='#ff4fa8';$.ctxmg.fillRect(m.x+cr.x*m.scale-1,m.y+cr.y*m.scale-1,3,3);}});
