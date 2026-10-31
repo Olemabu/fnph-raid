@@ -48,6 +48,8 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 - **Aim assist:** the answer plate counts as part of its gunship. The cursor snaps to the nearest gunship within about 70 px and stays on it until you clearly move away. Shots lead the moving target. A shot fired at a locked or hovered answer flies past the other answers, so you never hit a wrong one by accident. Keys 1 to 4 lock on, and the lock survives small mouse movements.
 - **Arsenal:** the gun upgrades as total mastered items grow (`ARSENAL` in `src/raid.js`): Mk I Pulse (0), Mk II Twin (10), Mk III Plasma (25), Mk IV Rail (50), Mk V Seeker (90, homing rounds). From Mk III the answer gunships carry more armour. Power-ups stack on top (`src/core.js`).
 
+- **Ramming:** flying into the correct answer counts as answering it, with a "Rammed it!" toast. Flying into a wrong answer counts as choosing it, so you die and see why it was wrong.
+
 ## Saved progress
 
 Progress is saved in the browser's localStorage under keys starting `fnphraid.` (stats, captured stations, settings, custom deck). Saved progress is specific to the browser and file location.

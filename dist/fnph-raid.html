@@ -3478,7 +3478,8 @@ $.Carrier.prototype.update=function(i){
   for(const o of $.carriers){if(o===this||!o.alive)continue;const ox=this.x-o.x,oy=this.y-o.y,od=Math.hypot(ox,oy)||1;if(od<140){this.x+=ox/od*(140-od)*.02*$.dt;this.y+=oy/od*(140-od)*.02*$.dt;}}
   this.x=Math.max(this.radius,Math.min($.ww-this.radius,this.x));this.y=Math.max(this.radius,Math.min($.wh-this.radius,this.y));
   const fdt=$.dt||1;this.vx=(this.x-ox0)/fdt;this.vy=(this.y-oy0)/fdt;
-  if(R.phase==='fight'&&h.life>0&&d<h.radius+this.radius*.75)R.overrun();
+  // ramming counts as choosing: the right answer scores, a wrong one kills you
+  if(R.phase==='fight'&&h.life>0&&d<h.radius+this.radius*.75){this.rammed=true;R.carrierDown(this);}
 };
 $.Carrier.prototype.hit=function(dmg){
   if(!this.alive||R.phase!=='fight')return;
@@ -3787,7 +3788,7 @@ R.carrierDown=function(c){
     else{it.found.push(c.text);
       if(it.found.length===it.seq.length){gradeRecall(it);R.cleared++;R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
-    R.toast((it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
+    R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
     c.explode(0,false);R.die(c.text);
   }
@@ -3833,7 +3834,7 @@ R.deathCard=function(){
   Q('#hurt').classList.remove('on');
   const it=R.cur,{picked,opts,found}=R.deadInfo;let body='<p class="cq">'+esc(it.prompt)+'</p>';
   if(it.type==='q'){
-    if(picked)body+='<div class="ans bad"><span class="lbl">You shot</span><b>'+esc(picked)+'</b><span>'+esc(reasonFor(it,picked))+'</span></div>';
+    if(picked)body+='<div class="ans bad"><span class="lbl">You picked</span><b>'+esc(picked)+'</b><span>'+esc(reasonFor(it,picked))+'</span></div>';
     else body+='<div class="ans bad"><span class="lbl">Overrun</span><span>The answers reached you before you destroyed the right one.</span></div>';
     body+='<div class="ans good"><span class="lbl">Correct answer</span><b>'+esc(it.answer)+'</b></div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
@@ -3843,7 +3844,7 @@ R.deathCard=function(){
     if(picked){let why;
       if(it.type==='l'&&it.seq.includes(picked))why='It is on this list, but it is step '+(it.seq.indexOf(picked)+1)+'. You needed step '+(found.length+1)+'.';
       else why=reasonFor(it,picked);
-      body+='<div class="ans bad"><span class="lbl">You shot</span><b>'+esc(picked)+'</b><span>'+esc(why)+'</span></div>';}
+      body+='<div class="ans bad"><span class="lbl">You picked</span><b>'+esc(picked)+'</b><span>'+esc(why)+'</span></div>';}
     else body+='<div class="ans bad"><span class="lbl">Overrun</span><span>The answers reached you before you destroyed the right one.</span></div>';
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
