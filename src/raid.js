@@ -16,17 +16,18 @@ const WS=2; // world scale: map coords x2 = world (1920 x 1200)
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36);}
 function splitOpts(raw){const why={},opts=raw.split('|').map(x=>x.trim()).filter(Boolean).map(p=>{const k=p.indexOf(' :: ');if(k<0)return p;const o=p.slice(0,k).trim();why[o]=p.slice(k+4).trim();return o;});return{opts,why};}
 function parseDeck(text){
-  const rooms=[],errors=[];let cur=null,target=null;
+  const rooms=[],errors=[];let cur=null,target=null,curC=null;
   text.split(/\r?\n/).forEach((raw,i)=>{
     const line=raw.trim();if(!line)return;
     if(line.startsWith('>')){const t=line.slice(1).trim();if(target){(target.note=target.note||[]).push(t);}return;}
-    if(line.startsWith('##')){const p=line.slice(2).split('|').map(s=>s.trim());cur={locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',mode:(p[2]||'').toLowerCase(),items:[],note:[]};rooms.push(cur);target=cur;return;}
+    if(line.startsWith('###')){const p=line.slice(3).split('|').map(s=>s.trim());if(!cur){cur={locus:'Station 1',topic:'General',mode:'',items:[],note:[],concepts:[]};rooms.push(cur);}curC={title:p[0]||'Concept',mode:(p[1]||'').toLowerCase(),note:[],items:[]};cur.concepts.push(curC);target=curC;return;}
+    if(line.startsWith('##')){curC=null;const p=line.slice(2).split('|').map(s=>s.trim());cur={concepts:[],locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',mode:(p[2]||'').toLowerCase(),items:[],note:[]};rooms.push(cur);target=cur;return;}
     if(line.startsWith('#'))return;
     const m=line.match(/^([QLS])\s*:\s*(.+)$/i);
     if(!m){errors.push('Line '+(i+1)+': start it with Q:, L:, S:, ## or >');return;}
     const body=m[2],eq=body.indexOf(' = ');
     if(eq<0){errors.push('Line '+(i+1)+': needs " = " between the question and the answer');return;}
-    if(!cur){cur={locus:'Station 1',topic:'General',items:[],note:[]};rooms.push(cur);}
+    if(!cur){cur={locus:'Station 1',topic:'General',mode:'',items:[],note:[],concepts:[]};rooms.push(cur);}
     const prompt=body.slice(0,eq).trim(),rest=body.slice(eq+3),t=m[1].toUpperCase();
     let it;
     if(t==='Q'){const {opts,why}=splitOpts(rest);if(!opts.length){errors.push('Line '+(i+1)+': no answer');return;}it={type:'q',prompt,answer:opts[0],wrongs:opts.slice(1),why};}
@@ -34,17 +35,28 @@ function parseDeck(text){
       const d=cut<0?{opts:[],why:{}}:splitOpts(rest.slice(cut+4));
       if(seq.length<2){errors.push('Line '+(i+1)+': a list needs at least 2 items');return;}
       it={type:t==='L'?'l':'s',prompt,seq,decoys:d.opts,why:d.why};}
-    it.note=[];cur.items.push(it);target=it;
+    it.note=[];it.concept=curC;if(curC)curC.items.push(it);cur.items.push(it);target=it;
   });
   rooms.forEach((r,ri)=>{r.idx=ri;r.items.forEach(it=>{it.id=hash(r.topic+'::'+it.type+'::'+it.prompt);it.room=r;});});
   return{rooms,errors};
 }
+{const bh=hash(window.FNPH_DECK);if(store.get('deckBase','')!==bh){const sv=store.get('deck',null);if(sv!=null){store.set('deckOld',sv);try{localStorage.removeItem('fnphraid.deck');}catch(e){}}store.set('deckBase',bh);}}
 let deckText=store.get('deck',window.FNPH_DECK);
 let deck=parseDeck(deckText);if(!deck.rooms.length){deckText=window.FNPH_DECK;deck=parseDeck(deckText);}
 let ALL_ANS=[],ALL_LIST=[];
 function indexDeck(){ALL_ANS=[];ALL_LIST=[];deck.rooms.forEach(r=>r.items.forEach(it=>{if(it.type==='q')ALL_ANS.push({t:it.answer,room:r});else it.seq.forEach(x=>ALL_LIST.push({t:x,room:r}));}));}
 indexDeck();
 let stats=store.get('stats',{}),captured=new Set(store.get('captured',[])),skipped=new Set(store.get('skip',[]));
+/* concepts: a station is a syllabus topic; each run plays one concept (summary + its questions) */
+let cdone=new Set(store.get('cdone',[]));
+const ckey=(r,c)=>r.topic+'::'+c.title;
+function pickConcept(r){
+  const cs=(r.concepts||[]).filter(c=>c.items.length);if(!cs.length)return null;
+  const next=cs.find(c=>!cdone.has(ckey(r,c)));if(next)return next;
+  // all secured once: revisit the weakest concept
+  let best=null,bm=2;cs.forEach(c=>{const m=c.items.filter(i=>stats[i.id]&&stats[i.id].box>=3).length/c.items.length;if(m<bm){bm=m;best=c;}});return best;
+}
+function conceptsDone(r){const cs=(r.concepts||[]).filter(c=>c.items.length);return cs.filter(c=>cdone.has(ckey(r,c))).length;}
 let timerOn=store.get('timer',true);const MASTER_AT=3;
 let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode2','drill');
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
@@ -57,10 +69,10 @@ const mapRooms=()=>deck.rooms.slice(0,SLOTS.length);
 /* ---------- arsenal: the gun upgrades as you master more questions (saved progress, across runs) ---------- */
 const ARSENAL=[
   {at:0, name:'Mk I Pulse',  fireRate:5,  speed:10, count:1, spread:.3,  damage:1,   piercing:0, size:24, lineWidth:2.6, color:'#ffd27a', homing:0,   armour:0},
-  {at:10,name:'Mk II Twin',  fireRate:4.5,speed:11, count:2, spread:.10, damage:1,   piercing:0, size:26, lineWidth:2.8, color:'#9dff7a', homing:0,   armour:0},
-  {at:25,name:'Mk III Plasma',fireRate:4, speed:12, count:2, spread:.10, damage:1.5, piercing:0, size:30, lineWidth:3.4, color:'#62e6ff', homing:0,   armour:1},
-  {at:50,name:'Mk IV Rail',  fireRate:3.5,speed:14, count:2, spread:.08, damage:1.5, piercing:1, size:36, lineWidth:3.6, color:'#c78bff', homing:0,   armour:1},
-  {at:90,name:'Mk V Seeker', fireRate:3,  speed:14, count:3, spread:.12, damage:2,   piercing:1, size:36, lineWidth:3.8, color:'#ff7ad9', homing:.06, armour:2}
+  {at:40,name:'Mk II Twin',  fireRate:4.5,speed:11, count:2, spread:.10, damage:1,   piercing:0, size:26, lineWidth:2.8, color:'#9dff7a', homing:0,   armour:0},
+  {at:120,name:'Mk III Plasma',fireRate:4, speed:12, count:2, spread:.10, damage:1.5, piercing:0, size:30, lineWidth:3.4, color:'#62e6ff', homing:0,   armour:1},
+  {at:300,name:'Mk IV Rail',  fireRate:3.5,speed:14, count:2, spread:.08, damage:1.5, piercing:1, size:36, lineWidth:3.6, color:'#c78bff', homing:0,   armour:1},
+  {at:700,name:'Mk V Seeker', fireRate:3,  speed:14, count:3, spread:.12, damage:2,   piercing:1, size:36, lineWidth:3.8, color:'#ff7ad9', homing:.06, armour:2}
 ];
 const totalMastered=()=>deck.rooms.reduce((n,r)=>n+masteredCount(r),0);
 function arsenalTier(){const m=totalMastered();let t=0;ARSENAL.forEach((a,i)=>{if(m>=a.at)t=i;});return t;}
@@ -373,7 +385,7 @@ R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toas
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
 const MODES=['race','fps'];
 function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':/\bOSCE\b/i.test(r.topic)?'fps':'';}
-R.modeName=()=>R.active&&R.rooms&&R.rooms[R.si]?roomMode(R.rooms[R.si]):'';
+R.modeName=()=>{if(!(R.active&&R.rooms&&R.rooms[R.si]))return'';const c=R.concept;if(c&&MODES.includes(c.mode))return c.mode;return roomMode(R.rooms[R.si]);};
 R.swarmOn=()=>R.active&&(R.phase==='travel'||((R.phase==='fight'||R.phase==='resolve')&&!R.modeName()));
 R.swarmRate=()=>R.phase==='fight'?2.2:R.phase==='travel'?1.1:1.6;
 R.aimTarget=()=>$.aimLock&&$.aimLock.alive?$.aimLock:(R.hover&&R.hover.alive?R.hover:null);
@@ -430,18 +442,20 @@ R.update=function(){
 };
 function openBriefing(){
   const r=R.rooms[R.si];
-  const fresh=r.items.filter(i=>!mastered(i)),done=r.items.filter(mastered);
+  const C=R.concept=pickConcept(r),pool=C?C.items:r.items;
+  const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
   R.phase='briefing';R.queue=mixQueue(fresh.concat(review));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*(recallOn?55:30)+review.length*(recallOn?30:15));R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
-  const m=Math.round(masteredCount(r)/r.items.length*100);
+  const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
+  const head=C?'<p class="meta">'+esc(r.topic)+' · concept '+(cs.indexOf(C)+1)+' of '+cs.length+' · '+conceptsDone(r)+' secured so far</p><h2>'+esc(C.title)+'</h2>'+(C.note.length?'<div class="note">'+noteHTML(C.note)+'</div>':''):'<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'');
   card('brief','Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
-    '<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'')+
+    head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
     '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
-    (roomMode(r)==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':roomMode(r)==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
-    roomMode(r)==='race'?'Start the run':roomMode(r)==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
+    (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
+    mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
 function fmt(sec){sec=Math.max(0,Math.ceil(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
 let tLast=performance.now();
@@ -627,8 +641,10 @@ function swarmDown(){
   },900),1000);
 }
 function stationCleared(){
-  const r=R.rooms[R.si],s=SP(r.idx);
-  captured.add(r.topic);store.set('captured',[...captured]);R.taken++;
+  const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
+  if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
+  const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
+  if(allC){captured.add(r.topic);store.set('captured',[...captured]);}R.taken++;
   $.score+=1000;synth('captured');$.rumble.level=14;
   for(let k=0;k<6;k++)setTimeout(()=>{$.explosions.push(new $.Explosion({x:s.x+rand(-60,60),y:s.y+rand(-60,60),radius:rand(30,70),hue:190,saturation:100}));$.audio.play('explosionAlt');},k*160);
   $.levelPops.push(new $.LevelPop({level:r.idx+1}));
@@ -641,13 +657,13 @@ function stationCleared(){
     timeHTML='<div class="plan"><div><b>'+fmt(R.clock)+'</b><span>your time (reading excluded)</span></div><div><b>'+fmt(R.par)+'</b><span>par</span></div><div><b class="'+(under?'win':'')+'">'+(under?'Beat par':'Over par')+'</b><span>'+(under?'+500 bonus':'no penalty')+'</span></div><div><b>'+fmt(Math.min(R.clock,prevBest||R.clock))+'</b><span>best time here</span></div></div>';
   }
   const mNow=masteredCount(r),left=r.items.filter(i=>!mastered(i));
-  let body='<p class="cq">'+esc(r.locus)+' is yours.</p>'+timeHTML+
+  let body=(C?'<p class="cq">Concept secured: '+esc(C.title)+'</p><p class="meta">'+conceptsDone(r)+' of '+csN+' concepts secured at '+esc(r.locus)+(allC?'. The whole station is yours.':'. The next run here plays the next concept.')+'</p>':'<p class="cq">'+esc(r.locus)+' is yours.</p>')+timeHTML+
     '<div class="mbar"><i style="width:'+Math.round(mNow/r.items.length*100)+'%"></i></div>'+
     '<p class="meta">'+mNow+' of '+r.items.length+' mastered here ('+(mNow-R.m0>=0?'+'+(mNow-R.m0):mNow-R.m0)+' this run) · '+(R.deaths-R.d0)+' death'+(R.deaths-R.d0===1?'':'s')+' here.</p>';
   if(left.length)body+='<div class="others"><span class="lbl">Still to master here (they come back next time)</span><ul>'+left.slice(0,8).map(it=>'<li><b>'+esc(it.prompt)+'</b><span>'+esc(it.type==='q'?it.answer:it.seq.join(' → '))+'</span></li>').join('')+(left.length>8?'<li><span>…and '+(left.length-8)+' more. See Study the stations.</span></li>':'')+'</ul></div>';
   else body+='<p>Every item here is mastered. Next time this station is just a quick review.</p>';
   const nxt=R.si+1<R.rooms.length?R.rooms[R.si+1]:null;
-  card('learn','Station taken',body,nxt?'Advance to '+nxt.locus:'Finish the raid',()=>{
+  card('learn',C&&!allC?'Concept secured':'Station taken',body,nxt?'Advance to '+nxt.locus:'Finish the raid',()=>{
     if(nxt){R.si++;R.phase='travel';objective();}else victory();
   },600);
 }
@@ -701,7 +717,7 @@ function hud(){
   updateGlobal();
   const r=R.rooms[R.si],tot=R.total||r.items.length,done=R.phase==='travel'?0:R.cleared;
   const key=[r.idx,done,tot,$.score,R.deaths,R.streak,Math.round($.hero.life*20),R.par,R.phase].join('|');if(key===hudKey)return;hudKey=key;
-  Q('#hStn').textContent='Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=r.topic;
+  Q('#hStn').textContent='Station '+(R.si+1)+' of '+R.rooms.length;Q('#hLoc').textContent=(r.idx+1)+'. '+r.locus;Q('#hTopic').textContent=R.concept?r.topic+' · '+R.concept.title:r.topic;
   Q('#hProg').style.width=(tot?done/tot*100:0)+'%';Q('#hCount').textContent=done+' / '+tot+' cleared';
   Q('#hScore').textContent=$.score.toLocaleString();Q('#hStreak').textContent='×'+Math.min(5,1+Math.floor(R.streak/3));Q('#hDeaths').textContent=R.deaths;
   Q('#hLife').style.width=Math.max(0,$.hero.life*100)+'%';

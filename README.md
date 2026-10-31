@@ -25,10 +25,21 @@ Rebuild after every change. The game is a single HTML file with no server or int
 
 Load order matters, so it is fixed in `build.py`. The global `$` is the engine namespace. Game logic is in the `R` object inside `raid.js` (`R.start`, `setupWave`, `R.carrierDown`, `R.die`, `stationCleared`, `R.pollPad`).
 
+## Syllabus coverage
+
+`src/deck.txt` is generated from **nebula-study** (`C:\Users\USER\Documents\nebula-study\data`, GitHub `Olemabu/nebula-study`) by `tools/nebula2deck.js`:
+- **20 map stations = the 20 NPMCN Part I topics** in `data/syllabus.js`. Each station keeps its FNPH locus. The 5 new loci (Admin Block, OPD Clinic, Pharmacy, Library, Records Office) are placeholders: rename them to real FNPH places for your memory palace.
+- **Concepts:** each high-yield point in `data/topics/<topic>.js` becomes a `### concept`. Its summary is the briefing, and all of its MCQs follow (all 1,783, with 4 wrong options sampled 3 at a time).
+- **OSCE:** all 59 scripts in `data/osce/stations.js` are embedded as `### OSCE:` concepts inside their related topic. Each one tests phase order, which phase a line comes from, what the examiner checks, the critical fail and viva answers. They play as the first-person ward round, or as the ambulance run in Emergency.
+- **Bonus drills:** the earlier hand-written stations are kept as `### Bonus drill:` concepts.
+- **One run = one concept.** A station is taken when all its concepts are secured. After that, runs revisit the weakest concept.
+- **To regenerate** after nebula changes: see the header of `tools/nebula2deck.js`, then rebuild.
+
 ## Deck format (`src/deck.txt`)
 
 ```
-## Station name | Topic                 <- starts a station (route order; first 15 go on the map)
+## Station name | Topic | mode          <- starts a station (map order; first 20 go on the map)
+### Concept title | mode                 <- starts a concept inside the station (one run plays one concept)
 > briefing line                          <- '>' lines under a station = briefing card
 > - bullet                               <- bullet point
 Q: question = right answer | wrong :: why it is wrong | wrong :: why | wrong :: why
@@ -46,7 +57,7 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 ## Aiming and the arsenal
 
 - **Aim assist:** the answer plate counts as part of its gunship. The cursor snaps to the nearest gunship within about 70 px and stays on it until you clearly move away. Shots lead the moving target. A shot fired at a locked or hovered answer flies past the other answers, so you never hit a wrong one by accident. Keys 1 to 4 lock on, and the lock survives small mouse movements.
-- **Arsenal:** the gun upgrades as total mastered items grow (`ARSENAL` in `src/raid.js`): Mk I Pulse (0), Mk II Twin (10), Mk III Plasma (25), Mk IV Rail (50), Mk V Seeker (90, homing rounds). From Mk III the answer gunships carry more armour. Power-ups stack on top (`src/core.js`).
+- **Arsenal:** the gun upgrades as total mastered items grow (`ARSENAL` in `src/raid.js`): Mk I Pulse (0), Mk II Twin (40), Mk III Plasma (120), Mk IV Rail (300), Mk V Seeker (700, homing rounds). From Mk III the answer gunships carry more armour. Power-ups stack on top (`src/core.js`).
 
 - **Ramming:** flying into the correct answer counts as answering it, with a "Rammed it!" toast. Flying into a wrong answer counts as choosing it, so you die and see why it was wrong.
 
