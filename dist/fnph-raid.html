@@ -100,6 +100,11 @@ details.credits pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5p
 .toast.hot{border-color:var(--pink);color:#ffd0e8}
 #hurt{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at center,rgba(255,0,40,0) 30%,rgba(255,0,40,.6) 100%)}
 #hurt.on{opacity:1}
+.answerSplash{position:absolute;inset:0;z-index:6;display:grid;place-items:center;pointer-events:none;padding:24px;background:radial-gradient(ellipse,rgba(32,230,190,.16),transparent 65%)}
+.answerSplash strong{max-width:100%;text-align:center;overflow-wrap:anywhere;font-family:var(--display);font-size:clamp(30px,6vw,76px);font-weight:700;line-height:1.08;color:#eafff4;text-transform:uppercase;text-shadow:0 0 14px #39e6b4,0 0 42px rgba(57,230,180,.65),0 3px 8px #000;animation:answerImpact 1.1s ease-out both}
+@keyframes answerImpact{0%{opacity:0;transform:scale(1.35)}14%{opacity:1;transform:scale(1)}75%{opacity:1;transform:scale(1.025)}100%{opacity:0;transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){.answerSplash strong{animation:none}}
+
 .keys{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:3;margin:0;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;text-shadow:0 1px 3px #000;pointer-events:none;line-height:1.6}
 @media (max-width:760px){.keys{display:none}}
 
@@ -271,6 +276,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <section id="play" hidden>
   <div id="stage"><canvas id="cmg"></canvas><canvas id="cfg" aria-label="Raid battlefield"></canvas></div>
   <div id="hurt"></div>
+  <div id="answerSplash" class="answerSplash" hidden role="status" aria-live="polite" aria-atomic="true"><strong id="answerSplashText"></strong></div>
   <div class="gbar" title="Overall progress"><div class="segs" id="gSegs"></div><span id="gLabel"></span></div>
   <div class="hud">
     <div class="stn"><span class="lbl" id="hStn"></span><b id="hLoc"></b><span id="hTopic"></span><div class="bar"><i id="hProg"></i></div><span class="lbl" id="hCount"></span><div class="life" title="Health"><i id="hLife"></i></div></div>
@@ -3190,6 +3196,8 @@ $.setupStates = function() {
 	$.states[ 'freeze' ] = function() { $.lt = Date.now(); };
 	$.states[ 'play' ] = function() {
 		$.updateDelta();
+		var answerDelta = $.dt;
+		if( $.raid && $.raid.answerSplash ) { $.dt *= .18; }
 		$.updateScreen();
 		$.updatePowerupTimers();
 		$.spawnEnemies();
@@ -3204,6 +3212,7 @@ $.setupStates = function() {
 		i = $.levelPops.length; while( i-- ) { $.levelPops[ i ].update( i ); }
 		i = $.bullets.length; while( i-- ) { $.bullets[ i ].update( i ); }
 		$.hero.update();
+		$.dt = answerDelta;
 		if( $.raid ) { $.raid.update(); }
 
 		$.clearScreen();
@@ -3650,6 +3659,14 @@ $.Carrier.prototype.explode=function(hue,big){
 const R=$.raid={active:false,phase:'idle'};
 let toastT=0;
 R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
+// The reward reveals the term only after the player selects its description.
+function clearAnswerSplash(){R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#answerSplashText').textContent='';}
+function showAnswerSplash(term){
+  const el=Q('#answerSplash');el.hidden=true;
+  Q('#answerSplashText').textContent=term.charAt(0).toUpperCase()+' — '+term.toUpperCase();
+  void el.offsetWidth; // restart the impact animation for consecutive correct terms
+  el.hidden=false;R.answerSplash=true;R.timer=Math.max(R.timer,1.1);
+}
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
 const MODES=['race','fps'];
@@ -3677,6 +3694,7 @@ R.leadPoint=function(c,fx,fy){
 R.lockOn=function(c){$.aimLock=c;R.lockAnchor={x:$.mouse.sx||0,y:$.mouse.sy||0};};
 
 R.start=function(rooms,si){
+  clearAnswerSplash();
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
@@ -3744,6 +3762,7 @@ function nextQuestion(){
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
+  clearAnswerSplash();
   const it=R.cur;let opts,correct,chip;
   if(it.type==='q'){opts=qOptions(it);correct=[it.answer];chip='Shoot the correct answer';}
   else{
@@ -3781,6 +3800,7 @@ R.carrierDown=function(c){
     else{it.found.push(c.text);
       if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
+    if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
     c.explode(0,false);R.die(c.text);
@@ -3797,6 +3817,7 @@ function reinforce(it){
 }
 function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
+  clearAnswerSplash();
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
@@ -3819,6 +3840,7 @@ function learnCard(it){
   card('learn',it.type==='q'?'Correct':it.type==='l'?'Procedure complete':'List complete',body,R.queue.length?'Next':'Finish station',nextQuestion,700);
 }
 R.die=function(picked){
+  clearAnswerSplash();
   const it=R.cur;R.phase='dead';R.deaths++;R.streak=0;grade(it.id,false);
   const prev=R.misses.get(it.id);R.misses.set(it.id,{item:it,pick:picked||(prev&&prev.pick)||null,n:(prev?prev.n:0)+1});
   R.deadInfo={picked,opts:R.wave?R.wave.opts.slice():[],found:(it.found||[]).slice()};
@@ -3862,6 +3884,7 @@ function respawn(){
   else if(deathMode==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
+  clearAnswerSplash();
   R.phase='swarmdead';R.deaths++;R.streak=0;$.rumble.level=25;$.audio.play('death');synth('killed');
   $.carriers.forEach(o=>{if(o.alive)o.explode(0,false);});
   $.explosions.push(new $.Explosion({x:$.hero.x,y:$.hero.y,radius:60,hue:0,saturation:0}));
@@ -3911,7 +3934,7 @@ R.pause=function(){
   Q('#cEnd').onclick=()=>{closeCard(true);debrief();};
   Q('#cHome').onclick=()=>{closeCard(true);quitToHome();};
 };
-function quitToHome(){R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
+function quitToHome(){clearAnswerSplash();R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
@@ -4685,7 +4708,7 @@ function loop(now){
   const keys=document.querySelector('#play .keys');if(keys)keys.style.visibility=(vis||(R.modeName&&R.modeName()&&R.phase!=='travel'))?'hidden':'';
   if(!vis){if(run&&!R.active)run=null;return;}
   const paused=R.paused||$.state!=='play'||!document.getElementById('cardWrap').hidden;
-  if(!paused)update(dt);
+  if(!paused)update(dt*(R.answerSplash?.18:1));
   draw();
 }
 ensureCanvas();requestAnimationFrame(loop);
@@ -4956,7 +4979,7 @@ function loop(now){
   if(vis){const keys=document.querySelector('#play .keys');if(keys)keys.style.visibility='hidden';}
   if(!vis){if(run&&!R.active)run=null;return;}
   const paused=R.paused||$.state!=='play'||!document.getElementById('cardWrap').hidden;
-  if(!paused)update(dt);
+  if(!paused)update(dt*(R.answerSplash?.18:1));
   draw();
 }
 ensureCanvas();requestAnimationFrame(loop);

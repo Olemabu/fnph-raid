@@ -100,6 +100,11 @@ details.credits pre{white-space:pre-wrap;font-family:var(--mono);font-size:11.5p
 .toast.hot{border-color:var(--pink);color:#ffd0e8}
 #hurt{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at center,rgba(255,0,40,0) 30%,rgba(255,0,40,.6) 100%)}
 #hurt.on{opacity:1}
+.answerSplash{position:absolute;inset:0;z-index:6;display:grid;place-items:center;pointer-events:none;padding:24px;background:radial-gradient(ellipse,rgba(32,230,190,.16),transparent 65%)}
+.answerSplash strong{max-width:100%;text-align:center;overflow-wrap:anywhere;font-family:var(--display);font-size:clamp(30px,6vw,76px);font-weight:700;line-height:1.08;color:#eafff4;text-transform:uppercase;text-shadow:0 0 14px #39e6b4,0 0 42px rgba(57,230,180,.65),0 3px 8px #000;animation:answerImpact 1.1s ease-out both}
+@keyframes answerImpact{0%{opacity:0;transform:scale(1.35)}14%{opacity:1;transform:scale(1)}75%{opacity:1;transform:scale(1.025)}100%{opacity:0;transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){.answerSplash strong{animation:none}}
+
 .keys{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:3;margin:0;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;text-shadow:0 1px 3px #000;pointer-events:none;line-height:1.6}
 @media (max-width:760px){.keys{display:none}}
 
@@ -271,6 +276,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 <section id="play" hidden>
   <div id="stage"><canvas id="cmg"></canvas><canvas id="cfg" aria-label="Raid battlefield"></canvas></div>
   <div id="hurt"></div>
+  <div id="answerSplash" class="answerSplash" hidden role="status" aria-live="polite" aria-atomic="true"><strong id="answerSplashText"></strong></div>
   <div class="gbar" title="Overall progress"><div class="segs" id="gSegs"></div><span id="gLabel"></span></div>
   <div class="hud">
     <div class="stn"><span class="lbl" id="hStn"></span><b id="hLoc"></b><span id="hTopic"></span><div class="bar"><i id="hProg"></i></div><span class="lbl" id="hCount"></span><div class="life" title="Health"><i id="hLife"></i></div></div>

@@ -114,3 +114,6 @@ When you stop, update section 2 (what you finished, with commit hashes) and sect
 ## Gameplay update (31 Oct 2026)
 
 User requested removal of unaided recall from gameplay. Removed reveal/rate gate and its controls across all three modes; successful gameplay choices now grade mastery directly. Existing saved recall preferences are ignored; progress is preserved. Seven mnemonic drills use `Term => description` labels, with current-letter cues and terms revealed after choosing. Includes CAGE, SAD PERSONS, ASEPTIC, SIG E CAPS, five Cs, SPIKES and the four As. Miss/reinforcement and scheduled practice remain automatic. This supersedes the recall-first descriptions above.
+
+### Answer splash reward (31 Oct 2026)
+Correct mnemonic description picks now show a central letter + term splash (for example D — DEPRESSION) for 1.1 seconds, with the existing correct-answer sound. World action slows during that reward; the resolution timer uses real gameplay time. No extra input is needed. The term remains in the completed chain. Wrong answers never trigger it; restart, next wave and exit clear it. Reduced-motion preference disables the impact scaling.

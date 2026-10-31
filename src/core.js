@@ -246,6 +246,8 @@ $.setupStates = function() {
 	$.states[ 'freeze' ] = function() { $.lt = Date.now(); };
 	$.states[ 'play' ] = function() {
 		$.updateDelta();
+		var answerDelta = $.dt;
+		if( $.raid && $.raid.answerSplash ) { $.dt *= .18; }
 		$.updateScreen();
 		$.updatePowerupTimers();
 		$.spawnEnemies();
@@ -260,6 +262,7 @@ $.setupStates = function() {
 		i = $.levelPops.length; while( i-- ) { $.levelPops[ i ].update( i ); }
 		i = $.bullets.length; while( i-- ) { $.bullets[ i ].update( i ); }
 		$.hero.update();
+		$.dt = answerDelta;
 		if( $.raid ) { $.raid.update(); }
 
 		$.clearScreen();

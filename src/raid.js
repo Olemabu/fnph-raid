@@ -402,6 +402,14 @@ $.Carrier.prototype.explode=function(hue,big){
 const R=$.raid={active:false,phase:'idle'};
 let toastT=0;
 R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
+// The reward reveals the term only after the player selects its description.
+function clearAnswerSplash(){R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#answerSplashText').textContent='';}
+function showAnswerSplash(term){
+  const el=Q('#answerSplash');el.hidden=true;
+  Q('#answerSplashText').textContent=term.charAt(0).toUpperCase()+' — '+term.toUpperCase();
+  void el.offsetWidth; // restart the impact animation for consecutive correct terms
+  el.hidden=false;R.answerSplash=true;R.timer=Math.max(R.timer,1.1);
+}
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
 const MODES=['race','fps'];
@@ -429,6 +437,7 @@ R.leadPoint=function(c,fx,fy){
 R.lockOn=function(c){$.aimLock=c;R.lockAnchor={x:$.mouse.sx||0,y:$.mouse.sy||0};};
 
 R.start=function(rooms,si){
+  clearAnswerSplash();
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
@@ -496,6 +505,7 @@ function nextQuestion(){
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
+  clearAnswerSplash();
   const it=R.cur;let opts,correct,chip;
   if(it.type==='q'){opts=qOptions(it);correct=[it.answer];chip='Shoot the correct answer';}
   else{
@@ -533,6 +543,7 @@ R.carrierDown=function(c){
     else{it.found.push(c.text);
       if(it.found.length===it.seq.length){grade(it.id,true);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
+    if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
     c.explode(0,false);R.die(c.text);
@@ -549,6 +560,7 @@ function reinforce(it){
 }
 function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
+  clearAnswerSplash();
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
@@ -571,6 +583,7 @@ function learnCard(it){
   card('learn',it.type==='q'?'Correct':it.type==='l'?'Procedure complete':'List complete',body,R.queue.length?'Next':'Finish station',nextQuestion,700);
 }
 R.die=function(picked){
+  clearAnswerSplash();
   const it=R.cur;R.phase='dead';R.deaths++;R.streak=0;grade(it.id,false);
   const prev=R.misses.get(it.id);R.misses.set(it.id,{item:it,pick:picked||(prev&&prev.pick)||null,n:(prev?prev.n:0)+1});
   R.deadInfo={picked,opts:R.wave?R.wave.opts.slice():[],found:(it.found||[]).slice()};
@@ -614,6 +627,7 @@ function respawn(){
   else if(deathMode==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
+  clearAnswerSplash();
   R.phase='swarmdead';R.deaths++;R.streak=0;$.rumble.level=25;$.audio.play('death');synth('killed');
   $.carriers.forEach(o=>{if(o.alive)o.explode(0,false);});
   $.explosions.push(new $.Explosion({x:$.hero.x,y:$.hero.y,radius:60,hue:0,saturation:0}));
@@ -663,7 +677,7 @@ R.pause=function(){
   Q('#cEnd').onclick=()=>{closeCard(true);debrief();};
   Q('#cHome').onclick=()=>{closeCard(true);quitToHome();};
 };
-function quitToHome(){R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
+function quitToHome(){clearAnswerSplash();R.active=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
