@@ -371,8 +371,8 @@ let toastT=0;
 R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
-const MODES=['race'];
-function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':'';}
+const MODES=['race','fps'];
+function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':/\bOSCE\b/i.test(r.topic)?'fps':'';}
 R.modeName=()=>R.active&&R.rooms&&R.rooms[R.si]?roomMode(R.rooms[R.si]):'';
 R.swarmOn=()=>R.active&&(R.phase==='travel'||((R.phase==='fight'||R.phase==='resolve')&&!R.modeName()));
 R.swarmRate=()=>R.phase==='fight'?2.2:R.phase==='travel'?1.1:1.6;
@@ -440,8 +440,8 @@ function openBriefing(){
     '<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'')+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
     '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
-    (roomMode(r)==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':''),
-    roomMode(r)==='race'?'Start the run':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
+    (roomMode(r)==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':roomMode(r)==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
+    roomMode(r)==='race'?'Start the run':roomMode(r)==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
 function fmt(sec){sec=Math.max(0,Math.ceil(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
 let tLast=performance.now();
@@ -479,6 +479,7 @@ function setupWave(){
   const cx=Math.max(r0+40,Math.min($.ww-r0-40,$.hero.x)),cy=Math.max(m,Math.min($.wh-m,$.hero.y));
   opts.forEach((text,i)=>{const a=a0+i*$.twopi/opts.length;$.carriers.push(new $.Carrier({text,num:i+1,x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0*.85}));});
   if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
+  if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
   Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt;
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
   if(recallOn){R.phase='recall';Q('#qChip').textContent='Recall first, then shoot';showRecall();}else R.phase='fight';
@@ -931,7 +932,7 @@ R.pollPad=function(){
   if(M){lx=dev(M.aim.x)*M.aim.sx;ly=dev(M.aim.y)*M.aim.sy;}
   else if(p.mapping==='standard'){lx=dev(2);ly=dev(3);}
   else{const pairs=[[2,3],[2,5],[3,4],[5,2],[3,2]];let bm=.2;for(const [a,b] of pairs){if(a>=p.axes.length||b>=p.axes.length)continue;if(Math.abs(padBase.v[a])>.5||Math.abs(padBase.v[b])>.5)continue;const x=dev(a),y=dev(b),mg=Math.hypot(x,y);if(mg>bm){bm=mg;lx=x;ly=y;}}}
-  const lm=Math.hypot(lx,ly);
+  const lm=Math.hypot(lx,ly);$.pad.ax=lm>.3?lx:0;$.pad.ay=lm>.3?ly:0;
   if(lm>.3&&R.active&&$.state==='play'){
     $.aimLock=null;padCur.on=false;$.mouse.moved=0;
     const want=Math.atan2(ly,lx);

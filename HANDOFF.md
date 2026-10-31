@@ -54,7 +54,7 @@ With the default death mode ("question goes back into the queue"), a wrong answe
 Arsenal tiers (`ARSENAL` in `src/raid.js`, applied in `src/core.js`) and gunship armour. Still to do: **enemy (swarm) variety by tier**, for example shielded and splitting enemies, using the `vendor/radius-raid/definitions.js` enemy types through `$.setDifficulty`. Also visual flair for each gun tier (muzzle flash, bullet trail shape).
 
 ### Task 4: Varied stage modes (large, do each as its own step)
-**Racing: DONE** (`src/mode-race.js`, the ambulance run on Emergency Resus, West Courtyard and Round Huts). Use it as the template for the next modes (see "Stage modes" in README). **Next: `fps` for the OSCE stations, then `stealth`.**
+**Racing: DONE** (`src/mode-race.js`, the ambulance run on Emergency Resus, West Courtyard and Round Huts). Use it as the template for the next modes (see "Stage modes" in README). **First person: DONE** (`src/mode-fps.js`, the ward round on Clozapine Clinic, South Ward, Courtyard Block and SE Clinic). **Next: `stealth` (007).** Ideas: sneak past guard sight-cones to reach the right answer's door, or plant the device on the correct option before the patrol turns.
 
 The player wants some stages played differently:
 - a 3D first-person shooter

@@ -54,10 +54,11 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 
 ## Stage modes
 
-A station can be played as a different mini-game. Add a third field to its deck header: `## Emergency Resus | Clozapine emergencies | race`. If there is no third field, any topic containing "emergency" plays as a race.
+A station can be played as a different mini-game. Add a third field to its deck header: `## Emergency Resus | Clozapine emergencies | race`. If there is no third field, any topic containing "emergency" plays as a race, and any topic containing "OSCE" plays as a first-person ward round.
 
 - **race: Ambulance run** (`src/mode-race.js`). This is a pseudo-3D road. Each question is a gantry of colour-coded answer lanes, and the answer text is on cards along the bottom. To pick, steer with ←/→, the left stick, the mouse, keys 1 to 4, or by tapping a card. Hold ↑ to boost (more points) or ↓ to brake (more reading time). The lane you are in when you reach the gantry is your answer. It goes through `R.carrierDown()`, so grading, drill mode and teaching cards work unchanged.
-- Planned: `fps` (first-person ward round, for OSCE stations) and `stealth` (007-style). Build each as its own `src/mode-*.js` using the same hook: `setupWave()` calls the mode's start function, and the mode calls `R.carrierDown(fake)` with the chosen option.
+- **fps: Ward round** (`src/mode-fps.js`). This is a raycast first-person ward. The answer panels walk towards you. Aim with the mouse (the screen edges turn you), ←/→ or the sticks. Fire with click, Space, F or the trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won't pick an answer. If the panels reach you, you are overrun. It is used for OSCE stations (`| fps`, or any topic that mentions OSCE).
+- Planned: `stealth` (007-style). Build each as its own `src/mode-*.js` using the same hook: `setupWave()` calls the mode's start function, and the mode calls `R.carrierDown(fake)` with the chosen option.
 
 ## Saved progress
 

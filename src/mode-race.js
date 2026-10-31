@@ -192,7 +192,7 @@ function loop(now){
   if(!cv)return;
   const vis=visible();
   cv.style.display=vis?'block':'none';
-  const keys=document.querySelector('#play .keys');if(keys)keys.style.visibility=vis?'hidden':'';
+  const keys=document.querySelector('#play .keys');if(keys)keys.style.visibility=(vis||(R.modeName&&R.modeName()&&R.phase!=='travel'))?'hidden':'';
   if(!vis){if(run&&!R.active)run=null;return;}
   const paused=R.paused||$.state!=='play'||!document.getElementById('cardWrap').hidden;
   if(!paused)update(dt);

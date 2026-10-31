@@ -318,7 +318,7 @@ S: Schneider's first-rank symptoms = Audible thoughts (thought echo) | Voices ar
 Q: Which antipsychotic is uniquely proven to reduce suicide in schizophrenia? = Clozapine | Olanzapine :: Olanzapine has strong metabolic effects but no unique anti-suicide licence | Haloperidol :: First-generation antipsychotic with high EPS; does not reduce suicide risk | Risperidone :: High EPS and prolactin; does not share clozapine's anti-suicide evidence
 > Clozapine is the only antipsychotic with FDA and international approval for reducing suicidal behaviour in schizophrenia and schizoaffective disorder.
 
-## Clozapine Clinic | OSCE: Clozapine Initiation & Blood Monitoring
+## Clozapine Clinic | OSCE: Clozapine Initiation & Blood Monitoring | fps
 > CANDIDATE BRIEF: A 28-year-old patient with treatment-resistant schizophrenia is referred after failing olanzapine and risperidone. Counsel the patient and their sister, explain the CPMS monitoring traffic lights, outline baseline tests, and take informed consent.
 > CRITICAL FAIL: Failing to explain that fever or sore throat requires an immediate emergency hospital check; or combining clozapine with carbamazepine.
 
@@ -565,7 +565,7 @@ L: ECT procedure = Informed consent | Pre-ECT work-up (examination, bloods, ECG,
 Q: Commonest cognitive side effect of ECT = Short-term memory impairment around the treatment period | Permanent loss of all memories from before ECT :: Not typical; effects are mostly around the treatment period | Impaired procedural memory (skills) :: Procedural memory is usually preserved | Lasting aphasia :: Not an ECT effect
 > Right unilateral electrode placement causes less memory impairment than bilateral, but may be slightly less effective.
 
-## South Ward | OSCE: history taking & risk
+## South Ward | OSCE: history taking & risk | fps
 > OSCE stations are marked against a checklist. Examiners reward structure, and they reward you for naming each domain out loud.
 > - Open every station the same way: introduce yourself, confirm the patient's name, explain the task, get consent, and mention confidentiality and its limits.
 > - Start with open questions, then funnel down to closed ones. Summarise back regularly. Close with a summary, the plan, and "Is there anything I haven't asked that you think is important?"
@@ -602,7 +602,7 @@ Q: In an OSCE risk assessment, asking directly about suicidal thoughts = Does no
 Q: Which is a high-intent feature of a suicide attempt? = Taking precautions against being discovered | Taking an overdose in front of family :: Acting where help is likely suggests lower intent | Calling a friend soon afterwards :: Seeking help suggests lower intent | An impulsive overdose after an argument :: Impulsive acts can still be dangerous, but planning and concealment mark higher intent
 > High-intent markers: planning, choosing a time when no one will find you, precautions against discovery, final acts (a note or will), believing the method would be lethal, and regret at surviving.
 
-## Courtyard Block | OSCE: explaining treatment
+## Courtyard Block | OSCE: explaining treatment | fps
 > Explanation stations are marked on structure and on checking understanding. Use the same frame every time:
 > - Find out what they know and what they want to know (avoid lecturing).
 > - Give information in small chunks, in plain language. Check understanding with teach-back ("Can you tell me in your own words…?").
@@ -625,7 +625,7 @@ L: OSCE: explaining a diagnosis of schizophrenia to a relative = Check consent a
 Q: Best way to check understanding in an explanation station = Ask the patient to explain it back in their own words (teach-back) | Ask "Do you have any questions?" :: This invites questions but does not check understanding | Ask "Do you understand?" :: A closed question; patients usually just say yes | Summarise the key points for them yourself :: Your summary does not show what THEY understood
 > Teach-back is the single most rewarded technique in explanation stations.
 
-## SE Clinic | OSCE: examination, capacity & communication
+## SE Clinic | OSCE: examination, capacity & communication | fps
 > Practical stations mix examination, legal reasoning and communication. Say what you are doing as you do it, so the examiner can tick it.
 
 L: OSCE: examining for extrapyramidal side effects = Introduce, consent, explain the examination | Observe at rest: tremor, abnormal movements, posture, facial expression | Tone at wrist and elbow: cogwheel or lead-pipe rigidity (use an activation manoeuvre) | Bradykinesia: finger tapping, hand opening | Gait: arm swing, shuffling, turning | Akathisia: watch for restlessness, ask about inner restlessness | Tardive dyskinesia: orofacial movements, tongue, limbs, trunk (AIMS style) | Summarise findings, offer temperature and observations if NMS is suspected ~~ Skip asking about inner restlessness :: Akathisia is partly subjective; you must ask | Test reflexes only :: Reflexes do not assess EPS | Forget to observe the tongue :: Tongue and orofacial movements are the commonest signs of tardive dyskinesia
