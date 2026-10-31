@@ -29,6 +29,13 @@ $.Bullet.prototype.update = function( i ) {
 	/*==============================================================================
 	Apply Forces
 	==============================================================================*/
+	// Mk V seeker rounds curve towards the locked answer
+	if( this.homing && this.target && this.target.alive ) {
+		var want = Math.atan2( this.target.y - this.y, this.target.x - this.x ), dd = want - this.direction;
+		while( dd > Math.PI ) dd -= Math.PI * 2;
+		while( dd < -Math.PI ) dd += Math.PI * 2;
+		this.direction += Math.max( -this.homing, Math.min( this.homing, dd ) ) * $.dt;
+	}
 	this.x += Math.cos( this.direction ) * ( this.speed * $.dt );
 	this.y += Math.sin( this.direction ) * ( this.speed * $.dt );
 	this.ex = this.x - Math.cos( this.direction ) * this.size;
@@ -57,6 +64,8 @@ $.Bullet.prototype.update = function( i ) {
 	var ci = $.carriers.length;
 	while( ci-- && !removed ) {
 		var carrier = $.carriers[ ci ];
+		// a shot fired at a locked answer flies past the other answers, so you never hit a wrong one by accident
+		if( this.target && this.target.alive && carrier !== this.target ) { continue; }
 		if( carrier.alive && $.util.distance( this.x, this.y, carrier.x, carrier.y ) <= carrier.radius + 2 ) {
 			if( this.enemiesHit.indexOf( 'c' + carrier.num ) == -1 ) {
 				this.enemiesHit.push( 'c' + carrier.num );

@@ -54,6 +54,21 @@ function mastered(it){return !!stats[it.id]&&stats[it.id].box>=MASTER_AT;}
 function masteredCount(room){return room.items.filter(mastered).length;}
 function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=(stats[it.id]?stats[it.id].box:0));return t/(room.items.length*5);}
 const mapRooms=()=>deck.rooms.slice(0,SLOTS.length);
+/* ---------- arsenal: the gun upgrades as you master more questions (saved progress, across runs) ---------- */
+const ARSENAL=[
+  {at:0, name:'Mk I Pulse',  fireRate:5,  speed:10, count:1, spread:.3,  damage:1,   piercing:0, size:24, lineWidth:2.6, color:'#ffd27a', homing:0,   armour:0},
+  {at:10,name:'Mk II Twin',  fireRate:4.5,speed:11, count:2, spread:.10, damage:1,   piercing:0, size:26, lineWidth:2.8, color:'#9dff7a', homing:0,   armour:0},
+  {at:25,name:'Mk III Plasma',fireRate:4, speed:12, count:2, spread:.10, damage:1.5, piercing:0, size:30, lineWidth:3.4, color:'#62e6ff', homing:0,   armour:1},
+  {at:50,name:'Mk IV Rail',  fireRate:3.5,speed:14, count:2, spread:.08, damage:1.5, piercing:1, size:36, lineWidth:3.6, color:'#c78bff', homing:0,   armour:1},
+  {at:90,name:'Mk V Seeker', fireRate:3,  speed:14, count:3, spread:.12, damage:2,   piercing:1, size:36, lineWidth:3.8, color:'#ff7ad9', homing:.06, armour:2}
+];
+const totalMastered=()=>deck.rooms.reduce((n,r)=>n+masteredCount(r),0);
+function arsenalTier(){const m=totalMastered();let t=0;ARSENAL.forEach((a,i)=>{if(m>=a.at)t=i;});return t;}
+function applyArsenal(announce){
+  const t=arsenalTier(),prev=R.tier;R.tier=t;$.arsenal=ARSENAL[t];
+  if(announce&&prev!=null&&t>prev)setTimeout(()=>{R.toast('Arsenal upgraded: '+ARSENAL[t].name+'. Answer gunships are armoured up too.',true);synth('mastered');},1300);
+}
+function arsenalLine(){const t=arsenalTier(),m=totalMastered(),nx=ARSENAL[t+1];return 'Arsenal: <b>'+ARSENAL[t].name+'</b>'+(nx?' · next, '+nx.name+', at '+nx.at+' mastered (you have '+m+')':' · fully upgraded');}
 const routeRooms=()=>mapRooms().filter(r=>!skipped.has(r.topic)&&r.items.length);
 function noteHTML(lines){
   if(!lines||!lines.length)return '';let h='',ul=false;
@@ -188,7 +203,7 @@ function makeLabel(text,num){
 }
 $.Carrier=function(o){
   for(const k in o)this[k]=o[k];
-  this.radius=26;this.life=this.lifeMax=3;this.hitFlag=0;this.t=Math.random()*6;this.label=makeLabel(this.text,this.num);this.vx=0;this.vy=0;this.alive=true;
+  this.radius=26;this.life=this.lifeMax=3+(($.arsenal&&$.arsenal.armour)||0);this.hitFlag=0;this.t=Math.random()*6;this.label=makeLabel(this.text,this.num);this.vx=0;this.vy=0;this.alive=true;
 };
 $.Carrier.prototype.update=function(i){
   if(!this.alive)return;
@@ -196,9 +211,11 @@ $.Carrier.prototype.update=function(i){
   this.t+=.03*$.dt;
   const sp=R.wave&&R.phase==='fight'?R.wave.speed*($.slow?.4:1):0;
   const px=-dy/d,py=dx/d,wob=Math.sin(this.t+this.num)*.35;
+  const ox0=this.x,oy0=this.y;
   this.x+=(dx/d*sp+px*wob*sp)*$.dt;this.y+=(dy/d*sp+py*wob*sp)*$.dt;
   for(const o of $.carriers){if(o===this||!o.alive)continue;const ox=this.x-o.x,oy=this.y-o.y,od=Math.hypot(ox,oy)||1;if(od<140){this.x+=ox/od*(140-od)*.02*$.dt;this.y+=oy/od*(140-od)*.02*$.dt;}}
   this.x=Math.max(this.radius,Math.min($.ww-this.radius,this.x));this.y=Math.max(this.radius,Math.min($.wh-this.radius,this.y));
+  const fdt=$.dt||1;this.vx=(this.x-ox0)/fdt;this.vy=(this.y-oy0)/fdt;
   if(R.phase==='fight'&&h.life>0&&d<h.radius+this.radius*.75)R.overrun();
 };
 $.Carrier.prototype.hit=function(dmg){
@@ -310,6 +327,7 @@ $.Carrier.prototype.render=function(){
   let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
 
+  this.plate={x:lx,y:ly,w:L.w,h:L.h};
   // Cyber plate canvas
   ctx.drawImage(L.canvas,lx,ly,L.w,L.h);
 
@@ -354,12 +372,30 @@ R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toas
 R.swarmOn=()=>R.active&&(R.phase==='travel'||R.phase==='fight'||R.phase==='resolve');
 R.swarmRate=()=>R.phase==='fight'?2.2:R.phase==='travel'?1.1:1.6;
 R.aimTarget=()=>$.aimLock&&$.aimLock.alive?$.aimLock:(R.hover&&R.hover.alive?R.hover:null);
+/* ---------- aim assist: the answer plate counts as part of the target, the nearest gunship snaps, and the current target is sticky ---------- */
+const SNAP=70,KEEP=120,PLATE_PAD=10,UNLOCK_MOVE=60;
+function inPlate(c,x,y){const p=c.plate;return!!p&&x>=p.x-PLATE_PAD&&x<=p.x+p.w+PLATE_PAD&&y>=p.y-PLATE_PAD&&y<=p.y+p.h+PLATE_PAD;}
+R.pickAt=function(x,y,prev){
+  let plateHit=null,best=null,bd=1e9;
+  $.carriers.forEach(c=>{if(!c.alive)return;if(inPlate(c,x,y)&&!plateHit)plateHit=c;const d=Math.hypot(c.x-x,c.y-y);if(d<c.radius+SNAP&&d<bd){bd=d;best=c;}});
+  if(plateHit)return plateHit;
+  if(prev&&prev.alive&&Math.hypot(prev.x-x,prev.y-y)<prev.radius+KEEP&&(!best||best===prev||Math.hypot(best.x-x,best.y-y)>Math.hypot(prev.x-x,prev.y-y)*.6))return prev;
+  return best;
+};
+/* where to shoot so the bullet meets a moving gunship */
+R.leadPoint=function(c,fx,fy){
+  const bs=($.hero&&$.hero.weapon&&$.hero.weapon.bullet&&$.hero.weapon.bullet.speed)||10;
+  let tx=c.x,ty=c.y;for(let k=0;k<3;k++){const t=Math.hypot(tx-fx,ty-fy)/bs;tx=c.x+(c.vx||0)*t;ty=c.y+(c.vy||0)*t;}
+  return{x:tx,y:ty};
+};
+R.lockOn=function(c){$.aimLock=c;R.lockAnchor={x:$.mouse.sx||0,y:$.mouse.sy||0};};
 
 R.start=function(rooms,si){
   rooms=rooms.filter(r=>r.idx<SLOTS.length&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
   Object.assign(R,{active:true,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
+  R.tier=null;applyArsenal(false);
   const s=SP(R.rooms[R.si].idx);
   if(R.si===0){$.hero.x=Math.min($.ww-30,s.x+170);$.hero.y=s.y+20;}else{const p=SP(R.rooms[R.si-1].idx);$.hero.x=p.x;$.hero.y=p.y;}
   $.screen.x=$.cw/2-$.hero.x;$.screen.y=$.ch/2-$.hero.y;
@@ -398,7 +434,7 @@ function openBriefing(){
   card('brief','Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     '<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'')+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>',
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>',
     'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
 function fmt(sec){sec=Math.max(0,Math.ceil(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
@@ -496,7 +532,7 @@ R.carrierDown=function(c){
   hud();
 };
 function gradeRecall(it){const r=recallOn?(it.rec||'missed'):'got';if(r==='got')grade(it.id,true);else if(r==='partly')grade(it.id,true,true);else grade(it.id,false);}
-function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);}}
+function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
@@ -559,6 +595,7 @@ function respawn(){
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
+  if(deathMode!=='restart')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){
   R.phase='swarmdead';R.deaths++;R.streak=0;$.rumble.level=25;$.audio.play('death');synth('killed');
@@ -724,6 +761,7 @@ R.renderWorld=function(){
 };
 R.renderAim=function(){
   const c=$.ctxmg,h=$.hero;
+  R.refreshHover();
   drawTactical(c);
   // objective arrow while travelling
   if(R.phase==='travel'){const s=SP(R.rooms[R.si].idx),dx=s.x-h.x,dy=s.y-h.y,d=Math.hypot(dx,dy);
@@ -809,9 +847,16 @@ R.minimap=function(m){
 
 /* ---------- input: mouse hover, keys, controller ---------- */
 R.onMouseMove=function(){
-  if(!R.active)return;$.aimLock=null;$.pad.aim=null;padCur.on=false;
-  let best=null,bd=1e9;$.carriers.forEach(c=>{if(!c.alive)return;const d=Math.hypot(c.x-$.mouse.x,c.y-$.mouse.y);if(d<c.radius+22&&d<bd){bd=d;best=c;}});
-  R.hover=best;
+  if(!R.active)return;$.pad.aim=null;padCur.on=false;
+  R.hover=R.pickAt($.mouse.x,$.mouse.y,R.hover);
+  // a key or controller lock survives small mouse jitter; it clears once the mouse really moves away
+  if($.aimLock){const a=R.lockAnchor||{x:0,y:0};if(R.hover!==$.aimLock&&Math.hypot(($.mouse.sx||0)-a.x,($.mouse.sy||0)-a.y)>UNLOCK_MOVE)$.aimLock=null;}
+};
+/* called every frame: keep the mouse target up to date as the gunships move */
+R.refreshHover=function(){
+  if(!R.active||$.pad.aim!=null||padCur.on)return;
+  $.mouse.x=($.mouse.sx||0)-$.screen.x;$.mouse.y=($.mouse.sy||0)-$.screen.y;
+  R.hover=R.pickAt($.mouse.x,$.mouse.y,R.hover);
 };
 let keyFire=0;
 document.addEventListener('keydown',e=>{
@@ -819,7 +864,7 @@ document.addEventListener('keydown',e=>{
   if(!Q('#cardWrap').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();closeCard();}return;}
   if(R.active&&R.phase==='recall'){if(R.rv&&!R.rv.revealed&&e.key==='Enter'){e.preventDefault();revealRecall();}else if(R.rv&&R.rv.revealed&&['1','2','3'].includes(e.key)){e.preventDefault();rateRecall({1:'got',2:'partly',3:'missed'}[e.key]);}return;}
   if(!R.active||R.phase!=='fight')return;
-  if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){$.aimLock=c;synth('lock');R.toast('Locked on '+c.num+' · '+c.text,true);}e.preventDefault();}
+  if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){R.lockOn(c);synth('lock');R.toast('Locked on '+c.num+' · '+c.text,true);}e.preventDefault();}
   else if(e.key==='Tab'){cycleLock(1);e.preventDefault();}
   else if(e.key===' '){keyFire=1;e.preventDefault();}
 });
@@ -827,7 +872,7 @@ document.addEventListener('keyup',e=>{if(e.key===' ')keyFire=0;});
 function cycleLock(dir){
   padCur.on=false;
   const live=$.carriers.filter(c=>c.alive).sort((a,b)=>a.num-b.num);if(!live.length)return;
-  const i=live.indexOf($.aimLock);$.aimLock=live[(i+dir+live.length)%live.length];synth('lock');R.toast('Locked on '+$.aimLock.num+' · '+$.aimLock.text,true);
+  const i=live.indexOf($.aimLock);R.lockOn(live[(i+dir+live.length)%live.length]);synth('lock');R.toast('Locked on '+$.aimLock.num+' · '+$.aimLock.text,true);
 }
 R.input=function(){ $.keyFire=keyFire; };
 let padPrev=[],padId='',padBase=null;const padCur={on:false,x:0,y:0};let padSens=store.get('padSens',1);
@@ -874,9 +919,11 @@ R.pollPad=function(){
     const want=Math.atan2(ly,lx);
     if($.pad.aim==null)$.pad.aim=$.hero.direction;
     const diff=((want-$.pad.aim)+$.pi*3)%$.twopi-$.pi;$.pad.aim+=diff*Math.min(1,.25*padSens*($.dt||1));
-    let best=null,bd=.21;
-    $.carriers.forEach(c=>{if(!c.alive)return;const da=Math.abs(((Math.atan2(c.y-$.hero.y,c.x-$.hero.x)-want)+$.pi*3)%$.twopi-$.pi);if(da<bd){bd=da;best=c;}});
-    R.hover=best;
+    const ang=c=>Math.abs(((Math.atan2(c.y-$.hero.y,c.x-$.hero.x)-want)+$.pi*3)%$.twopi-$.pi);
+    let best=null,bd=.34;
+    $.carriers.forEach(c=>{if(!c.alive)return;const da=ang(c);if(da<bd){bd=da;best=c;}});
+    const prev=R.hover&&R.hover.alive?R.hover:null;
+    R.hover=prev&&ang(prev)<.5&&(!best||best===prev||bd>ang(prev)*.6)?prev:best;
   }
   if(R.hover&&R.hover.alive&&$.pad.aim!=null){const ta=Math.atan2(R.hover.y-$.hero.y,R.hover.x-$.hero.x);$.pad.aim+=(((ta-$.pad.aim)+$.pi*3)%$.twopi-$.pi)*.35;}
   // fire (buttons, or a trigger that reports as an axis)

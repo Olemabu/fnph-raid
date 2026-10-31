@@ -6,6 +6,7 @@ Read this first if you are an AI picking up this project (Antigravity, Codex, Cl
 
 - **GitHub is the source of truth:** `https://github.com/Olemabu/fnph-raid` (private, branch `main`). Local copy: `C:\Users\USER\Downloads\fnph-raid-project\fnph-raid-project`. Run `git pull` before you start. Push after every finished step.
 - **Build:** run `build.bat` on Windows (PowerShell port of the build script). Use `python build.py` where Python exists. Both write `dist/fnph-raid.html`. Commit the rebuilt `dist` file with the source.
+- **Sync:** double-click `push.bat`. It pulls, commits everything and pushes. To set the commit message, write it to `.commitmsg` first. The result is written to `.last-push.txt`. This lets a tool without terminal access still push.
 - **Test URL:** `file:///C:/Users/USER/Downloads/fnph-raid-project/fnph-raid-project/dist/fnph-raid.html`
 - **Single self-contained HTML.** No frameworks, no server, no external scripts. Keep the Radius Raid MIT credit.
 - **Controller:** left stick moves, right stick turns (axis 5 = X, axis 2 = Y). Do not change it.
@@ -24,8 +25,9 @@ The player is a psychiatry resident at FNPH Barnawa preparing for the NPMCN Part
 | `ee499d4` | Graphics: interceptor ship, 2.5D map depth and lighting, neon plasma weapons, "cyber" answer gunships |
 | `f2f52f8` | "Mecha" overhaul: mobile-frame ship, tactical coordinate grid, hazard stripes, bloom lighting |
 | `e78fc00` | Deck expanded to 645 lines, 15 stations, about 93 `Q:` items. Adds the clinical arc **Schizophrenia → Clozapine initiation (OSCE) → Clozapine neutropenia emergency** and OSCE stations (history and risk, explaining treatment, examination, capacity and communication) |
+| Aim + arsenal (after `a888cd6`) | **Task 1 done:** aim assist (plate hit area, snap, sticky lock, lead aim, smart rounds that skip non-target answers). **Task 3 done (first pass):** arsenal tiers Mk I to Mk V tied to total mastery, plus armoured gunships at higher tiers. Map slots for stations 14 and 15 added. Tested headless with Playwright: in mouse aim tests on plate, near-ship and jittery cursor, the intended answer was hit every time. |
 
-Current stations (in `src/deck.txt`): Main Gate, Car Park, Main Block, NE Wing, Pink Quad (schizophrenia), Clozapine Clinic (OSCE), Emergency Resus (OSCE/emergency), U-Block, Sports Field, West Courtyard, Long Red Ward, Round Huts, South Ward (OSCE), Courtyard Block (OSCE), SE Clinic (OSCE). Only the first 13 get map slots, so stations 14 and 15 need slots in `src/mapgeo.js`. Check this.
+Current stations (in `src/deck.txt`): Main Gate, Car Park, Main Block, NE Wing, Pink Quad (schizophrenia), Clozapine Clinic (OSCE), Emergency Resus (OSCE/emergency), U-Block, Sports Field, West Courtyard, Long Red Ward, Round Huts, South Ward (OSCE), Courtyard Block (OSCE), SE Clinic (OSCE). All 15 now have map slots (`SLOTS` in `src/mapgeo.js`). Add a slot for every new station.
 
 **Teaching design the player agreed to:** OSCEs are **embedded as the next stage** after the related syllabus station, then the route returns to the syllabus. Conditions chain into their complications (for example schizophrenia → clozapine → neutropenia).
 
@@ -42,27 +44,14 @@ Current stations (in `src/deck.txt`): Main Gate, Car Park, Main Block, NE Wing, 
 
 Do one task at a time. After each: build, play-test, commit and push.
 
-### Task 1: Fix aiming (top priority, the player's main complaint)
-The player says he often knows the answer but cannot land the shot on the option he means.
+### Task 1: Fix aiming: DONE
+See "Aiming and the arsenal" in README. If the player still reports misses, tune `SNAP`, `KEEP`, `PLATE_PAD` and `UNLOCK_MOVE` near `R.pickAt` in `src/raid.js`, and the gamepad cone (`bd=.34`, hysteresis `.5`) in `R.pollPad`.
 
-Relevant code in `src/raid.js`:
-- `R.onMouseMove` (about line 811). The hover target only registers within `c.radius + 22` px of the carrier **centre**, and every mouse move clears `$.aimLock`.
-- `$.Carrier` and `Carrier.prototype.render` (about lines 189 to 340). The answer text is drawn on a holographic plate set **away from** the carrier centre, so the player aims at the text and misses.
-- `R.aimTarget` (line 356). Keys 1 to 4 lock on (line 822). Gamepad cycling is around line 828. `R.pollPad` is at line 837.
+### Task 2: Gated progression: ALREADY IN THE GAME
+With the default death mode ("question goes back into the queue"), a wrong answer re-queues the item later in the station. The station only clears when every item has been answered correctly. A toast now explains this on respawn. Behaviour: `respawn()` and `nextQuestion()` in `src/raid.js`.
 
-Suggested fix:
-- Count the label plate's rectangle as part of the hit and hover area.
-- When the cursor is near a carrier, snap aim to the nearest one (a magnetic aim-assist cone).
-- Do not drop the lock on small mouse jitter.
-- Show a clear lock reticle and the option number on each plate.
-
-Warning: the last session got stuck **re-reading lines 185 to 205, 300 to 330 and 810 to 820 over and over without editing**. Read them once, then write the change.
-
-### Task 2: Gated progression
-On a wrong answer the player can move on to the next question. The **stage does not clear until every question in it has been answered correctly**: missed items go back into the queue. See `R.carrierDown` (line 481), the queue handling near line 417 (`R.queue`), and `stationCleared` (line 573).
-
-### Task 3: Upgrades so it doesn't get boring
-Upgrade the gun, bullets and enemies as stations are cleared and mastery grows. For example: spread shot, then piercing plasma, then homing rounds; tougher or shielded enemy waves in later stations. Tie upgrades to mastery, not just time played. Weapon definitions start from `vendor/radius-raid/definitions.js`, with patched copies in `src/hero.js` and `src/bullet.js`. Do not edit the vendor files: override them in `src/`.
+### Task 3: Upgrades: FIRST PASS DONE
+Arsenal tiers (`ARSENAL` in `src/raid.js`, applied in `src/core.js`) and gunship armour. Still to do: **enemy (swarm) variety by tier**, for example shielded and splitting enemies, using the `vendor/radius-raid/definitions.js` enemy types through `$.setDifficulty`. Also visual flair for each gun tier (muzzle flash, bullet trail shape).
 
 ### Task 4: Varied stage modes (large, do each as its own step)
 The player wants some stages played differently:

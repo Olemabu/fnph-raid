@@ -28,7 +28,7 @@ Load order matters, so it is fixed in `build.py`. The global `$` is the engine n
 ## Deck format (`src/deck.txt`)
 
 ```
-## Station name | Topic                 <- starts a station (route order; first 13 go on the map)
+## Station name | Topic                 <- starts a station (route order; first 15 go on the map)
 > briefing line                          <- '>' lines under a station = briefing card
 > - bullet                               <- bullet point
 Q: question = right answer | wrong :: why it is wrong | wrong :: why | wrong :: why
@@ -42,6 +42,11 @@ Rules: exactly 4 options per `Q:` (the first is correct). Every wrong option and
 ## Controller
 
 There is a built-in profile for the user's USB Gamepad (vendor 0810, product 0001): left stick (axes 0, 1) moves, right stick turns (axis 5 = left/right, axis 2 = up/down), axis 9 is the D-pad hat. It needs the ANALOG light on. See `PROFILE` in `R.pollPad` in `src/raid.js`. Other pads use automatic detection or the in-game **Set up controller** wizard.
+
+## Aiming and the arsenal
+
+- **Aim assist:** the answer plate counts as part of its gunship. The cursor snaps to the nearest gunship within about 70 px and stays on it until you clearly move away. Shots lead the moving target. A shot fired at a locked or hovered answer flies past the other answers, so you never hit a wrong one by accident. Keys 1 to 4 lock on, and the lock survives small mouse movements.
+- **Arsenal:** the gun upgrades as total mastered items grow (`ARSENAL` in `src/raid.js`): Mk I Pulse (0), Mk II Twin (10), Mk III Plasma (25), Mk IV Rail (50), Mk V Seeker (90, homing rounds). From Mk III the answer gunships carry more armour. Power-ups stack on top (`src/core.js`).
 
 ## Saved progress
 

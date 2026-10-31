@@ -217,9 +217,12 @@ $.updateScreen = function() {
 $.updatePowerupTimers = function() {
 	if( $.powerupTimers[ 0 ] > 0 ) { if( $.hero.life < 1 ) { $.hero.life += 0.001; } if( $.hero.life > 1 ) { $.hero.life = 1; } $.powerupTimers[ 0 ] -= $.dt; }
 	if( $.powerupTimers[ 1 ] > 0 ) { $.slow = 1; $.powerupTimers[ 1 ] -= $.dt; } else { $.slow = 0; }
-	if( $.powerupTimers[ 2 ] > 0 ) { $.hero.weapon.fireRate = 2; $.hero.weapon.bullet.speed = 14; $.powerupTimers[ 2 ] -= $.dt; } else { $.hero.weapon.fireRate = 5; $.hero.weapon.bullet.speed = 10; }
-	if( $.powerupTimers[ 3 ] > 0 ) { $.hero.weapon.count = 3; $.powerupTimers[ 3 ] -= $.dt; } else { $.hero.weapon.count = 1; }
-	if( $.powerupTimers[ 4 ] > 0 ) { $.hero.weapon.bullet.piercing = 1; $.powerupTimers[ 4 ] -= $.dt; } else { $.hero.weapon.bullet.piercing = 0; }
+	// base weapon comes from the arsenal tier (earned by mastering questions); power-ups stack on top
+	var A = $.arsenal || { fireRate: 5, speed: 10, count: 1, spread: 0.3, damage: 1, piercing: 0, size: 24, lineWidth: 2.6, color: '#ffd27a', homing: 0 }, W = $.hero.weapon;
+	W.bullet.damage = A.damage; W.bullet.size = A.size; W.bullet.lineWidth = A.lineWidth; W.bullet.strokeStyle = A.color; W.homing = A.homing;
+	if( $.powerupTimers[ 2 ] > 0 ) { W.fireRate = Math.min( 2, A.fireRate ); W.bullet.speed = Math.max( 14, A.speed ); $.powerupTimers[ 2 ] -= $.dt; } else { W.fireRate = A.fireRate; W.bullet.speed = A.speed; }
+	if( $.powerupTimers[ 3 ] > 0 ) { W.count = Math.max( 3, A.count ); W.spread = 0.3; $.powerupTimers[ 3 ] -= $.dt; } else { W.count = A.count; W.spread = A.spread; }
+	if( $.powerupTimers[ 4 ] > 0 ) { W.bullet.piercing = 1; $.powerupTimers[ 4 ] -= $.dt; } else { W.bullet.piercing = A.piercing; }
 };
 $.spawnPowerup = function( x, y, force ) {
 	if( force || Math.random() < 0.1 ) {

@@ -92,8 +92,13 @@ $.Hero.prototype.update = function() {
 		Update Direction & Turn Rate for Mecha RCS
 		==============================================================================*/
 		var lock = ( $.aimLock && $.aimLock.alive ) ? $.aimLock : null;
+		// mouse aim: if the cursor is on (or near) an answer gunship, aim at it
+		if( !lock && ( $.pad.aim === null || $.pad.aim === undefined ) && $.raid && $.raid.hover && $.raid.hover.alive ) { lock = $.raid.hover; }
+		this.aimTarget = lock;
 		if( lock ) {
-			this.direction = Math.atan2( lock.y - this.y, lock.x - this.x );
+			// lead the target so the shot meets it where it will be
+			var lp = $.raid && $.raid.leadPoint ? $.raid.leadPoint( lock, this.x, this.y ) : lock;
+			this.direction = Math.atan2( lp.y - this.y, lp.x - this.x );
 		} else if( $.pad.aim !== null && $.pad.aim !== undefined ) {
 			this.direction = $.pad.aim;
 		} else {
@@ -154,7 +159,9 @@ $.Hero.prototype.update = function() {
 						size: this.weapon.bullet.size,
 						lineWidth: this.weapon.bullet.lineWidth,
 						strokeStyle: color,
-						piercing: this.weapon.bullet.piercing					
+						piercing: this.weapon.bullet.piercing,
+						homing: this.weapon.homing || 0,
+						target: this.aimTarget || ( $.pad.aim != null && $.raid && $.raid.hover && $.raid.hover.alive ? $.raid.hover : null )
 					} ) );
 				}
 			}
