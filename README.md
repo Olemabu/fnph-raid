@@ -52,6 +52,13 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 
 - **Drill mode (default):** a missed question comes straight back until you get it right, then once more 2 to 3 questions later for reinforcement. The home-screen "When I die" button cycles through drill, back into the queue, and restart station.
 
+## Stage modes
+
+A station can be played as a different mini-game. Add a third field to its deck header: `## Emergency Resus | Clozapine emergencies | race`. If there is no third field, any topic containing "emergency" plays as a race.
+
+- **race: Ambulance run** (`src/mode-race.js`). This is a pseudo-3D road. Each question is a gantry of colour-coded answer lanes, and the answer text is on cards along the bottom. To pick, steer with ←/→, the left stick, the mouse, keys 1 to 4, or by tapping a card. Hold ↑ to boost (more points) or ↓ to brake (more reading time). The lane you are in when you reach the gantry is your answer. It goes through `R.carrierDown()`, so grading, drill mode and teaching cards work unchanged.
+- Planned: `fps` (first-person ward round, for OSCE stations) and `stealth` (007-style). Build each as its own `src/mode-*.js` using the same hook: `setupWave()` calls the mode's start function, and the mode calls `R.carrierDown(fake)` with the chosen option.
+
 ## Saved progress
 
 Progress is saved in the browser's localStorage under keys starting `fnphraid.` (stats, captured stations, settings, custom deck). Saved progress is specific to the browser and file location.

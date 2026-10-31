@@ -31,7 +31,8 @@ $order = @(
     'vendor/radius-raid/textpop.js',
     'vendor/radius-raid/levelpop.js',
     'src/core.js',
-    'src/raid.js'
+    'src/raid.js',
+    'src/mode-race.js'
 )
 
 foreach ($f in $order) {

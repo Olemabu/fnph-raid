@@ -20,7 +20,7 @@ function parseDeck(text){
   text.split(/\r?\n/).forEach((raw,i)=>{
     const line=raw.trim();if(!line)return;
     if(line.startsWith('>')){const t=line.slice(1).trim();if(target){(target.note=target.note||[]).push(t);}return;}
-    if(line.startsWith('##')){const p=line.slice(2).split('|').map(s=>s.trim());cur={locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',items:[],note:[]};rooms.push(cur);target=cur;return;}
+    if(line.startsWith('##')){const p=line.slice(2).split('|').map(s=>s.trim());cur={locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',mode:(p[2]||'').toLowerCase(),items:[],note:[]};rooms.push(cur);target=cur;return;}
     if(line.startsWith('#'))return;
     const m=line.match(/^([QLS])\s*:\s*(.+)$/i);
     if(!m){errors.push('Line '+(i+1)+': start it with Q:, L:, S:, ## or >');return;}
@@ -370,7 +370,11 @@ const R=$.raid={active:false,phase:'idle'};
 let toastT=0;
 R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
-R.swarmOn=()=>R.active&&(R.phase==='travel'||R.phase==='fight'||R.phase==='resolve');
+/* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
+const MODES=['race'];
+function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':'';}
+R.modeName=()=>R.active&&R.rooms&&R.rooms[R.si]?roomMode(R.rooms[R.si]):'';
+R.swarmOn=()=>R.active&&(R.phase==='travel'||((R.phase==='fight'||R.phase==='resolve')&&!R.modeName()));
 R.swarmRate=()=>R.phase==='fight'?2.2:R.phase==='travel'?1.1:1.6;
 R.aimTarget=()=>$.aimLock&&$.aimLock.alive?$.aimLock:(R.hover&&R.hover.alive?R.hover:null);
 /* ---------- aim assist: the answer plate counts as part of the target, the nearest gunship snaps, and the current target is sticky ---------- */
@@ -415,7 +419,7 @@ R.update=function(){
   if(R.phase==='travel'){
     const s=SP(R.rooms[R.si].idx);
     if(Math.hypot($.hero.x-s.x,$.hero.y-s.y)<120)openBriefing();
-  }else if(R.phase==='fight'&&R.wave){
+  }else if(R.phase==='fight'&&R.wave&&$.carriers.length){
     const near=$.carriers.filter(c=>c.alive).reduce((m,c)=>Math.min(m,Math.hypot(c.x-$.hero.x,c.y-$.hero.y)),1e9);
     R.wave.t=Math.max(0,Math.min(1,1-(near-60)/(R.wave.r0-60)));
     Q('#qEta').style.transform='scaleX('+(1-R.wave.t).toFixed(3)+')';
@@ -435,8 +439,9 @@ function openBriefing(){
   card('brief','Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     '<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'')+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>',
-    'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
+    (roomMode(r)==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':''),
+    roomMode(r)==='race'?'Start the run':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
 function fmt(sec){sec=Math.max(0,Math.ceil(sec));return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
 let tLast=performance.now();
@@ -473,9 +478,11 @@ function setupWave(){
   const a0=Math.random()*$.twopi,m=r0*.85+60;
   const cx=Math.max(r0+40,Math.min($.ww-r0-40,$.hero.x)),cy=Math.max(m,Math.min($.wh-m,$.hero.y));
   opts.forEach((text,i)=>{const a=a0+i*$.twopi/opts.length;$.carriers.push(new $.Carrier({text,num:i+1,x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0*.85}));});
+  if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
   Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.prompt;
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
   if(recallOn){R.phase='recall';Q('#qChip').textContent='Recall first, then shoot';showRecall();}else R.phase='fight';
+  if(R.modeName()==='race'){R.wave.chip=it.type==='q'?'Drive into the correct lane':chip.replace(/^Procedure · shoot/,'Procedure · drive through');if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
   synth('wave');hud();
 }
 /* ---------- recall first: produce it yourself before the options open ---------- */
@@ -596,7 +603,7 @@ R.deathCard=function(){
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
   body+='<p class="meta">'+(deathMode==='restart'?'This station restarts from the beginning.':deathMode==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
-  card('death',picked?'Killed':'Overrun',body,'Respawn',respawn,2500);
+  card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
   const it=R.cur;it.found=[];

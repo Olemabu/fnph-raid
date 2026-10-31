@@ -332,7 +332,7 @@ Q: CPMS Blood Monitoring Thresholds: When does a count require RED ALERT immedia
 Q: What is the management if a patient on Clozapine misses doses for 48 hours or more? = Restart at 12.5 mg once or twice daily and re-titrate | Resume at their previous full maintenance dose :: Resuming a full dose after 48h carries high risk of fatal collapse, severe hypotension and seizures | Double the next dose to compensate :: Extremely dangerous; clozapine must be re-titrated from 12.5 mg | Switch immediately to another antipsychotic :: Missing 48 hours only requires safe re-titration, not abandonment of effective therapy
 > Because tolerance to alpha-1 adrenergic and histaminic blockade is rapidly lost, missing ≥48 hours requires restarting at 12.5 mg and re-titrating to prevent syncope and cardiac arrest.
 
-## Emergency Resus | OSCE / Emergency: Clozapine Neutropenia & Red Alert Protocol
+## Emergency Resus | OSCE / Emergency: Clozapine Neutropenia & Red Alert Protocol | race
 > CANDIDATE BRIEF: Week 8 of Clozapine therapy. The patient presents to casualty with a temperature of 38.6°C, shivering, and a sore throat. Urgent FBC reveals: WBC 2.2 × 10⁹/L, Absolute Neutrophil Count (ANC) 850/mm³.
 > CRITICAL FAIL: Reducing the clozapine dose instead of immediately stopping it; or discharging the patient with oral antipyretics.
 
@@ -435,7 +435,7 @@ Q: Mood stabiliser that needs slow titration because of rash (Stevens-Johnson) =
 Q: Carbamazepine commonly causes which electrolyte problem? = Hyponatraemia (SIADH) | Hypernatraemia :: The opposite: carbamazepine causes hyponatraemia | Hyponatraemia through a diuretic effect :: The mechanism is SIADH (water retention), not diuresis | Hypokalaemia :: Not typical of carbamazepine
 > Carbamazepine also induces liver enzymes (it lowers levels of the contraceptive pill and many other drugs) and can cause agranulocytosis. Screen for HLA-B*1502 in people of Asian ancestry.
 
-## West Courtyard | Antipsychotic emergencies
+## West Courtyard | Antipsychotic emergencies | race
 > Three reactions you must not miss:
 > - NMS: dopamine blockade, slow onset over days. Lead-pipe rigidity, high fever, autonomic instability, confusion, very high CK.
 > - Serotonin syndrome: serotonin excess, fast onset within 24 hours. Clonus, hyperreflexia, tremor, agitation, diarrhoea, dilated pupils.
@@ -530,7 +530,7 @@ S: Normal pressure hydrocephalus triad = Gait disturbance | Urinary incontinence
 L: Delirium management = Identify and treat the underlying cause | Review and stop offending drugs | Non-drug measures: reorientation, lighting, family, sleep | Short-term low-dose antipsychotic only if distressed or a risk | Follow up cognition after recovery ~~ Start an antipsychotic first :: Treat the cause first; drugs are a last resort | Routine benzodiazepines :: They can worsen delirium (except alcohol withdrawal) | Physical restraint :: Avoid; it worsens agitation and injury risk
 > Common causes: infection, drugs (anticholinergics, opioids, sedatives), metabolic problems, hypoxia, urinary retention, constipation, pain, withdrawal.
 
-## Round Huts | Emergency protocols
+## Round Huts | Emergency protocols | race
 > Emergencies are examined as sequences. The same principles run through all of them: safety first, the least restrictive option, treat the medical cause, monitor, document, and debrief.
 
 L: Rapid tranquillisation steps = Verbal de-escalation | Offer oral medication | IM medication (e.g. lorazepam, or haloperidol with promethazine) | Monitor vital signs afterwards | Debrief patient and staff ~~ Physical restraint first :: Use the least restrictive option first | Electroconvulsive therapy :: Not part of rapid tranquillisation | IV haloperidol first :: Start with de-escalation, then oral, then IM
