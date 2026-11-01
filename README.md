@@ -138,3 +138,5 @@ These explicit loadouts apply only to operation runs. Starting a campaign or a l
 
 ## Startup downloads
 The menu displays a loading message while the embedded syllabus/game downloads, and launch controls stay disabled until initialization finishes. If the response is interrupted, use Retry download to request a fresh copy. Retrying does not clear saved progress. `src/startup.js` runs before the syllabus payload and the build signals readiness after all game modules load.
+
+The executable bundle and syllabus are compressed inside the HTML and unpacked locally by `src/unpack.js` using DecompressionStream. This reduces the self-contained file size while preserving offline operation in supported browsers. No external runtime files are fetched. A missing decompression capability produces a visible browser-update message.
