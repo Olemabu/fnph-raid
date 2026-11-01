@@ -472,7 +472,7 @@ R.start=function(rooms,si){
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
   showScreen('play');$.resizecb();$.reset();
-  Object.assign(R,{active:true,concept:null,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
+  Object.assign(R,{lastAnswer:null,retryResume:null,active:true,concept:null,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
   R.tier=null;applyArsenal(false);
   const s=SP(R.rooms[R.si].idx);
   if(R.si===0){$.hero.x=Math.min($.ww-30,s.x+170);$.hero.y=s.y+20;}else{const p=SP(R.rooms[R.si-1].idx);$.hero.x=p.x;$.hero.y=p.y;}
@@ -540,8 +540,8 @@ function insertMcqRepeat(it){
 }
 function nextQuestion(){
   const eligible=R.queue.filter(it=>!mastered(it));R.total=Math.max(R.cleared,R.total-(R.queue.length-eligible.length));R.queue=eligible;
-  if(!R.queue.length){stationCleared();return;}
-  R.cur=R.queue.shift();R.cur.found=[];setupWave();
+  if(!R.queue.length){if(R.lastAnswer){R.phase='reviewEnd';card('learn','Questions complete','<p>You can retry the last MCQ or mark it as guessed before finishing.</p>','Finish question set',()=>{R.lastAnswer=null;stationCleared();},0);}else stationCleared();return;}
+  R.cur=R.queue.shift();R.cur.found=R.retryResume&&R.retryResume.it===R.cur?R.retryResume.found:[];if(R.retryResume&&R.retryResume.it===R.cur)R.retryResume=null;setupWave();
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
@@ -576,9 +576,9 @@ function setupWave(){
   synth('wave');hud();
 }
 R.carrierDown=function(c){
-  const it=R.cur,ok=R.wave.correct.includes(c.text);R.answered++;R.wasMastered=mastered(it);
+  const it=R.cur,ok=R.wave.correct.includes(c.text);R.lastAnswer=ok&&it.type==='q'?{it,stats:stats[it.id]?{...stats[it.id]}:null,streak:R.streak,points:0,si:R.si}:null;R.answered++;R.wasMastered=mastered(it);
   if(ok){
-    R.correct++;R.streak++;const mult=Math.min(5,1+Math.floor(R.streak/3)),pts=Math.round((150+250*(1-R.wave.t))*mult);$.score+=pts;
+    R.correct++;R.streak++;const mult=Math.min(5,1+Math.floor(R.streak/3)),pts=Math.round((150+250*(1-R.wave.t))*mult);$.score+=pts;if(R.lastAnswer)R.lastAnswer.points=pts;
     c.explode(190,true);$.textPops.push(new $.TextPop({x:c.x,y:c.y,value:pts,hue:190,saturation:100,lightness:70}));
     $.carriers.forEach((o,k)=>{if(o!==c&&o.alive)setTimeout(()=>{if(o.alive)o.explode(20,false);},140+k*110);});
     $.spawnPowerup(c.x,c.y,true);$.rumble.level=10;synth('correct');
@@ -594,6 +594,29 @@ R.carrierDown=function(c){
   }
   hud();
 };
+// One-step MCQ correction: preserve the unfinished next question when revisiting.
+R.canReconsider=()=>!!(R.active&&!R.paused&&R.lastAnswer&&R.lastAnswer.si===R.si&&['fight','resolve','reviewEnd'].includes(R.phase));
+R.reconsider=function(guessed){
+ if(!R.canReconsider())return;
+ const last=R.lastAnswer,it=last.it,current=R.cur,wasCurrent=current===it&&R.phase!=='fight';
+ R.lastAnswer=null;
+ if(last.stats)stats[it.id]={...last.stats};else delete stats[it.id];
+ if(guessed){const s=st(it.id);s.mcqDone=false;s.mcqRemaining=3;s.box=0;s.guessed=(s.guessed||0)+1;}
+ store.set('stats',stats);R.correct=Math.max(0,R.correct-1);R.answered=Math.max(0,R.answered-1);R.cleared=Math.max(0,R.cleared-1);R.streak=last.streak;$.score=Math.max(0,$.score-last.points);
+ if(R.campaign&&R.campaign.undoItem)R.campaign.undoItem(it);
+ if(!Q('#cardWrap').hidden)closeCard(true);
+ clearAnswerSplash();$.mouse.down=0;$.bullets.length=0;$.aimLock=null;applyArsenal(false);
+ if(guessed){
+  const before=R.queue.length;R.queue=R.queue.filter(q=>q.id!==it.id);for(let n=0;n<3;n++)insertMcqRepeat(it);R.total+=R.queue.length-before;
+  if(wasCurrent||R.phase==='reviewEnd'){R.phase='fight';nextQuestion();}
+  R.toast('Marked as guessed · three random repeats scheduled.',true);
+ }else{
+  if(!wasCurrent&&R.phase==='fight'){R.retryResume={it:current,found:(current.found||[]).slice()};R.queue.unshift(current);}
+  R.cur=it;it.found=[];R.phase='fight';setupWave();
+  R.toast('Retry the previous MCQ · its last credit was reversed.',true);
+ }
+ $.setState('play');hud();
+};
 /* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
 function reinforce(it){
   if(it.type==='q')return;
@@ -603,7 +626,7 @@ function reinforce(it){
   R.queue.splice(pos,0,it);R.total++;
   setTimeout(()=>R.toast('Got it. It comes back once more after '+pos+' more question'+(pos===1?'':'s')+' to lock it in.',true),1100);
 }
-function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
+function newlyMastered(it){if(!R.wasMastered&&mastered(it)){setTimeout(()=>{if(!mastered(it))return;R.toast('Mastered! This one drops out of future runs.',true);synth('mastered');},500);applyArsenal(true);}}
 function afterCorrect(){
   clearAnswerSplash();
   const it=R.cur;

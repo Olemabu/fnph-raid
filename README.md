@@ -151,3 +151,6 @@ Racing, 007 infiltration and the first-person ward shooter have been removed. Al
 
 ## MCQ repetition rule
 An MCQ appears once and retires if answered correctly. A failed MCQ is inserted three times at random points among the remaining questions. Each correct repeat reduces its saved outstanding count; another miss resets the count to three without adding duplicate batches. Unfinished repeats survive reload. Procedures and list drills retain their previous mastery rule.
+
+## Reconsider an answer
+During gameplay, Back / Retry reopens the last correctly answered MCQ with shuffled answer positions and reverses its last mastery/score credit. The interrupted question resumes afterward. Guessed it instead schedules three random repeats and keeps the current question running. These controls remain available on the final-question confirmation before finishing the set, and disable after use until another correct MCQ.
