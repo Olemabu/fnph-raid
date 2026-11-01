@@ -11,6 +11,7 @@ $deck = J('src/deck.txt')
 $deckJson = ($deck | ConvertTo-Json -Compress) -replace '</', '<\/'
 
 $parts = [System.Collections.Generic.List[string]]::new()
+$parts.Add("<script>/* Startup download status */`n" + (J('src/startup.js')) + "`n</script>")
 $parts.Add('<script>var $ = {};</script>')
 $parts.Add("<script>window.FNPH_DECK = $deckJson;</script>")
 $parts.Add("<script>/* jsfxr (sound synthesis), wrapped so its globals stay private */`n(function(){`n" + (J('vendor/radius-raid/jsfxr.js')) + "`nwindow.jsfxr = jsfxr;`n})();</script>")
@@ -46,6 +47,8 @@ foreach ($f in $order) {
     $content = J($f)
     $parts.Add("<script>/* $f */`n$content`n</script>")
 }
+
+$parts.Add('<script>window.FNPHBoot.finish();</script>')
 
 $scripts = $parts -join "`n"
 $shell = J('src/shell.html')
