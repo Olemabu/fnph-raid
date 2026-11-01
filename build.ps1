@@ -35,7 +35,6 @@ $order = @(
     'src/mode-race.js',
     'src/mode-fps.js',
     'src/mecha.js',
-    'src/mecha3d.js',
     'src/campaign.js'
 )
 

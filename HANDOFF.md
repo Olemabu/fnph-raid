@@ -139,3 +139,6 @@ Reproduced stalled external-font startup using the deployed HTML. Removed Google
 ### Real 3D mech model (1 Nov 2026)
 User clarified HALO meant 3D mechanical detail, not colours. Added original dependency-free WebGL mesh rendering for the mecha in `src/mecha3d.js`: bevelled hard-surface armour, joint housings, weapon barrels, frame-specific hardware, lighting, emissive elements and pointer-controlled hangar viewpoint. It renders in hangar/loadout/combat through the shared drawFrame interface. The battlefield remains 2D. Do not call this HALO-equivalent or a full 3D engine. Fallback retains Canvas playability if WebGL is absent/lost. Source build registration added to both Python and PowerShell paths. Returned command UI highlights to existing project gold instead of the imposed military-green accent.
 Validated real WebGL availability/rendering, hangar viewpoint change, direct combat deployment, correct-answer progression and optional briefing resume in Chromium with external requests blocked.
+
+### Ship shape reverted (1 Nov 2026)
+At the user’s request, restored the previous vector ship/mecha renderer by removing the 3D override from both build paths. Startup fixes, direct deployment, war map, early refits and mastery retirement are unchanged. The unselected 3D prototype remains in source history/files but is not loaded.
