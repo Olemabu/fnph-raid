@@ -207,7 +207,7 @@ function draw(){
   // tracers
   r.tracers.forEach(q=>{c.strokeStyle=q.col;c.globalAlpha=q.life/6;c.lineWidth=3;c.beginPath();c.moveTo(q.x0,q.y0);c.lineTo(q.x1,q.y1);c.stroke();c.globalAlpha=1;});
   // gun
-  const frame=R.frames?R.frames[R.campaign?R.campaign.frameTier():Math.min(4,R.tier||0)]:null,gc=frame?frame.core:($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
+  const frame=R.frames?(R.campaign?R.campaign.frameLook():R.frames[Math.min(4,R.tier||0)]):null,gc=frame?frame.core:($.arsenal&&$.arsenal.color)||'#ffd27a',gx=W*.62,gy=H*.86+r.recoil*14;
   const gs=Math.min(W,H*1.6)/1000;
   c.fillStyle='#141a26';c.beginPath();c.moveTo(gx-90*gs,H+10);c.lineTo(gx-34*gs,gy-20*gs);c.lineTo(gx+40*gs,gy-20*gs);c.lineTo(gx+120*gs,H+10);c.closePath();c.fill();
   c.fillStyle='#2c3647';c.beginPath();c.moveTo(gx-26*gs,gy-20*gs);c.lineTo(gx-14*gs,gy-110*gs);c.lineTo(gx+22*gs,gy-110*gs);c.lineTo(gx+34*gs,gy-20*gs);c.closePath();c.fill();

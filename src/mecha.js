@@ -14,7 +14,7 @@ const line=(c,p,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();p.forEa
 function glow(c,x,y,r,col){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'transparent');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}
 function plate(c,pts,f){const yy=pts.map(p=>p[1]),g=c.createLinearGradient(0,Math.min(...yy),20,Math.max(...yy)+1);g.addColorStop(0,f.light);g.addColorStop(.23,f.metal);g.addColorStop(1,f.ink);poly(c,pts,g,f.metal);const a=pts[0],b=pts[1];line(c,[[a[0]+2,a[1]+2],[b[0]-2,b[1]+2]],f.light,1.6);}
 R.drawFrame=function(c,x,y,scale,tier,time,topDown,heading,recoil){
- const f=FRAMES[Math.max(0,Math.min(4,tier|0))];c.save();c.translate(x,y);c.scale(scale,scale);
+ const f=R.campaign&&tier===R.campaign.frameTier()?R.campaign.frameLook():FRAMES[Math.max(0,Math.min(4,tier|0))];c.save();c.translate(x,y);c.scale(scale,scale);
  if(topDown){
   c.rotate(heading||0);c.shadowColor=f.core;c.shadowBlur=10;
   for(const s of [-1,1]){

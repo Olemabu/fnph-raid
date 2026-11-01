@@ -54,19 +54,19 @@ let stats=store.get('stats',{}),captured=new Set(store.get('captured',[])),skipp
 let cdone=new Set(store.get('cdone',[]));
 const ckey=(r,c)=>r.topic+'::'+c.title;
 function pickConcept(r){
-  const cs=(r.concepts||[]).filter(c=>c.items.length);if(!cs.length)return null;
+  const cs=(r.concepts||[]).filter(c=>c.items.some(i=>!mastered(i)));if(!cs.length)return null;
   const next=cs.find(c=>!cdone.has(ckey(r,c)));if(next)return next;
   // all secured once: revisit the weakest concept
   let best=null,bm=2;cs.forEach(c=>{const m=c.items.filter(mastered).length/c.items.length;if(m<bm){bm=m;best=c;}});return best;
 }
 function conceptsDone(r){const cs=(r.concepts||[]).filter(c=>c.items.length);return cs.filter(c=>cdone.has(ckey(r,c))).length;}
-let timerOn=store.get('timer',true);const MASTER_AT=4;
+let timerOn=store.get('timer',true);const MASTER_AT=3;
 let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode2','drill');
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 /* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
 const SRS_DAYS=[0,1,3,7,16,35];
 function grade(id,ok){const s=st(id);s.seen++;if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}store.set('stats',stats);}
-function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
+function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return !mastered(it)&&s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
 function reviewRoom(){
   const items=dueItems(30);if(!items.length)return null;
   const cnt={};items.forEach(it=>cnt[it.room.idx]=(cnt[it.room.idx]||0)+1);
@@ -100,7 +100,7 @@ function routeRooms(){
   const rr=mapRooms().filter(r=>!skipped.has(r.topic)&&r.items.length);
   if(routeOrder==='plan'){const k=r=>{const i=PLAN_ORDER.indexOf(r.topic);return i<0?99:i;};return rr.slice().sort((a,b)=>k(a)-k(b));}
   if(routeOrder==='weak')return rr.slice().sort((a,b)=>mastery(a)-mastery(b));
-  if(routeOrder==='due'){const now=Date.now(),d=r=>r.items.filter(it=>stats[it.id]&&stats[it.id].seen&&(stats[it.id].due||0)<=now).length;return rr.slice().sort((a,b)=>d(b)-d(a));}
+  if(routeOrder==='due'){const now=Date.now(),d=r=>r.items.filter(it=>!mastered(it)&&stats[it.id]&&stats[it.id].seen&&(stats[it.id].due||0)<=now).length;return rr.slice().sort((a,b)=>d(b)-d(a));}
   return rr;
 }
 function noteHTML(lines){
@@ -476,9 +476,9 @@ function openBriefing(){
   const C=R.concept=r.missionConcept||pickConcept(r),basePool=C?C.items:r.items,
     pool=R.campaignRun&&R.campaign?R.campaign.missionItems(basePool):basePool;
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
-  const review=shuffle(done).slice(0,Math.min(fresh.length?2:3,done.length));
-  R.phase='briefing';R.queue=mixQueue(fresh.concat(review));
-  if(R.campaignRun&&r.review)R.queue=mixQueue(pool);
+  const review=[];
+  R.phase='briefing';R.queue=mixQueue(fresh);
+  if(R.campaignRun&&r.review)R.queue=mixQueue(pool.filter(i=>!mastered(i)));
   if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
@@ -487,7 +487,7 @@ function openBriefing(){
   card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 4 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
     (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
     mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
@@ -504,6 +504,7 @@ function timerLoop(now){
 }
 requestAnimationFrame(timerLoop);
 function nextQuestion(){
+  const eligible=R.queue.filter(it=>!mastered(it));R.total=Math.max(R.cleared,R.total-(R.queue.length-eligible.length));R.queue=eligible;
   if(!R.queue.length){stationCleared();return;}
   R.cur=R.queue.shift();R.cur.found=[];setupWave();
 }
@@ -548,6 +549,7 @@ R.carrierDown=function(c){
     else{it.found.push(c.text);Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');
       if(it.found.length===it.seq.length){grade(it.id,true);if(R.campaign)R.campaign.recordItem(it);R.cleared++;reinforce(it);R.phase='resolve';R.timer=.9;R.after='list';newlyMastered(it);}
       else{R.phase='resolve';R.timer=.6;R.after='step';Q('#qChain').innerHTML=it.found.map(x=>'<span>'+esc(x)+'</span>').join('');}}
+    if(R.campaign)R.campaign.onCorrect();
     if(it.clues&&it.clues[c.text])showAnswerSplash(c.text);
     R.toast((c.rammed?'Rammed it! ':'')+(it.type==='q'?'Correct: ':'Correct step: ')+c.text,true);
   }else{
@@ -557,7 +559,7 @@ R.carrierDown=function(c){
 };
 /* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
 function reinforce(it){
-  if((!R.campaignRun&&deathMode!=='drill')||!it.drillMiss)return;
+  if(mastered(it)||(!R.campaignRun&&deathMode!=='drill')||!it.drillMiss)return;
   it.drillMiss=false;
   const pos=Math.min(R.queue.length,2+Math.floor(Math.random()*2));
   R.queue.splice(pos,0,it);R.total++;
@@ -623,7 +625,7 @@ R.deathCard=function(){
 };
 function respawn(){
   const it=R.cur,dm=R.campaignRun?'drill':deathMode;it.found=[];
-  if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items);R.cleared=0;}
+  if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items.filter(i=>!mastered(i)));R.total=R.queue.length;R.cleared=0;}
   else if(dm==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
@@ -663,7 +665,7 @@ function stationCleared(){
     '<div class="mbar"><i style="width:'+Math.round(mNow/r.items.length*100)+'%"></i></div>'+
     '<p class="meta">'+mNow+' of '+r.items.length+' mastered here ('+(mNow-R.m0>=0?'+'+(mNow-R.m0):mNow-R.m0)+' this run) · '+(R.deaths-R.d0)+' death'+(R.deaths-R.d0===1?'':'s')+' here.</p>';
   if(left.length)body+='<div class="others"><span class="lbl">Still to master here (they come back next time)</span><ul>'+left.slice(0,8).map(it=>'<li><b>'+esc(it.prompt)+'</b><span>'+esc(it.type==='q'?it.answer:it.seq.join(' → '))+'</span></li>').join('')+(left.length>8?'<li><span>…and '+(left.length-8)+' more. See Study the stations.</span></li>':'')+'</ul></div>';
-  else body+='<p>Every item here is mastered. Next time this station is just a quick review.</p>';
+  else body+='<p>Every item here is mastered and retired from gameplay.</p>';
   if(R.onCampaignClear&&R.onCampaignClear())return;
   const nxt=R.si+1<R.rooms.length?R.rooms[R.si+1]:null;
   card('learn',C&&!allC?'Concept secured':'Station taken',body,nxt?'Advance to '+nxt.locus:'Finish the raid',()=>{
@@ -945,7 +947,7 @@ R.pollPad=function(){
   const anyFireEdge=fireBtns.some(edge)||[0,1,2,3].some(edge),anyPauseEdge=pauseBtns.some(edge);
   // overlays and menus: any fire or pause button presses the main button
   if(!Q('#cardWrap').hidden){if(anyFireEdge||anyPauseEdge)closeCard();padPrev=cur;return;}
-  {const scr=['home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
+  {const scr=['warRoom','home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
    if(scr){let nx=0,ny=0;if(M){nx=dev(M.drive.x)*M.drive.sx;ny=dev(M.drive.y)*M.drive.sy;}else{nx=dev(0);ny=dev(1);}
      if(cur[14])nx=-1;if(cur[15])nx=1;if(cur[12])ny=-1;if(cur[13])ny=1;
      {const hi=M&&M.hat!=null?M.hat:(p.axes.length>9?9:null);if(hi!=null){const h=p.axes[hi];const H=[[-1,0,-1],[-.71,1,-1],[-.43,1,0],[-.14,1,1],[.14,0,1],[.43,-1,1],[.71,-1,0],[1,-1,-1]];for(const [v,hx,hy] of H)if(Math.abs(h-v)<.08){nx=hx;ny=hy;}}}
@@ -953,9 +955,9 @@ R.pollPad=function(){
      const now=performance.now();
      if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
      if(!dir){navLast='';navRep=false;}
-     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
+     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
-     else if(anyPauseEdge){if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(anyPauseEdge){if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
   // drive
@@ -1037,7 +1039,7 @@ function renderWiz(p){
 function padStatus(){const el=Q('#padStatus');if(el){el.textContent=padId?'Controller connected: '+padId.replace(/\(.*?\)/g,'').trim().slice(0,46)+(padMap&&padMap.id===padId?' · your custom layout is set':(/0810/.test(padId)&&/0001/.test(padId)?' · your controller profile is loaded: left stick moves, right stick turns. Keep the ANALOG light on.':' · default: left stick moves, right stick turns. If the right stick does nothing, press the ANALOG button on the controller (red light on).')):'No controller detected. Plug it in and press a button.';el.classList.toggle('on',!!padId);}}
 
 /* ================= Screens ================= */
-const SCREENS=['home','play','walk','edit','debrief'];
+const SCREENS=['home','warRoom','play','walk','edit','debrief'];
 function showScreen(id){SCREENS.forEach(s=>Q('#'+s).hidden=s!==id);if(id==='play')setTimeout(()=>$.resizecb(),0);window.scrollTo(0,0);}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{renderHome();showScreen(b.dataset.go);}));
 function alertHome(msg){renderHome();showScreen('home');const p=document.createElement('p');p.className='errs';p.textContent=msg;Q('#homeMsg').appendChild(p);setTimeout(()=>p.remove(),4000);}
@@ -1230,7 +1232,7 @@ function drawTactical(ctx){
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
   ctx.restore();
 }
-R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
+R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 window.addEventListener('load',()=>{
   $.init();buildMap();renderHome();showScreen('home');
