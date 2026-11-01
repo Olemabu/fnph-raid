@@ -58,7 +58,7 @@ function visible(){return R.active&&R.modeName&&R.modeName()==='fps'&&['fight','
 const wrapA=a=>{while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;};
 
 function start(wave){
-  ensureCanvas();
+  ensureCanvas();if(R.ensureCombatAudio)R.ensureCombatAudio();
   const n=wave.opts.length,dur=Math.max(12,(wave.r0-60)/(wave.speed*60));
   mouse.down=false;
   const facing=-Math.PI/2,prev=run;
@@ -66,7 +66,7 @@ function start(wave){
   const t=wave.opts.map((text,i)=>{const a=facing+(n>1?-spread/2+spread*i/(n-1):0)+(Math.random()-.5)*.12;
     return{i,text,a0:a,x:PX+Math.cos(a)*START,y:PY+Math.sin(a)*START,d:START,hp:HP,alive:true,flash:0,bob:Math.random()*6};});
   run={n,t,correct:wave.correct.slice(),dur,el:0,ang:prev?prev.ang:facing,done:false,result:null,
-       lock:null,keyAim:true,cool:0,recoil:0,tracers:[],shake:0,flash:0,hx:$.hero.x,hy:$.hero.y,speed:(START-1.3)/dur};
+       poseTime:prev?prev.poseTime:0,poseSway:0,previousAngle:prev?prev.ang:facing,reload:0,lock:null,keyAim:true,cool:0,recoil:0,tracers:[],shake:0,flash:0,hx:$.hero.x,hy:$.hero.y,speed:(START-1.3)/dur};
   $.enemies.length=0;$.carriers.length=0;
 }
 R.fpsStart=start;
@@ -74,7 +74,8 @@ R.fpsStart=start;
 function update(dt){
   const r=run;if(!r)return;
   $.hero.x=r.hx;$.hero.y=r.hy;$.hero.vx=0;$.hero.vy=0;
-  r.recoil=Math.max(0,r.recoil-dt*.25);r.shake=Math.max(0,r.shake-dt*.7);r.flash=Math.max(0,r.flash-dt*.04);
+  r.poseTime+=dt/60;r.poseSway+=(wrapA(r.ang-r.previousAngle)-r.poseSway)*.12;r.previousAngle=r.ang;
+  r.recoil=Math.max(0,r.recoil-dt*.16);r.shake=Math.max(0,r.shake-dt*.7);r.flash=Math.max(0,r.flash-dt*.04);
   r.tracers=r.tracers.filter(q=>(q.life-=dt)>0);
   r.t.forEach(t=>{t.flash=Math.max(0,t.flash-dt);t.bob+=dt*.05;});
   if(r.done)return;
@@ -99,8 +100,8 @@ function update(dt){
 }
 function crosshair(){return(run.keyAim||!mouse.on)?{x:W/2,y:H*.5}:{x:mouse.x,y:mouse.y};}
 function shoot(){
-  const r=run,ch=crosshair();r.recoil=1;$.audio&&$.audio.play('shoot');
-  const gs=Math.min(W,H*1.6)/1000,gun={x:W*.62+4*gs,y:H*.86-134*gs};
+  const r=run,ch=crosshair();r.recoil=1;if(R.combatShot)R.combatShot();else $.audio&&$.audio.play('shoot');
+  const gs=Math.min(W,H*1.6)/1000,gun=R.stage3d&&R.stage3d.weaponMuzzle||{x:W*.62+4*gs,y:H*.86-134*gs};
   let best=null;
   r.t.forEach(t=>{if(!t.alive||!t.rect)return;const q=t.rect;if(ch.x>=q.x&&ch.x<=q.x+q.w&&ch.y>=q.y&&ch.y<=q.y+q.h){if(!best||t.d<best.d)best=t;}});
   // generous aim assist: a near miss within a few pixels of a panel edge still counts, if nothing else is under the crosshair
@@ -179,6 +180,9 @@ function draw(){
     c.fillStyle='rgb('+(235*sh2|0)+','+(235*sh2|0)+','+(240*sh2|0)+')';c.fillRect(o.b.side<0?bx+bw*.05:bx+bw*.72,by-bh*.2,bw*.23,bh*.25);
     c.fillStyle='rgb('+(90*sh2|0)+','+(95*sh2|0)+','+(105*sh2|0)+')';c.fillRect(bx,by-bh*.5,bw*.03,bh*1.25);c.fillRect(bx+bw*.97,by-bh*.5,bw*.03,bh*1.25);});
   }else{R.stage3d.fps(c,W,H,r);zbuf=[];}
+  // Separate held-weapon pass keeps the model above the answer controls.
+  const viewCardsTop=H-(W<700?Math.ceil(r.n/2)*80:Math.max(78,H*.11)+10);
+  if(R.stage3d&&R.stage3d.available&&R.stage3d.weaponView)R.stage3d.weaponView(c,W,H,r,viewCardsTop);
   // sprites: answer panels, far to near
   const vis=r.t.filter(t=>t.alive||t===r.lastHit).map(t=>{const a=wrapA(Math.atan2(t.y-PY,t.x-PX)-r.ang);return{t,a,d:Math.hypot(t.x-PX,t.y-PY)};})
     .filter(o=>Math.abs(o.a)<FOV)
@@ -186,17 +190,17 @@ function draw(){
   r.t.forEach(t=>t.rect=null);
   for(const o of vis){const t=o.t;if(!t.alive)continue;
     const pd=o.d*Math.cos(o.a),sxp=W/2+Math.tan(o.a)*focal,size=focal/pd;
-    const pw=size*1.25,ph=size*.9,bob=Math.sin(t.bob)*size*.03,px=sxp-pw/2,py=hz-ph*.62+bob;
+    const aim=r.lock===t,label=R.optionLabel(t.text),pw=Math.max(W<700?92:166,Math.min(W<700?190:310,size*1.35)),fontSize=W<700?(aim?13:11):(aim?15:13);
+    c.font='600 '+fontSize+'px sans-serif';const lineCount=lines(c,label,pw-22).length;
+    const ph=Math.max(size*.58,Math.min(aim?225:195,lineCount*(fontSize+3)+34)),bob=Math.sin(t.bob)*size*.03,px=W<700?Math.max(2,Math.min(W-pw-2,sxp-pw/2)):sxp-pw/2,py=hz+size*.1-ph/2+bob;
     const zc=zbuf[Math.max(0,Math.min(zbuf.length-1,sxp/step|0))];if(zc!==undefined&&zc<pd-.3)continue;
     t.rect={x:px,y:py,w:pw,h:ph};
-    const aim=r.lock===t;
     if(R.stage3d&&R.stage3d.available){
-      c.strokeStyle=COL[t.i];c.lineWidth=aim?2:1;c.globalAlpha=aim?1:.7;
-      const arm=Math.min(15,pw*.12);for(const [xx,yy,sx,sy] of [[px,py,1,1],[px+pw,py,-1,1],[px,py+ph,1,-1],[px+pw,py+ph,-1,-1]]){c.beginPath();c.moveTo(xx+sx*arm,yy);c.lineTo(xx,yy);c.lineTo(xx,yy+sy*arm);c.stroke();}
-      c.globalAlpha=1;c.font='bold 12px monospace';c.textAlign='center';c.fillStyle=COL[t.i];c.fillText('0'+(t.i+1)+' / '+t.hp+' HP',sxp,py-10);c.textAlign='left';
-      if(t.flash>0){c.fillStyle=COL[t.i]+'44';c.fillRect(px,py,pw,ph);}continue;
+      // The answer is mounted on the moving target face, not just in the HUD.
+      c.fillStyle=t.flash>0?'#f0dfad':'#e5ece5';c.fillRect(px,py,pw,ph);c.strokeStyle=COL[t.i];c.lineWidth=aim?4:2;c.strokeRect(px,py,pw,ph);
+      c.fillStyle='#293f4b';c.fillRect(px,py,pw,25);c.fillStyle='#f5efdf';c.font='bold 11px monospace';c.fillText('0'+(t.i+1)+'   '+Math.max(0,t.hp)+' HP',px+10,py+17);
+      c.fillStyle='#172f3c';wrapText(c,label,px+11,py+40,pw-22,ph-34,fontSize);continue;
     }
-
     c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(sxp,hz+size*.5,pw*.4,size*.06,0,0,Math.PI*2);c.fill();
     c.fillStyle='rgba(8,12,22,.86)';c.fillRect(px,py,pw,ph);
     c.strokeStyle=COL[t.i];c.lineWidth=Math.max(1.5,size*.03)*(aim?1.6:1);c.strokeRect(px,py,pw,ph);
@@ -254,7 +258,7 @@ function draw(){
     c.fillText(W<1100?'mouse/←→ aim · click/Space fire · 1-4 lock':'Mouse aim (edges turn) or ←/→ · click, Space or F fire · 1-4 or tap a card to lock on',14,cardsTop-10);
   }
   if(r.recoil>.5){c.fillStyle='rgba(255,230,170,'+(r.recoil*.07)+')';c.fillRect(-20,-20,W+40,H+40);}
-  {const vg=c.createRadialGradient(W/2,H*.48,Math.min(W,H)*.35,W/2,H*.5,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=vg;c.fillRect(-20,-20,W+40,H+40);}
+  {const vg=c.createRadialGradient(W/2,H*.48,Math.min(W,H)*.35,W/2,H*.5,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.16)');c.fillStyle=vg;c.fillRect(-20,-20,W+40,H+40);}
   if(r.flash>0&&r.result){c.fillStyle=r.result.ok?'rgba(98,255,160,'+(r.flash*.3)+')':'rgba(255,30,60,'+(r.flash*.45)+')';c.fillRect(-20,-20,W+40,H+40);}
   c.restore();
 }

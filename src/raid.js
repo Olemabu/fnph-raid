@@ -400,6 +400,23 @@ $.Carrier.prototype.explode=function(hue,big){
 
 /* ================= Raid controller ================= */
 const R=$.raid={active:false,phase:'idle'};
+// Layered rifle reports and a continuous environmental bed use the same user audio controls.
+let roomBed=null,roomLive=false;
+R.ensureCombatAudio=function(){const ctx=ac();if(!ctx)return;if(!roomBed){
+ const gain=ctx.createGain();gain.gain.value=0;gain.connect(MUS);
+ const air=ctx.createBufferSource();air.buffer=NOISE;air.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=380;air.connect(filter);filter.connect(gain);air.start();
+ const hum=ctx.createOscillator(),hg=ctx.createGain();hum.type='sine';hum.frequency.value=58;hg.gain.value=.22;hum.connect(hg);hg.connect(gain);hum.start();roomBed={gain,air,hum};
+ }if(musicOn&&!musicTimer&&R.active)startMusic();};
+R.combatShot=function(){if(!soundOn||!ac())return;const t=AC.currentTime;
+ nz(.045,.38,6200,1800,t,null,'highpass');nz(.17,.50,1500,140,t);osc('triangle',125,43,.14,.42,t);
+ nz(.07,.12,2900,1300,t+.055,null,'bandpass',4);osc('square',760,360,.028,.045,t+.07);
+ for(const [delay,level] of [[.085,.07],[.17,.035],[.26,.016]])nz(.10,level,1700,260,t+delay);
+ R.shotAudioCount=(R.shotAudioCount||0)+1;
+};
+R.enableCombatAudio=function(){soundOn=musicOn=true;store.set('sound',true);store.set('music',true);R.ensureCombatAudio();applySound();};
+R.combatAudioState=()=>({state:AC?AC.state:'not-started',sound:soundOn,music:musicOn,ambient:roomLive});
+setInterval(()=>{const active=!!(R.active&&!R.paused&&$.state==='play'&&R.modeName&&R.modeName()==='fps');if(active&&!roomBed)R.ensureCombatAudio();if(roomBed&&active!==roomLive){roomLive=active;roomBed.gain.gain.setTargetAtTime(active?.18:0,AC.currentTime,.15);}},120);
+
 let toastT=0;
 R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
 // The reward reveals the term only after the player selects its description.
@@ -682,14 +699,16 @@ function victory(){
   card('learn',all?'FNPH taken':'Route complete','<p>'+R.taken+' station'+(R.taken===1?'':'s')+' captured · '+R.deaths+' death'+(R.deaths===1?'':'s')+' · score '+$.score.toLocaleString()+'</p><p class="meta">Your debrief lists every question that killed you, with the teaching notes.</p>','See debrief',debrief,500);
 }
 R.pause=function(){
-  if(!R.active||$.state!=='play'||R.phase==='dead'||R.phase==='swarmdead'||R.dying)return;
-  const r=R.rooms[R.si];
-  R.paused=true;
-  card('pause','Paused','<p>Station '+(r.idx+1)+': '+esc(r.locus)+'. Captured stations are saved.</p><div class="row"><button class="btn" id="cEnd">End raid and see debrief</button><button class="btn ghost" id="cHome">Back to base</button></div>','Resume',()=>{},0);
-  Q('#cEnd').onclick=()=>{closeCard(true);debrief();};
-  Q('#cHome').onclick=()=>{closeCard(true);quitToHome();};
+  if(!R.active)return;
+  if(R.paused&&Q('#card').classList.contains('pause')){closeCard();return;}
+  const previous=Q('#cardWrap').hidden?null:{nodes:[...Q('#cardInner').childNodes],kind:Q('#card').className,button:Q('#cardBtn').textContent,cb:cardCb,remaining:Math.max(0,cardReadyAt-performance.now())};
+  const r=R.rooms[R.si];R.paused=true;
+  card('pause','Paused','<p>'+esc(r.topic)+'. Your learning progress is saved.</p><p class="meta">Esc or controller Start resumes. Select confirms the highlighted menu choice.</p><div class="row"><button class="btn ghost" id="cHome">Main menu</button><button class="btn" id="cEnd">End run and see debrief</button></div>','Resume',()=>{
+    if(previous){Q('#card').className=previous.kind;Q('#cardInner').replaceChildren(...previous.nodes);Q('#cardBtn').textContent=previous.button;cardCb=previous.cb;cardReadyAt=performance.now()+previous.remaining;Q('#cardWrap').hidden=false;$.setState('freeze');const ready=()=>{if(Q('#cardWrap').hidden)return;Q('#cardBtn').disabled=performance.now()<cardReadyAt;if(Q('#cardBtn').disabled)requestAnimationFrame(ready);};ready();}
+  },0);
+  Q('#cEnd').onclick=()=>{closeCard(true);debrief();};Q('#cHome').onclick=()=>quitToHome();
 };
-function quitToHome(){clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
+function quitToHome(){Q('#cardWrap').hidden=true;cardCb=null;R.paused=false;R.touchFire=R.touchBoost=R.touchBrake=false;clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
@@ -697,7 +716,7 @@ function card(kind,title,body,btn,cb,delay){
   $.setState('freeze');$.mouse.down=0;
   const el=Q('#card');el.className='card '+kind;
   Q('#cardInner').innerHTML='<p class="kicker">'+esc(title)+'</p>'+body;
-  const b=Q('#cardBtn');b.textContent=btn;b.disabled=true;cardCb=cb;cardReadyAt=performance.now()+(delay||0);
+  const b=Q('#cardBtn');b.classList.toggle('padf',kind==='pause');b.textContent=btn;b.disabled=true;cardCb=cb;cardReadyAt=performance.now()+(delay||0);
   Q('#cardWrap').hidden=false;Q('#cardInner').scrollTop=0;synth('card');
   const tick=()=>{if(Q('#cardWrap').hidden)return;const left=cardReadyAt-performance.now();if(left<=0){b.disabled=false;b.focus({preventScroll:true});Q('#cardBar').style.transform='scaleX(1)';}else{Q('#cardBar').style.transform='scaleX('+(1-left/(delay||1)).toFixed(3)+')';requestAnimationFrame(tick);}};
   Q('#cardBar').style.transform='scaleX(0)';tick();
@@ -906,6 +925,7 @@ R.refreshHover=function(){
 let keyFire=0;
 document.addEventListener('keydown',e=>{
   if(Q('#play').hidden)return;
+  if(e.key==='Escape'){e.preventDefault();if(!e.repeat)R.pause();return;}
   if(!Q('#cardWrap').hidden){if(e.key==='Enter'||e.key===' '){e.preventDefault();closeCard();}return;}
   if(!R.active||R.phase!=='fight')return;
   if(e.key>='1'&&e.key<='4'){const c=$.carriers.find(c=>c.num===+e.key&&c.alive);if(c){R.lockOn(c);synth('lock');R.toast('Locked on '+c.num+' · '+R.optionLabel(c.text),true);}e.preventDefault();}
@@ -945,12 +965,13 @@ R.pollPad=function(){
   const cur=p.buttons.map(b=>!!b&&(b.pressed||b.value>.5)),edge=i=>cur[i]&&!padPrev[i];
   if(wiz){wizStep(p,cur,dev);padPrev=cur;return;}
   // known controller profiles (measured on the player's own pad), used unless a custom layout is saved
-  const PROFILE=/0810/.test(p.id)&&/0001/.test(p.id)?{id:p.id,drive:{x:0,y:1,sx:1,sy:1},aim:{x:5,y:2,sx:1,sy:1},fire:[0,1,2,3,4,5,6,7],pause:[8,9],hat:9}:null;
+  const PROFILE=/0810/.test(p.id)&&/0001/.test(p.id)?{id:p.id,drive:{x:0,y:1,sx:1,sy:1},aim:{x:5,y:2,sx:1,sy:1},fire:[0,1,2,3,4,5,6,7],pause:[9],select:[8],hat:9}:null;
   const M=padMap&&padMap.id===p.id?padMap:PROFILE;
-  const fireBtns=M?M.fire:[0,1,2,3,6,7],pauseBtns=M?M.pause:[8,9];
-  const anyFireEdge=fireBtns.some(edge)||[0,1,2,3].some(edge),anyPauseEdge=pauseBtns.some(edge);
+  const fireBtns=(M?M.fire:[0,1,2,3,6,7]).filter(i=>i!==8&&i!==9),pauseBtns=[...new Set([9,...(M?M.pause||[]:[])])].filter(i=>i!==8);
+  const anyFireEdge=fireBtns.some(edge)||[0,1,2,3].some(edge),anyPauseEdge=pauseBtns.some(edge),selectEdge=edge(8);
   // overlays and menus: any fire or pause button presses the main button
-  if(!Q('#cardWrap').hidden){if(anyFireEdge||anyPauseEdge)closeCard();padPrev=cur;return;}
+  if(R.active&&anyPauseEdge){R.pause();padPrev=cur;return;}
+  if(!Q('#cardWrap').hidden){if(R.paused){const x=dev(0),y=dev(1),dir=cur[12]?'u':cur[13]?'d':cur[14]?'l':cur[15]?'r':Math.abs(x)>.5?(x>0?'r':'l'):Math.abs(y)>.5?(y>0?'d':'u'):'';if(dir&&performance.now()-navT>220){padNav(Q('#cardWrap'),dir);navT=performance.now();}if(selectEdge){const focused=document.activeElement;if(focused&&Q('#cardWrap').contains(focused)&&focused.matches('button:not(:disabled)'))focused.click();else closeCard();}}else if(anyFireEdge||selectEdge)closeCard();padPrev=cur;return;}
   {const scr=['warRoom','home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
    if(scr){let nx=0,ny=0;if(M){nx=dev(M.drive.x)*M.drive.sx;ny=dev(M.drive.y)*M.drive.sy;}else{nx=dev(0);ny=dev(1);}
      if(cur[14])nx=-1;if(cur[15])nx=1;if(cur[12])ny=-1;if(cur[13])ny=1;
@@ -959,9 +980,9 @@ R.pollPad=function(){
      const now=performance.now();
      if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
      if(!dir){navLast='';navRep=false;}
-     if(edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     if(selectEdge||edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
-     else if(anyPauseEdge){if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(anyPauseEdge){if(scr.id==='home'){if(Q('#opsSetup')&&!Q('#opsSetup').hidden&&!Q('#opsDeploy').disabled)Q('#opsDeploy').click();else if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
   if(!Q('#play').hidden&&anyPauseEdge){R.pause();padPrev=cur;return;}
   // drive

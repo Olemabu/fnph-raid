@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 const R=$.raid,canvas=document.createElement('canvas');
-const gl=canvas.getContext('webgl',{alpha:false,antialias:true,preserveDrawingBuffer:true});
+const gl=canvas.getContext('webgl',{alpha:true,antialias:true,preserveDrawingBuffer:true});
 const api=R.stage3d={available:false};if(!gl)return;
 const vs=`attribute vec3 p;attribute vec3 n;attribute vec3 color;attribute float emission;
 uniform mat4 vp;varying vec3 P;varying vec3 N;varying vec3 C;varying float E;
@@ -127,31 +127,62 @@ function bed(x,z,side){
 }
 api.fps=function(c,w,h,r){
  const focal=(w/2)/Math.tan(1.15/2),fovy=2*Math.atan(h/(2*focal)),cam=[8,1.65,13.2];
- begin(w,h,cam,[8+Math.cos(r.ang)*8,1.65,13.2+Math.sin(r.ang)*8],fovy,'#122530',.026);
- box(8,-.09,4,16,.18,23,'#334950');box(8,3.75,4,16,.15,24,'#263b46');
- for(let z=-7;z<16;z+=1.4){box(8,.004,z,16,.01,.015,'#1f333e');for(let x=0;x<17;x+=1.4)box(x,.005,z,.012,.012,1.4,'#1d343c');}
- for(const side of [-1,1]){const x=8+side*8;box(x,1.8,4,.3,3.6,24,'#5d7379');box(x-side*.18,.55,4,.15,1.1,24,'#2d4854');box(x-side*.22,1.1,4,.09,.07,24,'#97aaa8');
-  for(let z=-5;z<15;z+=3){box(x-side*.23,2.7,z,.1,.35,1.5,'#78c9d1',0,.75);box(x-side*.28,2.4,z,.15,.18,1.8,'#293e49');box(x-side*.3,2.1,z,.1,.06,1.3,'#9dafaf');}}
- box(8,1.8,-7.5,16,3.6,.3,'#465d69');box(8,1.45,-7.28,2.8,2.9,.08,'#233e4c');for(const s of [-1,1]){box(8+s*1.55,1.55,-7.15,.14,3.1,.2,'#94bbc2');box(8+s*.07,1.5,-7.1,.04,2.5,.05,'#69c6ce',0,.8);}box(8,3.15,-7.1,3.2,.35,.12,'#467c77');
- for(let z=-5;z<15;z+=3){box(8,3.6,z,5.6,.12,.46,'#7f999f');box(8,3.52,z,4.7,.025,.27,'#c3e1de',0,1);for(const s of [-1,1])box(8+s*3.1,2.95,z,.16,1.4,.24,'#536976');}
+ begin(w,h,cam,[8+Math.cos(r.ang)*8,1.65,13.2+Math.sin(r.ang)*8],fovy,'#a7b7bd',.009);
+ box(8,-.09,4,16,.18,23,'#96a8ad');box(8,3.75,4,16,.15,24,'#d1d1c5');
+ for(let z=-7;z<16;z+=1.4){box(8,.004,z,16,.01,.015,'#6e858b');for(let x=0;x<17;x+=1.4)box(x,.005,z,.012,.012,1.4,'#738e91');}
+ for(const side of [-1,1]){const x=8+side*8;box(x,1.8,4,.3,3.6,24,'#c2ccca');box(x-side*.18,.55,4,.15,1.1,24,'#779da3');box(x-side*.22,1.1,4,.09,.07,24,'#d1cbb7');
+  for(let z=-5;z<15;z+=3){box(x-side*.23,2.7,z,.1,.35,1.5,'#d8f2ee',0,.75);box(x-side*.28,2.4,z,.15,.18,1.8,'#6b9099');box(x-side*.3,2.1,z,.1,.06,1.3,'#9dafaf');}}
+ box(8,1.8,-7.5,16,3.6,.3,'#b1c4c5');box(8,1.45,-7.28,2.8,2.9,.08,'#628c9c');for(const s of [-1,1]){box(8+s*1.55,1.55,-7.15,.14,3.1,.2,'#94bbc2');box(8+s*.07,1.5,-7.1,.04,2.5,.05,'#69c6ce',0,.8);}box(8,3.15,-7.1,3.2,.35,.12,'#467c77');
+ for(let z=-5;z<15;z+=3){box(8,3.6,z,5.6,.12,.46,'#c8cebf');box(8,3.52,z,4.7,.025,.27,'#c3e1de',0,1);for(const s of [-1,1])box(8+s*3.1,2.95,z,.16,1.4,.24,'#88a5ae');}
  for(let z=-3;z<12;z+=3.5){bed(2,z,-1);bed(14,z,1);}
  // Layered autonomous target housings and rotor arms inhabit the actual room.
  for(const t of r.t){if(!t.alive)continue;const y=1.55+Math.sin(t.bob)*.035,col=['#d66e9b','#62bdcf','#d5b677','#8ebf97'][t.i];
   shadow(t.x,t.y,1.1,.6);box(t.x,y,t.y,.9,.55,.24,'#1c3342');box(t.x,y-.4,t.y,.18,.23,.24,'#8d9e9e');box(t.x,y,t.y+.14,.65,.31,.02,'#365668');box(t.x,y+.22,t.y+.16,.62,.035,.02,col,0,1);
   for(const s of [-1,1]){box(t.x+s*.63,y+.1,t.y,.45,.08,.14,'#748b96');cylinder(t.x+s*.86,y+.1,t.y,.22,.07,'#293d48');box(t.x+s*.86,y+.15,t.y,.42,.02,.04,'#a0b2b5',performance.now()*.02);}
  }
- // Weapon built from a machined receiver, rails, sight and articulated foregrip.
- const fwd=[Math.cos(r.ang),Math.sin(r.ang)],right=[-Math.sin(r.ang),Math.cos(r.ang)];
- const weapon=(rx,y,forward,ww,hh,dd,col,e=0)=>{const x=8+right[0]*rx+fwd[0]*(forward+.65),z=13.2+right[1]*rx+fwd[1]*(forward+.65),angle=-r.ang-Math.PI/2;if(!e&&Math.min(ww,hh,dd)>.045)bevel(x,y,z,ww,hh,dd,col,angle);else box(x,y,z,ww,hh,dd,col,angle,e);};
- const kick=r.recoil*.07;weapon(.26,1.03,.58-kick,.21,.24,.48,'#2a3f4e');weapon(.26,1.16,.69-kick,.15,.08,.47,'#819399');weapon(.26,1.09,.98-kick,.075,.08,.32,'#182b35');weapon(.26,1.20,.83-kick,.035,.04,.21,'#5faeb9',.8);weapon(.26,.9,.62-kick,.11,.25,.14,'#182b35');weapon(.32,.78,.4,.21,.24,.35,'#273c49');weapon(.10,.89,.78,.14,.18,.2,'#283e4a');
- const profile=(R.runLoadout||{}).weapon,accent=($.arsenal||{}).color||'#84c8e3';weapon(.37,1.09,.75,.018,.07,.25,accent,.8);
- if(profile==='rail'){weapon(.26,1.1,1.15,.12,.12,.68,'#557584');for(const s of [-1,1])weapon(.26+s*.07,1.1,1.15,.025,.06,.64,accent,.8);}
- if(profile==='twin')for(const s of [-1,1])weapon(.26+s*.065,1.1,1.06,.045,.07,.35,'#718991');
- for(let k=0;k<5;k++){weapon(.26,1.22,.6+k*.06,.17,.018,.018,'#a2b4b5');weapon(.375,1.07,.56+k*.065,.025,.05,.035,'#10252e');}
- for(const s of [-1,1])weapon(.26+s*.067,1.30,.72,.025,.14,.05,'#243d48');weapon(.26,1.37,.72,.16,.025,.05,'#8eaaa9');weapon(.26,1.24,.72,.16,.025,.05,'#718a91');weapon(.26,1.30,.75,.008,.008,.01,'#80d1ce',.8);weapon(.26,.96,.5,.14,.13,.14,'#85999b');
- if(r.recoil>.6)weapon(.26,1.09,1.17,.15,.15,.035,'#ffe4a2',1);
  end(c);
  for(let z=-5;z<14;z+=3)bloom(c,[8,3.45,z],Math.max(10,65/(1+Math.abs(13-z)*.16)),'#b9ebdf');
+};
+api.weaponView=function(c,w,h,r,cardsTop){
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,t=reduced?0:r.poseTime||0;
+ const aim=r.poseSway||0,kick=r.recoil||0,reload=r.reload||0;
+ const vw=w<700?w*.98:w*.64,vh=Math.min(cardsTop*.55,h*.44),left=w-vw,bottom=h-cardsTop+8;
+ begin(w,h,[-1.65,.85,2.5],[0,-.12,-.5],.78,'#a3b9bf',0);
+ gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ const ratio=canvas.width/w;gl.viewport(left*ratio,bottom*ratio,vw*ratio,vh*ratio);
+ matrix=multiply(projection(.78,vw/vh,.05,30),look([-1.65,.85,2.5],[0,-.12,-.5]));gl.uniformMatrix4fv(uniforms.vp,false,new Float32Array(matrix));
+ const sx=Math.sin(t*1.7)*.023-aim*.14,sy=Math.cos(t*2.4)*.018+kick*.055-Math.sin(reload*Math.PI)*.16,sz=kick*.14;
+ const part=(x,y,z,ww,hh,dd,col,e=0)=>{if(e)box(x+sx,y+sy,z+sz,ww,hh,dd,col,0,e);else bevel(x+sx,y+sy,z+sz,ww,hh,dd,col);};
+ const accent=($.arsenal||{}).color||'#dfa85e',rail=(R.runLoadout||{}).weapon==='rail';
+ // Multi-layer receiver, lower assembly, stock rails and rubber shoulder pad.
+ part(0,0,0,.43,.33,1.05,'#536c7a');part(0,-.18,.08,.36,.13,.92,'#233c4b');part(0,.18,-.02,.36,.05,1.12,'#bec6c3');
+ part(0,-.03,.7,.28,.22,.48,'#6f8994');for(const side of [-1,1])part(side*.1,-.02,.96,.045,.06,.45,'#bec8c5');part(0,-.05,1.19,.4,.32,.1,'#263b43');
+ // Shrouded barrel, muzzle brake and concentric metal rings.
+ part(0,.02,-.91,.31,.27,.78,'#344c5b');part(0,.02,-1.47,.15,.15,.48,'#879da6');part(0,.02,-1.76,.23,.22,.17,'#314956');part(0,.02,-1.855,.125,.12,.025,'#07151c');
+ for(let k=0;k<6;k++)for(const side of [-1,1]){part(side*.164,.035,-.64-k*.10,.02,.075,.055,'#10232e');part(side*.128,-.015,-1.53+k*.045,.02,.16,.022,'#d1d4c5');}
+ // Floating quad rails, screws, charging handle, ejection port and bolt travel.
+ for(let k=0;k<13;k++)part(0,.225,.45-k*.13,.41,.04,.045,'#a7b8bb');
+ part(.225,.02,.12,.018,.12,.38,'#112732');part(.24,.02,.2-kick*.12,.03,.07,.21,'#c2c9c5');part(-.27,.1,.30,.19,.055,.08,'#9fb4bc');
+ for(const x of [-.223,.223])for(const z of [-.42,.38])part(x,.08,z,.025,.045,.045,'#e0d5b2');
+ part(.235,-.07,.35,.018,.05,.08,'#d7b877');part(.235,-.07,.47,.018,.05,.04,'#ac5945');
+ // Magazine well, ribbed magazine, pistol grip and open trigger guard.
+ part(0,-.3,-.07,.24,.2,.30,'#859da3');part(0,-.55,-.05,.21,.4,.28,'#314b58');for(let k=0;k<6;k++)part(.112,-.38-k*.055,-.05,.015,.022,.23,'#8ba1a8');
+ part(0,-.38,.44,.18,.32,.23,'#344d59');for(let k=0;k<4;k++)part(.1,-.28-k*.055,.44,.018,.018,.2,'#859a9d');
+ part(0,-.245,.26,.07,.1,.04,'#d5c9a9');part(0,-.34,.25,.26,.035,.29,'#b3bdb2');part(0,-.27,.11,.24,.13,.035,'#829da5');
+ // Holographic sight, lens frame, adjustment dials and backup iron sight.
+ part(0,.29,-.05,.27,.08,.37,'#284351');for(const side of [-1,1])part(side*.13,.43,-.14,.035,.24,.08,'#a4b5b7');part(0,.55,-.14,.29,.04,.08,'#d5d6c4');part(0,.32,-.14,.29,.04,.08,'#aec2c1');part(0,.435,-.15,.008,.008,.012,'#efaa5e',1);part(.2,.40,-.03,.09,.09,.12,'#52757f');
+ part(0,.30,-.95,.08,.18,.08,'#c5d4d2');part(0,.40,-.95,.018,.055,.018,'#28444e');
+ // Side capacitor readout, braided power conduit and foregrip.
+ part(.238,-.005,-.27,.018,.12,.17,'#102531');part(.25,-.005,-.27,.012,.08,.115,accent,.75);for(let k=0;k<5;k++)part(-.18,.09,-.37-k*.11,.065,.065,.065,k%2?'#bac6c1':'#384f5b');
+ part(0,-.25,-.74,.19,.35,.22,'#28424e');for(let k=0;k<5;k++)part(.103,-.13-k*.055,-.74,.014,.022,.19,'#839c9f');
+ // Two sleeved forearms and articulated gloves actually holding the grips.
+ part(.04,-.65,.68,.31,.29,.72,'#6b8185');part(.02,-.43,.47,.27,.22,.32,'#3f555d');
+ part(-.38,-.58,-.04,.3,.29,.95,'#8c9a8e');part(-.14,-.4,-.67,.29,.24,.33,'#415d66');
+ for(let k=0;k<4;k++){part(.10+k*.035,-.38,.36,.032,.085,.18,'#9ca79d');part(-.13+k*.055,-.32,-.71,.042,.11,.2,'#a4b2a5');}
+ for(const side of [-1,1])part(side*.13,-.65,.58,.025,.19,.15,'#afbaa8');
+ if(rail){for(const side of [-1,1]){part(side*.19,.03,-1.0,.035,.12,.9,accent,.8);part(side*.22,.03,-.9,.09,.27,.36,'#597b8b');}}
+ if(kick>.6){part(0,.02,-1.99,.24*kick,.24*kick,.16,'#ffe6a5',1);for(let k=0;k<5;k++){const a=k*Math.PI*.4;part(Math.cos(a)*.14,.02+Math.sin(a)*.14,-1.99,.045,.045,.22,'#ffd082',1);}}
+ const muzzle=project([sx,.02+sy,-1.99+sz]);api.weaponMuzzle={x:left+muzzle.x/w*vw,y:h-bottom-vh+muzzle.y/h*vh};end(c);api.weaponBounds={x:left,y:h-bottom-vh,w:vw,h:vh};
 };
 api.loadout=function(c,w,h,kind,id){begin(w,h,kind==='vehicle'?[6,3.8,7]:[2.5,1.8,3.5],[0,.7,0],.7,'#112631',.015);box(0,-.1,0,20,.2,20,'#283e46');ring(0,.01,0,kind==='vehicle'?3:1.5,'#769f9f');
  if(kind==='vehicle'){const v=R.vehicles.find(v=>v.id===id)||R.vehicles[0];car(0,0,v.color,v.id==='ambulance',-.4,performance.now()/1000,v.id);}
