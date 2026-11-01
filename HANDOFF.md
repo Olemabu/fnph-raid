@@ -142,3 +142,6 @@ Validated real WebGL availability/rendering, hangar viewpoint change, direct com
 
 ### Ship shape reverted (1 Nov 2026)
 At the user’s request, restored the previous vector ship/mecha renderer by removing the 3D override from both build paths. Startup fixes, direct deployment, war map, early refits and mastery retirement are unchanged. The unselected 3D prototype remains in source history/files but is not loaded.
+
+### Original interceptor restored (1 Nov 2026)
+The previous revert only disabled WebGL; the vector mecha override still replaced the original ship. Combat and both previews now share the original interceptor artwork from hero.js. Original flight effects, railguns and damage shield remain. Earned refits add wing extensions. Campaign, mastery and controls are unchanged.

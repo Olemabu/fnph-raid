@@ -203,15 +203,20 @@ $.Hero.prototype.update = function() {
 Render: Heavy Mecha Combat Interceptor (Mobile Frame)
 ==============================================================================*/
 $.Hero.prototype.render = function() {
+	$.drawInterceptor.call(this, $.ctxmg, $.tick / 60);
+};
+// Shared original interceptor artwork for combat and the hangar previews.
+$.drawInterceptor = function(c, t) {
 	if( this.life <= 0 ) { return; }
-	var c = $.ctxmg, t = $.tick / 60;
+	var keys = $.keys ? $.keys.state : {}, pad = $.pad || {};
 	var speed = Math.hypot( this.vx, this.vy );
-	var isThrusting = ( speed > 0.35 || $.keys.state.up || $.keys.state.down || $.keys.state.left || $.keys.state.right || $.pad.mx || $.pad.my );
+	var isThrusting = ( speed > 0.35 || keys.up || keys.down || keys.left || keys.right || pad.mx || pad.my );
 	var turnRate = this.turnRate || 0;
 
 	/*==============================================================================
 	1. Dual High-Intensity Mecha Searchlight Projectors
 	==============================================================================*/
+	if( !this.preview ) {
 	c.save();
 	c.translate( this.x, this.y );
 	c.rotate( this.direction );
@@ -235,6 +240,7 @@ $.Hero.prototype.render = function() {
 		c.fill();
 	}
 	c.restore();
+	}
 
 	/*==============================================================================
 	2. RCS Maneuvering Vernier Thrusters (Reaction Control System)
@@ -312,7 +318,7 @@ $.Hero.prototype.render = function() {
 			var ry = this.y - Math.sin( this.direction ) * 18 + ( Math.random() - 0.5 ) * 10;
 			$.particleEmitters.push( new $.ParticleEmitter( {
 				x: rx, y: ry, count: 1, spawnRange: 2, friction: 0.86, minSpeed: 2, maxSpeed: 5,
-				minDirection: this.direction + $.pi - 0.25, maxDirection: this.direction + $.pi + 0.25,
+				minDirection: this.direction + Math.PI - 0.25, maxDirection: this.direction + Math.PI + 0.25,
 				hue: Math.random() < 0.7 ? 195 : 28, saturation: 100
 			} ) );
 		}
@@ -455,9 +461,9 @@ $.Hero.prototype.render = function() {
 
 	// Wingtip Navigation Strobe Lights
 	c.fillStyle = '#ff3344'; // Port
-	c.beginPath(); c.arc( -11, -17, 1.8, 0, $.twopi ); c.fill();
+	c.beginPath(); c.arc( -11, -17, 1.8, 0, (Math.PI * 2) ); c.fill();
 	c.fillStyle = '#33ff77'; // Starboard
-	c.beginPath(); c.arc( -11, 17, 1.8, 0, $.twopi ); c.fill();
+	c.beginPath(); c.arc( -11, 17, 1.8, 0, (Math.PI * 2) ); c.fill();
 
 	// Central Armored Fuselage Spine & Stencil Marking
 	c.strokeStyle = 'rgba(242, 184, 75, 0.8)';
@@ -516,7 +522,7 @@ $.Hero.prototype.render = function() {
 			fGrad.addColorStop( 0.85, 'rgba(255, 100, 30, 0.65)' );
 			fGrad.addColorStop( 1, 'rgba(255, 60, 10, 0)' );
 			c.fillStyle = fGrad;
-			c.beginPath(); c.arc( 27, fy, fRad, 0, $.twopi ); c.fill();
+			c.beginPath(); c.arc( 27, fy, fRad, 0, (Math.PI * 2) ); c.fill();
 
 			c.strokeStyle = 'rgba(255, 245, 200, 0.95)';
 			c.lineWidth = 1.2;
@@ -543,7 +549,7 @@ $.Hero.prototype.render = function() {
 		// Hexagonal armor lattice
 		c.beginPath();
 		for( var h = 0; h < 6; h++ ) {
-			var ang = h * ( $.twopi / 6 ) + t * 4;
+			var ang = h * ( (Math.PI * 2) / 6 ) + t * 4;
 			var hx = Math.cos( ang ) * shieldR, hy = Math.sin( ang ) * shieldR;
 			if( h === 0 ) c.moveTo( hx, hy ); else c.lineTo( hx, hy );
 		}
@@ -555,7 +561,7 @@ $.Hero.prototype.render = function() {
 		// Deflection quadrant arcs
 		c.lineWidth = 1.8;
 		c.beginPath(); c.arc( 0, 0, shieldR + 6, t * 8, t * 8 + 1.6 ); c.stroke();
-		c.beginPath(); c.arc( 0, 0, shieldR + 6, t * 8 + $.pi, t * 8 + $.pi + 1.6 ); c.stroke();
+		c.beginPath(); c.arc( 0, 0, shieldR + 6, t * 8 + Math.PI, t * 8 + Math.PI + 1.6 ); c.stroke();
 		c.restore();
 	}
 };
