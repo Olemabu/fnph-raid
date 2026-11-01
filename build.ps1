@@ -11,7 +11,12 @@ $deck = J('src/deck.txt')
 $deckJson = ($deck | ConvertTo-Json -Compress) -replace '</', '<\/'
 
 $parts = [System.Collections.Generic.List[string]]::new()
-$parts.Add('<script>var $ = {};</script>')
+$shipAssets = @{}
+foreach ($name in @('kestrel-flight', 'kestrel-hangar')) {
+    $shipAssets[$name] = 'data:image/webp;base64,' + [Convert]::ToBase64String([System.IO.File]::ReadAllBytes((Join-Path $here ("src/assets/" + $name + ".webp"))))
+}
+$shipJson = $shipAssets | ConvertTo-Json -Compress
+$parts.Add('<script>var $ = {};window.FNPH_SHIP_ASSETS=' + $shipJson + ';</script>')
 $parts.Add("<script>window.FNPH_DECK = $deckJson;</script>")
 $parts.Add("<script>/* jsfxr (sound synthesis), wrapped so its globals stay private */`n(function(){`n" + (J('vendor/radius-raid/jsfxr.js')) + "`nwindow.jsfxr = jsfxr;`n})();</script>")
 $parts.Add("<script>/* FNPH map geometry */`n" + (J('src/mapgeo.js')) + "`n</script>")

@@ -19,6 +19,7 @@ window.addEventListener('load',()=>{if(ready||failed)return;if(window.FNPHUnpack
 window.FNPHBoot={fail,finish(){
  const complete=()=>{const R=window.$&&window.$.raid;if(!R||!R.campaign||!R.operations||!window.$.initialized||typeof launch.onclick!=='function'){fail();return;}
  ready=true;clearTimeout(timer);panel.remove();launch.disabled=false;document.documentElement.dataset.gameReady='true';};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',complete,{once:true});else complete();
+ const afterImages=()=>{const R=window.$&&$.raid;Promise.resolve(R&&R.shipAssetsReady).then(complete).catch(()=>fail('The ship artwork could not load. Retry the download.'));};
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',afterImages,{once:true});else afterImages();
 }};
 })();

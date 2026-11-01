@@ -157,3 +157,6 @@ During gameplay, Back / Retry reopens the last correctly answered MCQ with shuff
 
 ## Appearance
 At the top of home, Appearance offers Kestrel Studio Light (ivory, navy and champagne gold) and Original Dark. Your choice is saved locally. Light is the new default and includes the battlefield and teaching cards. The existing interceptor is unchanged; the detailed Kestrel concept has not been added as an in-game asset.
+
+## Rendered Kestrel ship
+The hangar, loadout and gameplay now use detailed transparent raster artwork matching the approved Kestrel concept. Both images are embedded in the offline HTML; no separate image downloads. Animated engine plumes, muzzle flashes and shield feedback supplement the rendered hull. This is sprite-based rendering, not a live 3D model. The single-file download is approximately 1 MB. Existing flight physics, hitbox, mastery, earned weapons and controller axes are unchanged.

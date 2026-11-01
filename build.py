@@ -5,8 +5,9 @@ import json, os, gzip, base64
 HERE=os.path.dirname(os.path.abspath(__file__))
 def J(p): return open(os.path.join(HERE,p),encoding='utf-8').read()
 deck=J('src/deck.txt')
+ship_assets={name:'data:image/webp;base64,'+base64.b64encode(open(os.path.join(HERE,'src/assets/'+name+'.webp'),'rb').read()).decode('ascii') for name in ['kestrel-flight','kestrel-hangar']}
 parts=[
- '<script>var $ = {};</script>',
+ '<script>var $ = {};window.FNPH_SHIP_ASSETS='+json.dumps(ship_assets)+';</script>',
  '<script>window.FNPH_DECK = '+json.dumps(deck).replace('</','<\\/')+';</script>',
  '<script>/* jsfxr (sound synthesis), wrapped so its globals stay private */\n(function(){\n'+J('vendor/radius-raid/jsfxr.js')+'\nwindow.jsfxr = jsfxr;\n})();</script>',
  '<script>/* FNPH map geometry */\n'+J('src/mapgeo.js')+'</script>',

@@ -9,28 +9,35 @@ const FRAMES=R.frames=[
  {name:'Archon',code:'RX–04',role:'Prismatic command frame',at:12,ink:'#2e2849',metal:'#9d94c9',light:'#eee6ff',core:'#c5a1ff'},
  {name:'Nightingale',code:'RX–05',role:'Ascendant guardian frame',at:17,ink:'#293342',metal:'#d3bf87',light:'#fff7dd',core:'#ffe392'}
 ];
-const poly=(c,pts,fill,stroke)=>{c.beginPath();pts.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}};
-const line=(c,p,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();p.forEach((v,i)=>i?c.lineTo(...v):c.moveTo(...v));c.stroke();};
-function glow(c,x,y,r,col){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'transparent');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}
-function plate(c,pts,f){const yy=pts.map(p=>p[1]),g=c.createLinearGradient(0,Math.min(...yy),20,Math.max(...yy)+1);g.addColorStop(0,f.light);g.addColorStop(.23,f.metal);g.addColorStop(1,f.ink);poly(c,pts,g,f.metal);const a=pts[0],b=pts[1];line(c,[[a[0]+2,a[1]+2],[b[0]-2,b[1]+2]],f.light,1.6);}
-// Use the original interceptor silhouette in every view.
-R.drawFrame=function(c,x,y,scale,tier,time,topDown,heading,recoil){
- c.save();c.translate(x,y);c.scale(scale*(topDown?1:4),scale*(topDown?1:4));
- const direction=topDown?(heading||0):-Math.PI/2;
- // Earned wing extensions preserve visible refits around the original hull.
- if(tier>0){c.save();c.rotate(direction);const f=FRAMES[tier];
-  for(const side of [-1,1]){plate(c,[[-12,side*17],[-22-tier*3,side*(23+tier*3)],[-4,side*(20+tier*3)],[7,side*12]],f);}
-  c.restore();}
- $.drawInterceptor.call({x:0,y:0,vx:0,vy:0,vmax:6,direction,life:1,takingDamage:0,turnRate:0,weapon:{fireFlag:0},preview:true},c,time);
+const flight=new Image(),hangar=new Image();
+flight.src=window.FNPH_SHIP_ASSETS['kestrel-flight'];hangar.src=window.FNPH_SHIP_ASSETS['kestrel-hangar'];
+R.shipAssets={flight,hangar,ready:false,draws:0};
+R.shipAssetsReady=Promise.all([flight.decode(),hangar.decode()]).then(()=>{R.shipAssets.ready=true;if(R.campaign)R.campaign.render();}).catch(()=>{throw Error('Ship artwork could not be decoded. Retry the game download.');});
+function thrust(c,x,y,size,power){
+ const g=c.createLinearGradient(x,y,x,y+size);g.addColorStop(0,'#e9fcff');g.addColorStop(.25,'#64dfffbb');g.addColorStop(1,'#1495ff00');c.fillStyle=g;c.beginPath();c.moveTo(x-3*power,y);c.quadraticCurveTo(x-4*power,y+size*.35,x,y+size);c.quadraticCurveTo(x+4*power,y+size*.35,x+3*power,y);c.fill();
+}
+function drawFlight(c,x,y,height,heading,time,speed,firing,damage){
+ if(!R.shipAssets.ready)return;
+ const width=height*flight.naturalWidth/flight.naturalHeight;
+ c.save();c.translate(x,y);c.rotate(heading+Math.PI/2);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+ // Effects supplement the rendered hull; they never replace its artwork.
+ const pulse=.86+.14*Math.sin(time*27),power=.7+Math.min(1,speed/6)*.6;
+ for(const side of [-1,1])thrust(c,side*width*.134,height*.43,height*(.13+speed*.018)*pulse,power*height/104);
+ c.drawImage(flight,-width/2,-height/2,width,height);R.shipAssets.draws++;
+ if(firing){for(const side of [-1,1]){const mx=side*width*.18,my=-height*.31;const g=c.createRadialGradient(mx,my,0,mx,my,height*.12);g.addColorStop(0,'#fffef1');g.addColorStop(.3,'#9befffdd');g.addColorStop(1,'#2ca8ff00');c.fillStyle=g;c.fillRect(mx-height*.12,my-height*.12,height*.24,height*.24);}}
+ if(damage){c.strokeStyle='#68dfff';c.lineWidth=1.8;c.globalAlpha=.65;c.beginPath();c.ellipse(0,0,width*.59,height*.53,0,0,Math.PI*2);c.stroke();}
  c.restore();
+}
+R.drawFrame=function(c,x,y,scale,tier,time,topDown,heading){
+ if(!R.shipAssets.ready)return;
+ if(topDown)drawFlight(c,x,y,74*scale,heading||0,time,0,false,false);
+ else{const size=300*scale;c.save();c.translate(x,y+Math.sin(time*1.4)*3);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(hangar,-size/2,-size/2,size,size);R.shipAssets.draws++;c.restore();}
 };
-// Keep the original flight effects, guns, searchlights and damage shield in combat.
-const originalRender=$.Hero.prototype.render;
+// Combat uses the rendered orthographic sprite, with the existing physics/hitbox.
 $.Hero.prototype.render=function(){
- const tier=R.campaign?R.campaign.frameTier():Math.min(4,R.tier||0);
- if(this.life>0&&tier>0){const c=$.ctxmg,f=FRAMES[tier];c.save();c.translate(this.x,this.y);c.rotate(this.direction);
-  for(const side of [-1,1])plate(c,[[-12,side*17],[-22-tier*3,side*(23+tier*3)],[-4,side*(20+tier*3)],[7,side*12]],f);
-  c.restore();}
- originalRender.call(this);
+ if(this.life<=0)return;
+ const c=$.ctxmg,speed=Math.hypot(this.vx||0,this.vy||0),fire=this.weapon.fireFlag>0;
+ drawFlight(c,this.x,this.y,104,this.direction,$.tick/60,speed,fire,this.takingDamage);
+ if(fire)this.weapon.fireFlag=Math.max(0,this.weapon.fireFlag-$.dt);
 };
 })();
