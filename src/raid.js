@@ -121,9 +121,7 @@ function noteHTML(lines){
 }
 function reasonFor(item,text){
   if(item.why&&item.why[text])return item.why[text];
-  const src=deck.rooms.flatMap(r=>r.items).find(o=>o!==item&&(o.type==='q'?o.answer===text:o.seq&&o.seq.includes(text)));
-  if(src)return 'That belongs to a different question: "'+src.prompt+'".';
-  return 'Not the right answer here.';
+  return item.type==='q'?'No option-specific explanation is available in this question’s notes. The keyed answer is “'+item.answer+'”; review the accompanying teaching note.':'No option-specific explanation is available in this drill’s notes. Review the complete list and teaching note.';
 }
 function qOptions(it){
   const pool=shuffle(it.wrongs).slice(0,3);
@@ -1313,3 +1311,4 @@ function boot(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+
