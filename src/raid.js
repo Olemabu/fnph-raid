@@ -89,7 +89,7 @@ const ARSENAL=[
 const totalMastered=()=>deck.rooms.reduce((n,r)=>n+masteredCount(r),0);
 function arsenalTier(){const m=totalMastered();let t=0;ARSENAL.forEach((a,i)=>{if(m>=a.at)t=i;});return t;}
 function applyArsenal(announce){
-  const t=arsenalTier(),prev=R.tier;R.tier=t;$.arsenal=ARSENAL[t];
+  const t=arsenalTier(),prev=R.tier;R.tier=t;$.arsenal=ARSENAL[t];if(R.applySelectedWeapon)R.applySelectedWeapon();
   if(announce&&prev!=null&&t>prev)setTimeout(()=>{R.toast('Arsenal upgraded: '+ARSENAL[t].name+'. Answer gunships are armoured up too.',true);synth('mastered');},1300);
 }
 function arsenalLine(){const t=arsenalTier(),m=totalMastered(),nx=ARSENAL[t+1];return 'Arsenal: <b>'+ARSENAL[t].name+'</b>'+(nx?' · next, '+nx.name+', at '+nx.at+' mastered (you have '+m+')':' · fully upgraded');}
@@ -575,7 +575,7 @@ function afterCorrect(){
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
   if(mastered(it)){nextQuestion();return;}
-  if(teachAll&&!R.campaignRun){learnCard(it);}else nextQuestion();
+  if(teachAll&&!R.campaignRun&&!R.rooms[R.si].randomFree){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
   let body='<p class="cq">'+esc(it.prompt)+'</p>';
@@ -649,6 +649,7 @@ function swarmDown(){
 }
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
+  if(R.onFreeRunClear&&R.onFreeRunClear(r))return;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
   const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
   if(allC&&!r.review){captured.add(r.topic);store.set('captured',[...captured]);}R.taken++;

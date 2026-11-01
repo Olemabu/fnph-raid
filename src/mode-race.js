@@ -62,12 +62,12 @@ function update(dt){
   if($.pad&&Math.abs($.pad.mx||0)>.2)steer=$.pad.mx;
   if(steer){r.target=null;mouseX=null;}
   if(mouseX!=null)r.target=Math.max(-1,Math.min(1,(mouseX-.5)*2.4));
-  if(steer)r.x+=steer*.035*dt;
+  if(steer)r.x+=steer*.035*dt*(R.vehicle?R.vehicle().handling:1);
   else if(r.target!=null)r.x+=(r.target-r.x)*Math.min(1,.12*dt);
   r.x=Math.max(-1.05,Math.min(1.05,r.x));
   // throttle: up/W boosts (more points), down/S brakes (more reading time)
   const up=R.touchBoost||k.up||($.pad&&$.pad.my<-.5),down=R.touchBrake||k.down||($.pad&&$.pad.my>.5);
-  r.boost=up?1.7:down?.45:1;
+  r.boost=(up?1.7:down?.45:1)*(R.vehicle?R.vehicle().speed:1);
   const base=Z0/(r.dur*60);
   const live=R.phase==='fight';
   const want=live?base*r.boost:base*.25;
@@ -193,17 +193,21 @@ function draw(){
   c.save();c.translate(ax,ay);c.rotate(tilt);
   c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(0,chh*.52,cw*.62,chh*.12,0,0,Math.PI*2);c.fill();
   c.fillStyle='#111';c.fillRect(-cw*.48,chh*.30,cw*.18,chh*.22);c.fillRect(cw*.30,chh*.30,cw*.18,chh*.22);
-  const body=c.createLinearGradient(-cw/2,0,cw/2,0);body.addColorStop(0,'#8ca4af');body.addColorStop(.12,'#edf0e8');body.addColorStop(.7,'#d5dfdf');body.addColorStop(1,'#718c9f');c.fillStyle=body;c.fillRect(-cw/2,-chh*.5,cw,chh*.86);c.strokeStyle='#e5efff';c.lineWidth=1;c.strokeRect(-cw/2,-chh*.5,cw,chh*.86);
+  const selectedVehicle=R.vehicle?R.vehicle():{id:'ambulance',color:'#d9dfda'};
+  c.scale(selectedVehicle.id==='coupe'?1.15:1,selectedVehicle.id==='coupe'?.67:1);
+  const body=c.createLinearGradient(-cw/2,0,cw/2,0);body.addColorStop(0,'#8ca4af');body.addColorStop(.12,'#edf0e8');body.addColorStop(.7,selectedVehicle.color);body.addColorStop(1,'#718c9f');c.fillStyle=body;c.fillRect(-cw/2,-chh*.5,cw,chh*.86);c.strokeStyle='#e5efff';c.lineWidth=1;c.strokeRect(-cw/2,-chh*.5,cw,chh*.86);
   c.fillStyle='#d01f3c';c.fillRect(-cw/2,chh*.02,cw,chh*.1);
   c.fillStyle='#1c2a3a';c.fillRect(-cw*.36,-chh*.40,cw*.3,chh*.28);c.fillRect(cw*.06,-chh*.40,cw*.3,chh*.28);
-  c.fillStyle='#d01f3c';c.fillRect(-cw*.05,-chh*.36,cw*.1,chh*.22);c.fillRect(-cw*.11,-chh*.3,cw*.22,chh*.09);
+  if(selectedVehicle.id==='ambulance'){c.fillStyle='#d01f3c';c.fillRect(-cw*.05,-chh*.36,cw*.1,chh*.22);c.fillRect(-cw*.11,-chh*.3,cw*.22,chh*.09);}
   c.strokeStyle='#bad2e177';c.lineWidth=1;c.beginPath();c.moveTo(0,-chh*.46);c.lineTo(0,chh*.3);c.moveTo(-cw*.36,-chh*.39);c.lineTo(-cw*.09,-chh*.18);c.moveTo(cw*.07,-chh*.39);c.lineTo(cw*.34,-chh*.18);c.stroke();
+  if(selectedVehicle.id==='ambulance'){
   const blink=(Date.now()/180|0)%2;
   c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.fillRect(-cw*.42,-chh*.62,cw*.3,chh*.12);
   c.fillStyle=blink?'#ff2a3d':'#2f7bff';c.fillRect(cw*.12,-chh*.62,cw*.3,chh*.12);
   c.globalAlpha=.18;c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.beginPath();c.ellipse(blink?-cw*.27:cw*.27,-chh*.56,cw*.32,chh*.16,0,0,Math.PI*2);c.fill();c.globalAlpha=1;
+  }
   c.fillStyle=r.boost>1.2?'#ffb03a':'#ff4040';c.fillRect(-cw*.48,chh*.14,cw*.12,chh*.08);c.fillRect(cw*.36,chh*.14,cw*.12,chh*.08);
-  c.fillStyle='#0b0e14';c.font='800 '+(cw*.09|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText('FNPH',0,chh*.3);
+  c.fillStyle='#0b0e14';c.font='800 '+(cw*.09|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText(selectedVehicle.id==='ambulance'?'FNPH':selectedVehicle.id==='coupe'?'APEX':'BASTION',0,chh*.3);
   c.restore();
   }
   // lane marker under the ambulance

@@ -6,7 +6,7 @@ const KEY='fnphraid.campaign.v1';let save;
 try{save=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
 if(!save||!Array.isArray(save.done))save={done:[],partial:null};
 if(save.partial&&(!Array.isArray(save.partial.cleared)||typeof save.partial.mission!=='string'))save.partial=null;
-let complete=new Set(save.done),active=null,lastTier=0,ribbonKey='';
+let complete=new Set(save.done),active=null,lastTier=0,ribbonKey='',selectedSector=0,selectedMission=null,topicRun=false;
 const FRAME_HITS=[0,5,15,30,60];
 if(!Number.isFinite(save.visualXP))save.visualXP=Object.values(R.itemStats()).reduce((n,s)=>n+(s.right||0),0);
 let refitTimer=0;
@@ -56,7 +56,7 @@ function weakTransfer(m){const stats=R.itemStats(),now=Date.now(),past=chapters(
  return pool.slice().sort((a,b)=>{const rank=i=>{const s=stats[i.id]||{};return(s.wrong||0)*5-(s.box||0)*2+(s.due&&s.due<=now?8:0);};return rank(b)-rank(a);}).slice(0,8);
 }
 function launch(){
- const m=next();if(!m){render();return;}launchMission(m);
+ topicRun=false;const m=next();if(!m){render();return;}launchMission(m);
 }
 function launchMission(m){
  active=m;lastTier=frameTier();
@@ -69,13 +69,13 @@ function showBriefing(){if(!active||!R.active)return;const m=active,notes=m.conc
  R.showCard('cinema','Mission briefing',body,'Return to combat',()=>{},0);
 }
 const originalStart=R.start;
-R.start=function(rooms,si,options){R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
+R.start=function(rooms,si,options){R.runLoadout=options&&options.loadout||null;R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
 R.onCampaignClear=function(){
  if(!R.campaignRun||!active)return false;
- const finished=active;complete.add(finished.id);save.partial=null;persist();const tier=frameTier(),upgrade=tier>lastTier,m=next(),f=frameLook();
+ const finished=active;complete.add(finished.id);save.partial=null;persist();const tier=frameTier(),upgrade=tier>lastTier,m=topicRun?sectorMission(finished.chapter,false):next(),f=frameLook();
  const list=timeline(),done=list.filter(x=>complete.has(x.id)).length;
- const body='<div class="cinemaTop"><span>TRANSMISSION CONFIRMED</span><span>'+done+' / '+list.length+' MISSIONS</span></div><p class="cinemaEyebrow">'+(upgrade?'FRAME EVOLUTION UNLOCKED':'SIGNAL RESTORED')+'</p><h2 class="cinemaTitle">'+esc(upgrade?f.name:finished.kind==='transfer'?'Arrival confirmed':'Objective secured')+'</h2><p class="cinemaStory">'+esc(upgrade?f.code+' · '+f.role+'. Your new frame is waiting in the hangar and is equipped for the next combat mission.':finished.title)+'</p><div class="missionDossier"><span>'+(m?'NEXT IN THE STORY':'NETWORK RESTORED')+'</span><h3>'+esc(m?m.title:'Operation Nightingale complete')+'</h3><p>'+clearedChapters()+' / 20 chapters restored · '+(R.correct||0)+' correct choices this mission</p></div><div class="cinemaBottom"><span>Progress saved automatically</span><button class="btn ghost" id="campaignHangar">Return to hangar</button></div>';
- R.showCard('cinema',upgrade?'Mecha refit complete':'Mission complete',body,m?'Continue the story':'Return to hangar',()=>m?launchMission(m):home(),300);
+ const body='<div class="cinemaTop"><span>TRANSMISSION CONFIRMED</span><span>'+done+' / '+list.length+' MISSIONS</span></div><p class="cinemaEyebrow">'+(upgrade?'FRAME EVOLUTION UNLOCKED':'SIGNAL RESTORED')+'</p><h2 class="cinemaTitle">'+esc(upgrade?f.name:finished.kind==='transfer'?'Arrival confirmed':'Objective secured')+'</h2><p class="cinemaStory">'+esc(upgrade?f.code+' · '+f.role+'. Your new frame is waiting in the hangar and is equipped for the next combat mission.':finished.title)+'</p><div class="missionDossier"><span>'+(m?(topicRun?'NEXT IN THIS TOPIC':'NEXT IN THE STORY'):(topicRun?'TOPIC TRAVERSED':'NETWORK RESTORED'))+'</span><h3>'+esc(m?m.title:topicRun?'Topic missions complete':'Operation Nightingale complete')+'</h3><p>'+clearedChapters()+' / 20 chapters restored · '+(R.correct||0)+' correct choices this mission</p></div><div class="cinemaBottom"><span>Progress saved automatically</span><button class="btn ghost" id="campaignHangar">Return to hangar</button></div>';
+ R.showCard('cinema',upgrade?'Mecha refit complete':'Mission complete',body,m?(topicRun?'Continue this topic':'Continue the story'):'Return to hangar',()=>m?launchMission(m):home(),300);
  Q('#campaignHangar').onclick=home;render();updateRibbon();return true;
 };
 function home(){active=null;R.campaignRun=false;R.active=false;R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#cardWrap').hidden=true;$.setState('idle');R.toHome();render();}
@@ -84,7 +84,7 @@ function missionItems(items){if(!R.campaignRun||!active||!save.partial||save.par
 function render(){
  const m=next(),tier=frameTier(),f=frameLook(),list=timeline(),done=list.filter(x=>complete.has(x.id)).length,percent=list.length?Math.round(done/list.length*100):0;
  const chapter=m?m.chapter:19;Q('#campaignChapter').textContent='CHAPTER '+String(chapter+1).padStart(2,'0')+' / 20';Q('#campaignTitle').textContent=m?m.ch.story[0]:'Network restored';Q('#campaignStory').textContent=m?m.ch.story[1]:'The course has been traversed. Keep building mastery through daily review and free-flight missions.';
- Q('#campaignObjective').textContent=m?m.title:'Operation Nightingale complete';Q('#campaignLaunch').textContent='Open war map / deploy →';Q('#campaignLaunch').disabled=false;
+ Q('#campaignObjective').textContent=m?m.title:topicRun?'Topic missions complete':'Operation Nightingale complete';Q('#campaignLaunch').textContent='Open war map / deploy →';Q('#campaignLaunch').disabled=false;
  Q('#frameName').textContent=f.name;Q('#frameCode').textContent=f.code+' / '+f.role;Q('#campaignProgress').textContent=done+' / '+list.length+' missions · '+clearedChapters()+' / 20 chapters';Q('#campaignFill').style.width=percent+'%';
  Q('#frameNext').textContent=R.frames[tier+1]?'Next refit: '+R.frames[tier+1].name+' · '+Math.max(0,FRAME_HITS[tier+1]-save.visualXP)+' correct hits to refit':'Reactor livery evolves every 10 further correct hits';
  Q('#chapterRail').innerHTML=chapters().map(ch=>{const n=ch.concepts.filter(c=>complete.has('concept::'+ch.room.topic+'::'+c.title)).length,status=n===ch.concepts.length?'done':ch.index===chapter?'current':'locked';return '<div class="chapterNode '+status+'" title="'+esc(ch.room.topic)+'"><span>'+String(ch.index+1).padStart(2,'0')+'</span><b>'+esc(ch.story[0])+'</b><small>'+n+'/'+ch.concepts.length+' missions</small></div>';}).join('');
@@ -93,19 +93,35 @@ function render(){
 }
 function updateRibbon(){const el=Q('#missionRibbon');el.hidden=!R.campaignRun||!R.active||!active||!!R.modeName();if(el.hidden){ribbonKey='';return;}const key=active.id+'::'+frameTier();if(key===ribbonKey)return;ribbonKey=key;const f=frameLook();el.innerHTML='<span>CH '+String(active.chapter+1).padStart(2,'0')+' · '+(active.kind==='transfer'?'DISPATCH':'NIGHTINGALE')+'</span><b>'+esc(active.title)+'</b><small>'+esc(f.name)+' · progress saves as you answer</small>';}
 function drawLoadout(){const cv=Q('#loadoutShip'),g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.strokeStyle='#66b9c533';g.lineWidth=1;for(let x=0;x<cv.width;x+=20){g.beginPath();g.moveTo(x,0);g.lineTo(x,cv.height);g.stroke();}for(let y=0;y<cv.height;y+=20){g.beginPath();g.moveTo(0,y);g.lineTo(cv.width,y);g.stroke();}R.drawFrame(g,180,90,2,frameTier(),save.visualXP*.1,true,-Math.PI/2,0);}
-function openWarMap(){R.showScreen('warRoom');renderWarMap();}
-function renderWarMap(){
- const m=next(),all=R.deckRooms(),items=all.flatMap(r=>r.items),retired=items.filter(R.isMastered).length,selected=m?m.chapter:0;
- Q('#warCount').textContent=all.length+' SECTORS / '+all.reduce((n,r)=>n+r.concepts.length,0)+' CONCEPTS';Q('#warMastery').textContent=retired+' / '+items.length+' ITEMS RETIRED';
- Q('#warNext').textContent=m?m.ch.room.topic+' · '+m.title:'All campaign objectives secured';Q('#warDeploy').disabled=!m;
- const positions=all.map((r,i)=>{const row=Math.floor(i/4),col=row%2?3-i%4:i%4;return{x:125+250*col,y:64+128*row};});
- Q('#warPaths').innerHTML=positions.slice(1).map((p,i)=>{const a=positions[i];return '<path d="M'+a.x+' '+a.y+' L'+p.x+' '+p.y+'" fill="none" stroke="'+(i<selected?'#a5d3ad':'#416c79')+'" stroke-width="2" stroke-dasharray="5 7"/>';}).join('');
- Q('#warNodes').innerHTML=all.map((r,i)=>{const done=r.items.filter(R.isMastered).length,p=positions[i],status=done===r.items.length?'secured':i===selected?'active':'pending';return '<button class="warNode '+status+'" data-sector="'+i+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%"><span>SECTOR '+String(i+1).padStart(2,'0')+' / '+(status==='secured'?'SECURED':i===selected?'NEXT OBJECTIVE':'INTEL')+'</span><b>'+esc(r.topic)+'</b><small>'+done+' / '+r.items.length+' retired</small><i style="--sectorFill:'+(done/r.items.length*100)+'%"></i></button>';}).join('');
- Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selected);
+function topicProgress(r){
+ const stats=R.itemStats(),total=r.items.length,retired=r.items.filter(R.isMastered).length;
+ const units=r.items.reduce((sum,it)=>sum+(R.isMastered(it)?3:Math.max(0,Math.min(3,(stats[it.id]||{}).box||0))),0);
+ const started=r.items.some(it=>{const st=stats[it.id]||{};return(st.seen||st.right||st.wrong||0)>0;});
+ const raw=total?units/(total*3):0,percent=retired===total?100:Math.min(99,Math.round(raw*100));
+ return {retired,total,percent,started,state:retired===total?'full':!started&&units===0?'empty':percent<34?'started':percent<67?'half':'advanced'};
 }
-function inspectSector(i){const r=R.deckRooms()[i];Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';const retired=r.items.filter(R.isMastered).length;Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+r.items.length+'<small>ITEMS</small></b><b>'+retired+'<small>RETIRED</small></b>';Q('#warConcepts').innerHTML=r.concepts.map(c=>'<li class="'+(c.items.every(R.isMastered)?'retired':'')+'">'+esc(c.title)+'<small>'+c.items.filter(R.isMastered).length+'/'+c.items.length+'</small></li>').join('');Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.classList.toggle('selected',+b.dataset.sector===i));}
-R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon};
-Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=launch;Q('#warBack').onclick=()=>R.showScreen('home');
+function sectorMission(i,allowReplay=true){const list=timeline().filter(m=>m.kind==='concept'&&m.chapter===i&&m.concept.items.some(it=>!R.isMastered(it)));return list.find(m=>!complete.has(m.id))||(allowReplay?list[0]:null);}
+function openWarMap(){const m=next();selectedSector=m?m.chapter:0;R.showScreen('warRoom');renderWarMap();}
+function renderWarMap(){
+ const all=R.deckRooms(),items=all.flatMap(r=>r.items),retired=items.filter(R.isMastered).length;
+ Q('#warCount').textContent=all.length+' SECTORS / '+all.reduce((n,r)=>n+r.concepts.length,0)+' CONCEPTS';Q('#warMastery').textContent=retired+' / '+items.length+' ITEMS RETIRED';
+ const positions=all.map((r,i)=>{const row=Math.floor(i/4),col=row%2?3-i%4:i%4;return{x:125+250*col,y:64+128*row};});
+ Q('#warPaths').innerHTML=positions.slice(1).map((p,i)=>{const a=positions[i];return '<path d="M'+a.x+' '+a.y+' L'+p.x+' '+p.y+'" fill="none" stroke="#416c79" stroke-width="2" stroke-dasharray="5 7"/>';}).join('');
+ const labels={empty:'UNTOUCHED',started:'IN PROGRESS',half:'BUILDING MASTERY',advanced:'NEARLY MASTERED',full:'MASTERED'};
+ Q('#warNodes').innerHTML=all.map((r,i)=>{const p=positions[i],st=topicProgress(r);return '<button class="warNode progress-'+st.state+'" data-sector="'+i+'" aria-label="'+esc(r.topic)+', '+st.percent+'% progress, '+labels[st.state].toLowerCase()+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%;--sectorFill:'+st.percent+'%"><span>SECTOR '+String(i+1).padStart(2,'0')+' / '+labels[st.state]+'</span><b>'+esc(r.topic)+'</b><small>'+st.percent+'% progress · '+st.retired+'/'+st.total+' mastered</small><i></i></button>';}).join('');
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selectedSector);
+}
+function selectMission(m){selectedMission=m;const r=R.deckRooms()[selectedSector];Q('#warNext').textContent=m?r.topic+' · '+m.title:r.topic+' · fully mastered';Q('#warDeploy').disabled=!m;Q('#warDeploy').textContent=m?'Deploy selected mission →':'Topic mastered';Q('#warConcepts').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!!m&&b.dataset.mission===m.id)));}
+function inspectSector(i){selectedSector=i;const r=R.deckRooms()[i],st=topicProgress(r);Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';
+ Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+st.percent+'%<small>PROGRESS</small></b><b>'+st.retired+'/'+st.total+'<small>MASTERED</small></b>';
+ const missions=timeline().filter(m=>m.kind==='concept'&&m.chapter===i);
+ Q('#warConcepts').innerHTML=missions.map((m,k)=>{const c=m.concept,retired=c.items.filter(R.isMastered).length;return '<li class="'+(retired===c.items.length?'retired':'')+'"><button data-mission="'+esc(m.id)+'" data-concept="'+k+'"'+(retired===c.items.length?' disabled':'')+'>'+esc(c.title)+'<small>'+retired+'/'+c.items.length+' mastered'+(retired===c.items.length?' · complete':' · select mission')+'</small></button></li>';}).join('');
+ Q('#warConcepts').querySelectorAll('button').forEach(b=>b.onclick=()=>selectMission(missions[+b.dataset.concept]));
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>{b.classList.toggle('selected',+b.dataset.sector===i);b.setAttribute('aria-pressed',String(+b.dataset.sector===i));});selectMission(sectorMission(i));
+}
+function deploySelected(){if(!selectedMission)return;topicRun=true;launchMission(selectedMission);}
+R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon,topicProgress,renderWarMap,inspectSector};
+Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=deploySelected;Q('#warBack').onclick=()=>R.showScreen('home');
 // Animated hangar, drawn at a bounded resolution and paused when it is off screen.
 let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
 function hangar(now){requestAnimationFrame(hangar);if(now-last<(reduced?1000:33)||Q('#home').hidden)return;const rect=canvas.getBoundingClientRect();if(rect.bottom<0||rect.top>window.innerHeight)return;last=now;

@@ -252,6 +252,13 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
 @media(prefers-reduced-motion:reduce){.opsCard{transition:none}.opsCard:hover{transform:none}}
 
 #operationTouch{display:none} @media(max-width:750px){#operationTouch{position:absolute;z-index:5;right:10px;display:flex;gap:8px}#operationTouch button{background:#112934ed;color:#e0e8db;border:1px solid #94aaa6;padding:10px 12px;font:11px monospace;touch-action:none}}
+
+.warLegend{display:flex;flex-wrap:wrap;gap:18px;padding:13px 20px;background:#0a1722;border:1px solid #3a515d;font:10px var(--mono);color:#c1cece}.warLegend span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--progress-color)}.legend-empty{--progress-color:#667a8d}.legend-started{--progress-color:#69b9eb}.legend-half{--progress-color:#e6bb68}.legend-advanced{--progress-color:#91d4b4}.legend-full{--progress-color:#53d784}.warNode{--progress-color:#667a8d;--progress-tint:#162535;border-color:var(--progress-color);background:linear-gradient(140deg,var(--progress-tint),#091621)}.warNode.progress-started{--progress-color:#69b9eb;--progress-tint:#183e58}.warNode.progress-half{--progress-color:#e6bb68;--progress-tint:#4b3e24}.warNode.progress-advanced{--progress-color:#91d4b4;--progress-tint:#214a43}.warNode.progress-full{--progress-color:#53d784;--progress-tint:#195235}.warNode>span{color:var(--progress-color)}.warNode>i{background:linear-gradient(90deg,var(--progress-color) var(--sectorFill),#2a3a47 var(--sectorFill))}.warNode.selected{outline:2px solid #e4e9d7;outline-offset:4px;box-shadow:0 0 24px #d2e6ee22}.warIntelStats b{font-size:19px}.warIntel li button{display:block;width:100%;border:1px solid transparent;text-align:left;color:inherit;background:transparent;padding:8px;font:inherit;line-height:1.5;cursor:pointer}.warIntel li button[aria-pressed=true]{border-color:#e2c38a;background:#273a45;color:#f3edda}.warIntel li button:hover:not(:disabled){background:#203946}.warIntel li button:disabled{opacity:.7;cursor:default}
+
+
+.opsHeading{display:grid;grid-template-columns:1fr 1fr}.opsHeading>p{justify-self:end}.opsHeading>#opsRandom{grid-column:2;justify-self:end;margin:0}.opsEquipment{border:1px solid #4d6670;background:#10232e;overflow:hidden}.opsEquipment canvas{width:100%;height:170px;object-fit:contain;display:block}.opsEquipment>b,.opsEquipment>small{display:block;padding:0 14px;color:#dbe5d7}.opsEquipment>b{font-size:16px;margin-bottom:6px}.opsEquipment>small{font:10px var(--mono);color:#b0c7c8;line-height:1.5;padding-bottom:14px}.opsFields{grid-template-columns:1fr 1fr}.opsFields>.opsEquipment,.opsFields>p,.opsFields>.launchBtn{grid-column:1/-1}#opsSetup{grid-template-columns:.7fr 1.3fr}
+@media(max-width:750px){.opsHeading{display:block}.opsHeading>#opsRandom{width:100%;margin-top:15px}#opsSetup{grid-template-columns:1fr}.opsFields{grid-template-columns:1fr}.opsEquipment canvas{height:150px}#stealthTouch{gap:5px;right:8px}#stealthTouch button{font-size:10px;padding:10px 8px}#stealthTouch #stealthTool{max-width:66px}}
+
 </style>
 
 <section id="home" class="page">
@@ -319,11 +326,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 <section id="warRoom" class="warRoom page" hidden>
- <header class="warHeader"><div><p class="warKicker">NIGHTINGALE // TACTICAL OPERATIONS</p><h1>SYLLABUS <em>WAR MAP</em></h1><p>Twenty sectors. One campaign. Mastered questions stay retired.</p></div><button class="btn ghost" id="warBack" data-go="home">← Armoury</button></header>
+ <header class="warHeader"><div><p class="warKicker">NIGHTINGALE // TACTICAL OPERATIONS</p><h1>SYLLABUS <em>WAR MAP</em></h1><p>Choose any topic. Build mastery in any order. Mastered questions stay retired.</p></div><button class="btn ghost" id="warBack" data-go="home">← Armoury</button></header>
  <div class="warStatus"><span id="warCount"></span><span id="warMastery"></span><span class="warLive">● STRATEGIC LINK LIVE</span></div>
+ <div class="warLegend" aria-label="Map progress colours"><span class="legend-empty">Untouched</span><span class="legend-started">Started</span><span class="legend-half">Halfway</span><span class="legend-advanced">Nearly mastered</span><span class="legend-full">Mastered</span></div>
  <div class="warLayout"><div class="warBoard"><div class="warScan"></div><svg class="warLinks" viewBox="0 0 1000 640" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="warGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#89b3ad" stroke-opacity=".1"/></pattern></defs><rect width="1000" height="640" fill="url(#warGrid)"/><path d="M30 550 L110 470 80 350 200 180 290 140 400 55 580 120 700 80 875 155 970 310 880 470 720 560 480 610 260 530Z" fill="#30534b" fill-opacity=".13" stroke="#65958a" stroke-opacity=".22"/><g id="warPaths"></g></svg><div id="warNodes"></div></div>
  <aside class="warIntel"><p class="warKicker" id="warSector"></p><h2 id="warTopic"></h2><p id="warIntelText"></p><div id="warIntelStats" class="warIntelStats"></div><h3>MISSION INTELLIGENCE</h3><ol id="warConcepts"></ol></aside></div>
- <footer class="warFooter"><div><span>NEXT DEPLOYMENT</span><b id="warNext"></b><small>Future sectors can be inspected. Deployment follows your campaign order.</small></div><button id="warDeploy" class="btn launchBtn">Deploy next mission →</button></footer>
+ <footer class="warFooter"><div><span>NEXT DEPLOYMENT</span><b id="warNext"></b><small>Choose any topic, select a concept, then deploy. Progress saves across all game modes.</small></div><button id="warDeploy" class="btn launchBtn">Deploy next mission →</button></footer>
 </section>
 
 <section id="play" hidden>

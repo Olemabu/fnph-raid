@@ -252,6 +252,13 @@ textarea{width:100%;min-height:55vh;box-sizing:border-box;background:var(--panel
 @media(prefers-reduced-motion:reduce){.opsCard{transition:none}.opsCard:hover{transform:none}}
 
 #operationTouch{display:none} @media(max-width:750px){#operationTouch{position:absolute;z-index:5;right:10px;display:flex;gap:8px}#operationTouch button{background:#112934ed;color:#e0e8db;border:1px solid #94aaa6;padding:10px 12px;font:11px monospace;touch-action:none}}
+
+.warLegend{display:flex;flex-wrap:wrap;gap:18px;padding:13px 20px;background:#0a1722;border:1px solid #3a515d;font:10px var(--mono);color:#c1cece}.warLegend span:before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--progress-color)}.legend-empty{--progress-color:#667a8d}.legend-started{--progress-color:#69b9eb}.legend-half{--progress-color:#e6bb68}.legend-advanced{--progress-color:#91d4b4}.legend-full{--progress-color:#53d784}.warNode{--progress-color:#667a8d;--progress-tint:#162535;border-color:var(--progress-color);background:linear-gradient(140deg,var(--progress-tint),#091621)}.warNode.progress-started{--progress-color:#69b9eb;--progress-tint:#183e58}.warNode.progress-half{--progress-color:#e6bb68;--progress-tint:#4b3e24}.warNode.progress-advanced{--progress-color:#91d4b4;--progress-tint:#214a43}.warNode.progress-full{--progress-color:#53d784;--progress-tint:#195235}.warNode>span{color:var(--progress-color)}.warNode>i{background:linear-gradient(90deg,var(--progress-color) var(--sectorFill),#2a3a47 var(--sectorFill))}.warNode.selected{outline:2px solid #e4e9d7;outline-offset:4px;box-shadow:0 0 24px #d2e6ee22}.warIntelStats b{font-size:19px}.warIntel li button{display:block;width:100%;border:1px solid transparent;text-align:left;color:inherit;background:transparent;padding:8px;font:inherit;line-height:1.5;cursor:pointer}.warIntel li button[aria-pressed=true]{border-color:#e2c38a;background:#273a45;color:#f3edda}.warIntel li button:hover:not(:disabled){background:#203946}.warIntel li button:disabled{opacity:.7;cursor:default}
+
+
+.opsHeading{display:grid;grid-template-columns:1fr 1fr}.opsHeading>p{justify-self:end}.opsHeading>#opsRandom{grid-column:2;justify-self:end;margin:0}.opsEquipment{border:1px solid #4d6670;background:#10232e;overflow:hidden}.opsEquipment canvas{width:100%;height:170px;object-fit:contain;display:block}.opsEquipment>b,.opsEquipment>small{display:block;padding:0 14px;color:#dbe5d7}.opsEquipment>b{font-size:16px;margin-bottom:6px}.opsEquipment>small{font:10px var(--mono);color:#b0c7c8;line-height:1.5;padding-bottom:14px}.opsFields{grid-template-columns:1fr 1fr}.opsFields>.opsEquipment,.opsFields>p,.opsFields>.launchBtn{grid-column:1/-1}#opsSetup{grid-template-columns:.7fr 1.3fr}
+@media(max-width:750px){.opsHeading{display:block}.opsHeading>#opsRandom{width:100%;margin-top:15px}#opsSetup{grid-template-columns:1fr}.opsFields{grid-template-columns:1fr}.opsEquipment canvas{height:150px}#stealthTouch{gap:5px;right:8px}#stealthTouch button{font-size:10px;padding:10px 8px}#stealthTouch #stealthTool{max-width:66px}}
+
 </style>
 
 <section id="home" class="page">
@@ -319,11 +326,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 <section id="warRoom" class="warRoom page" hidden>
- <header class="warHeader"><div><p class="warKicker">NIGHTINGALE // TACTICAL OPERATIONS</p><h1>SYLLABUS <em>WAR MAP</em></h1><p>Twenty sectors. One campaign. Mastered questions stay retired.</p></div><button class="btn ghost" id="warBack" data-go="home">← Armoury</button></header>
+ <header class="warHeader"><div><p class="warKicker">NIGHTINGALE // TACTICAL OPERATIONS</p><h1>SYLLABUS <em>WAR MAP</em></h1><p>Choose any topic. Build mastery in any order. Mastered questions stay retired.</p></div><button class="btn ghost" id="warBack" data-go="home">← Armoury</button></header>
  <div class="warStatus"><span id="warCount"></span><span id="warMastery"></span><span class="warLive">● STRATEGIC LINK LIVE</span></div>
+ <div class="warLegend" aria-label="Map progress colours"><span class="legend-empty">Untouched</span><span class="legend-started">Started</span><span class="legend-half">Halfway</span><span class="legend-advanced">Nearly mastered</span><span class="legend-full">Mastered</span></div>
  <div class="warLayout"><div class="warBoard"><div class="warScan"></div><svg class="warLinks" viewBox="0 0 1000 640" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="warGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#89b3ad" stroke-opacity=".1"/></pattern></defs><rect width="1000" height="640" fill="url(#warGrid)"/><path d="M30 550 L110 470 80 350 200 180 290 140 400 55 580 120 700 80 875 155 970 310 880 470 720 560 480 610 260 530Z" fill="#30534b" fill-opacity=".13" stroke="#65958a" stroke-opacity=".22"/><g id="warPaths"></g></svg><div id="warNodes"></div></div>
  <aside class="warIntel"><p class="warKicker" id="warSector"></p><h2 id="warTopic"></h2><p id="warIntelText"></p><div id="warIntelStats" class="warIntelStats"></div><h3>MISSION INTELLIGENCE</h3><ol id="warConcepts"></ol></aside></div>
- <footer class="warFooter"><div><span>NEXT DEPLOYMENT</span><b id="warNext"></b><small>Future sectors can be inspected. Deployment follows your campaign order.</small></div><button id="warDeploy" class="btn launchBtn">Deploy next mission →</button></footer>
+ <footer class="warFooter"><div><span>NEXT DEPLOYMENT</span><b id="warNext"></b><small>Choose any topic, select a concept, then deploy. Progress saves across all game modes.</small></div><button id="warDeploy" class="btn launchBtn">Deploy next mission →</button></footer>
 </section>
 
 <section id="play" hidden>
@@ -3409,7 +3417,7 @@ const ARSENAL=[
 const totalMastered=()=>deck.rooms.reduce((n,r)=>n+masteredCount(r),0);
 function arsenalTier(){const m=totalMastered();let t=0;ARSENAL.forEach((a,i)=>{if(m>=a.at)t=i;});return t;}
 function applyArsenal(announce){
-  const t=arsenalTier(),prev=R.tier;R.tier=t;$.arsenal=ARSENAL[t];
+  const t=arsenalTier(),prev=R.tier;R.tier=t;$.arsenal=ARSENAL[t];if(R.applySelectedWeapon)R.applySelectedWeapon();
   if(announce&&prev!=null&&t>prev)setTimeout(()=>{R.toast('Arsenal upgraded: '+ARSENAL[t].name+'. Answer gunships are armoured up too.',true);synth('mastered');},1300);
 }
 function arsenalLine(){const t=arsenalTier(),m=totalMastered(),nx=ARSENAL[t+1];return 'Arsenal: <b>'+ARSENAL[t].name+'</b>'+(nx?' · next, '+nx.name+', at '+nx.at+' mastered (you have '+m+')':' · fully upgraded');}
@@ -3895,7 +3903,7 @@ function afterCorrect(){
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
   if(mastered(it)){nextQuestion();return;}
-  if(teachAll&&!R.campaignRun){learnCard(it);}else nextQuestion();
+  if(teachAll&&!R.campaignRun&&!R.rooms[R.si].randomFree){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
   let body='<p class="cq">'+esc(it.prompt)+'</p>';
@@ -3969,6 +3977,7 @@ function swarmDown(){
 }
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
+  if(R.onFreeRunClear&&R.onFreeRunClear(r))return;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
   const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
   if(allC&&!r.review){captured.add(r.topic);store.set('captured',[...captured]);}R.taken++;
@@ -4565,6 +4574,31 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 </script>
+<script>/* src/loadouts.js */
+/* Explicit free-run loadouts. Campaign arsenal progression remains earned. */
+(function(){
+'use strict';
+const R=$.raid;
+R.vehicles=[
+ {id:'ambulance',name:'Response ambulance',color:'#d9dfda',speed:1,handling:1,description:'Balanced speed and steering · emergency lights'},
+ {id:'coupe',name:'Apex rally coupe',color:'#bc7455',speed:1.18,handling:1.3,description:'Faster approach · sharper steering'},
+ {id:'suv',name:'Bastion armoured SUV',color:'#718a73',speed:.88,handling:.8,description:'Slower approach · steadier steering'}
+];
+R.weaponCatalog=[
+ {id:'pulse',name:'Pulse carbine',fireRate:5,speed:10,count:1,spread:.1,damage:1,piercing:0,size:24,lineWidth:2.6,color:'#e3bb7c',homing:0,description:'Single round · 3 hits per drone'},
+ {id:'twin',name:'Twin-burst SMG',fireRate:8,speed:12,count:2,spread:.08,damage:.75,piercing:0,size:24,lineWidth:2.6,color:'#9bce9b',homing:0,description:'Two rounds per burst · 2 bursts per drone'},
+ {id:'rail',name:'Longshot rail rifle',fireRate:20,speed:18,count:1,spread:0,damage:3,piercing:1,size:36,lineWidth:3.6,color:'#84c8e3',homing:0,description:'Slow precision shot · 1 hit per drone'}
+];
+R.covertTools=[
+ {id:'dart',name:'Stun dart pistol',range:5,duration:7,cooldown:4,description:'Stun one visible patrol · 4 second recharge'},
+ {id:'emp',name:'EMP projector',range:3.5,duration:5,cooldown:9,description:'Disable nearby patrols together · 9 second recharge'}
+];
+R.vehicle=()=>R.vehicles.find(v=>v.id===(R.runLoadout||{}).vehicle)||R.vehicles[0];
+R.covertTool=()=>R.covertTools.find(v=>v.id===(R.runLoadout||{}).tool)||R.covertTools[0];
+R.applySelectedWeapon=()=>{const selected=R.weaponCatalog.find(w=>w.id===(R.runLoadout||{}).weapon);if(selected)$.arsenal={...$.arsenal,...selected};};
+})();
+
+</script>
 <script>/* src/stage3d.js */
 /* FNPH's dependency-free WebGL scene renderer. Geometry, materials and lighting
    are authored here; no network assets or libraries are needed by the build. */
@@ -4630,10 +4664,12 @@ function begin(w,h,cam,target,fov=.82,fog='#102332',density=.025){
 function end(c){gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,mesh.subarray(0,used),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,used/10);c.drawImage(canvas,0,0,width,height);api.vertices=used/10;}
 function bloom(c,p,r,col){const q=project(p);if(!q.visible||q.x< -r||q.x>width+r||q.y< -r||q.y>height+r)return;const g=c.createRadialGradient(q.x,q.y,0,q.x,q.y,r);g.addColorStop(0,col+'55');g.addColorStop(.15,col+'22');g.addColorStop(1,col+'00');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(q.x-r,q.y-r,r*2,r*2);c.restore();}
 function project(p){const a=[...p,1],o=[0,0,0,0];for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[r]+=matrix[k*4+r]*a[k];return{x:(o[0]/o[3]*.5+.5)*width,y:(.5-o[1]/o[3]*.5)*height,visible:o[3]>0};}
-function car(x,z,color='#e0ddd0',ambulance=false,angle=0,time=0){
+function car(x,z,color='#e0ddd0',ambulance=false,angle=0,time=0,kind='coupe'){
  shadow(x,z,2.5,4.7);const part=(dx,y,dz,w,h,d,col,e=0)=>{const ca=Math.cos(angle),sa=Math.sin(angle);box(x+dx*ca-dz*sa,y,z+dx*sa+dz*ca,w,h,d,col,angle,e);};
  bevel(x,.68,z,2.05,.72,4.3,color,angle);part(0,.38,0,2.1,.18,4.5,'#14212b');
- bevel(x,1.20,z+(ambulance?-.35:0),1.85,.73,ambulance?3.3:2.6,color,angle);
+ bevel(x,kind==='suv'?1.38:1.20,z+(ambulance?-.35:0),1.85,kind==='suv'?1.05:.73,ambulance?3.3:2.6,color,angle);
+ if(!ambulance&&kind==='coupe'){part(0,1.06,1.85,2.25,.1,.4,'#1e313c');for(const s of [-1,1])part(s*.7,.87,1.85,.08,.3,.15,'#6f838c');}
+ if(kind==='suv'){part(0,1.98,0,1.65,.1,2.4,'#243c46');for(const s of [-1,1])part(s*.82,2.08,0,.08,.12,2.8,'#9aa69b');part(0,.65,2.24,1.9,.22,.25,'#263b40');}
  part(0,1.3,1.28,1.65,.47,.035,'#173345');part(0,1.32,-1.34,1.65,.42,.035,'#294857');
  for(const s of [-1,1]){for(const dz of [-1.3,1.3]){const ca=Math.cos(angle),sa=Math.sin(angle);wheel(x+s*.98*ca-dz*sa,.39,z+s*.98*sa+dz*ca,angle);}part(s*.73,.75,2.16,.42,.16,.03,'#ff4c47',1);part(s*.73,.75,-2.16,.42,.14,.03,'#e4f5ff',1);part(s*1.035,1.4,.7,.025,.29,.6,'#244756');part(s*1.12,1.13,-.92,.22,.18,.19,'#172a34');}
  if(ambulance){part(0,1.84,-.55,1.4,.16,.3,'#29343e');const blink=Math.sin(time*12)>0;part(-.46,1.88,-.55,.44,.17,.31,blink?'#ff3c56':'#293c52',blink?1:0);part(.46,1.88,-.55,.44,.17,.31,blink?'#294059':'#438bff',blink?0:1);
@@ -4674,11 +4710,12 @@ api.race=function(c,w,h,r,theme){
  const gz=2.1-r.z*.095,xx=curve(gz);for(const s of [-1,1])box(xx+s*6.6,2.4,gz,.25,4.8,.3,'#a6a89a');box(xx,4.8,gz,13.5,.23,.35,'#82929b');
  const colors=['#e57aa1','#66c7dd','#e5c27d','#9bd6ab'];
  for(let i=0;i<r.n;i++){const x=xx-6+(i+.5)*12/r.n;box(x,4.1,gz,11/r.n,1.0,.2,'#172e3d');box(x,3.54,gz+.12,10/r.n,.055,.02,colors[i],0,1);for(let b=0;b<=i;b++)box(x+(b-i/2)*.15,4.12,gz+.12,.07,.4,.02,colors[i],0,1);}
- car(px,2.1,'#d9dfda',true,-Math.max(-.12,Math.min(.12,(r.target==null?0:r.target-r.x)*.2)),tm);
+ const vehicle=R.vehicle?R.vehicle():{id:'ambulance',color:'#d9dfda'};
+ car(px,2.1,vehicle.color,vehicle.id==='ambulance',-Math.max(-.12,Math.min(.12,(r.target==null?0:r.target-r.x)*.2)),tm,vehicle.id);
  end(c);
  c.save();c.textAlign='center';for(let i=0;i<r.n;i++){const p=project([xx-6+(i+.5)*12/r.n,4.1,gz+.15]);if(p.visible){c.font='bold '+Math.max(8,Math.min(80,h*.8/(13-gz)))+'px monospace';c.fillStyle=colors[i];c.fillText(String(i+1),p.x,p.y);}}c.restore();
  for(let k=0;k<7;k++){const z=-((k*12+r.pos*.24)%84)+10,xx=curve(z);for(const s of [-1,1])bloom(c,[xx+s*6.65,5.5,z],Math.max(8,180/(14-z*.7)),'#d3c4a2');}
- bloom(c,[px-.46,1.9,1.55],32,Math.sin(tm*12)>0?'#ff4967':'#407cff');bloom(c,[px+.46,1.9,1.55],32,Math.sin(tm*12)>0?'#407cff':'#ff4967');
+ if(vehicle.id==='ambulance'){bloom(c,[px-.46,1.9,1.55],32,Math.sin(tm*12)>0?'#ff4967':'#407cff');bloom(c,[px+.46,1.9,1.55],32,Math.sin(tm*12)>0?'#407cff':'#ff4967');}
  // Lens falloff, rain and restrained bloom remain inexpensive screen effects.
  const shade=c.createLinearGradient(0,0,0,h);shade.addColorStop(0,'#07132366');shade.addColorStop(.45,'#07132300');shade.addColorStop(1,'#02071088');c.fillStyle=shade;c.fillRect(0,0,w,h);
  if(theme.wet){c.strokeStyle='#c1daec44';c.lineWidth=.7;for(let k=0;k<100;k++){const x=(k*173+tm*38)%w,y=(k*91+tm*380)%h;c.beginPath();c.moveTo(x,y);c.lineTo(x-3,y+13);c.stroke();}}
@@ -4709,12 +4746,20 @@ api.fps=function(c,w,h,r){
  const fwd=[Math.cos(r.ang),Math.sin(r.ang)],right=[-Math.sin(r.ang),Math.cos(r.ang)];
  const weapon=(rx,y,forward,ww,hh,dd,col,e=0)=>{const x=8+right[0]*rx+fwd[0]*(forward+.65),z=13.2+right[1]*rx+fwd[1]*(forward+.65),angle=-r.ang-Math.PI/2;if(!e&&Math.min(ww,hh,dd)>.045)bevel(x,y,z,ww,hh,dd,col,angle);else box(x,y,z,ww,hh,dd,col,angle,e);};
  const kick=r.recoil*.07;weapon(.26,1.03,.58-kick,.21,.24,.48,'#2a3f4e');weapon(.26,1.16,.69-kick,.15,.08,.47,'#819399');weapon(.26,1.09,.98-kick,.075,.08,.32,'#182b35');weapon(.26,1.20,.83-kick,.035,.04,.21,'#5faeb9',.8);weapon(.26,.9,.62-kick,.11,.25,.14,'#182b35');weapon(.32,.78,.4,.21,.24,.35,'#273c49');weapon(.10,.89,.78,.14,.18,.2,'#283e4a');
+ const profile=(R.runLoadout||{}).weapon,accent=($.arsenal||{}).color||'#84c8e3';weapon(.37,1.09,.75,.018,.07,.25,accent,.8);
+ if(profile==='rail'){weapon(.26,1.1,1.15,.12,.12,.68,'#557584');for(const s of [-1,1])weapon(.26+s*.07,1.1,1.15,.025,.06,.64,accent,.8);}
+ if(profile==='twin')for(const s of [-1,1])weapon(.26+s*.065,1.1,1.06,.045,.07,.35,'#718991');
  for(let k=0;k<5;k++){weapon(.26,1.22,.6+k*.06,.17,.018,.018,'#a2b4b5');weapon(.375,1.07,.56+k*.065,.025,.05,.035,'#10252e');}
  for(const s of [-1,1])weapon(.26+s*.067,1.30,.72,.025,.14,.05,'#243d48');weapon(.26,1.37,.72,.16,.025,.05,'#8eaaa9');weapon(.26,1.24,.72,.16,.025,.05,'#718a91');weapon(.26,1.30,.75,.008,.008,.01,'#80d1ce',.8);weapon(.26,.96,.5,.14,.13,.14,'#85999b');
  if(r.recoil>.6)weapon(.26,1.09,1.17,.15,.15,.035,'#ffe4a2',1);
  end(c);
  for(let z=-5;z<14;z+=3)bloom(c,[8,3.45,z],Math.max(10,65/(1+Math.abs(13-z)*.16)),'#b9ebdf');
 };
+api.loadout=function(c,w,h,kind,id){begin(w,h,kind==='vehicle'?[6,3.8,7]:[2.5,1.8,3.5],[0,.7,0],.7,'#112631',.015);box(0,-.1,0,20,.2,20,'#283e46');ring(0,.01,0,kind==='vehicle'?3:1.5,'#769f9f');
+ if(kind==='vehicle'){const v=R.vehicles.find(v=>v.id===id)||R.vehicles[0];car(0,0,v.color,v.id==='ambulance',-.4,performance.now()/1000,v.id);}
+ else{const tool=kind==='tool',rail=id==='rail',emp=id==='emp',col=tool?'#b3d4ba':(R.weaponCatalog.find(w=>w.id===id)||{}).color||'#e3bb7c';shadow(0,0,2,1);bevel(0,.8,0,.26,.32,tool?.65:.95,'#506a76');bevel(0,.5,.17,.17,.45,.2,'#223e4a');box(0,.98,0,.3,.05,.65,'#a3b8b5');box(0,.83,rail?-.95:-.65,emp?.3:.09,emp?.2:.09,rail?1:.65,'#294853');box(.14,.82,0,.025,.1,.55,col,0,1);for(let k=0;k<6;k++)box(0,1.02,.24-k*.1,.32,.025,.03,'#839eaa');
+  if(rail)for(const s of [-1,1])box(s*.075,.83,-.9,.025,.07,.9,col,0,.8);if(id==='twin')for(const s of [-1,1])box(s*.07,.82,-.7,.045,.08,.7,'#8ca3ab');if(emp){cylinder(0,.9,-.75,.23,.12,col);box(0,.8,-.45,.4,.4,.25,'#516f79');}}
+ end(c);};
 api.begin=begin;api.end=end;api.box=box;api.bevel=bevel;api.cylinder=cylinder;api.ring=ring;api.project=project;api.shadow=shadow;api.available=true;api.canvas=canvas;
 canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();api.available=false;});
 }catch(e){api.error=e.message;api.available=false;}
@@ -4786,12 +4831,12 @@ function update(dt){
   if($.pad&&Math.abs($.pad.mx||0)>.2)steer=$.pad.mx;
   if(steer){r.target=null;mouseX=null;}
   if(mouseX!=null)r.target=Math.max(-1,Math.min(1,(mouseX-.5)*2.4));
-  if(steer)r.x+=steer*.035*dt;
+  if(steer)r.x+=steer*.035*dt*(R.vehicle?R.vehicle().handling:1);
   else if(r.target!=null)r.x+=(r.target-r.x)*Math.min(1,.12*dt);
   r.x=Math.max(-1.05,Math.min(1.05,r.x));
   // throttle: up/W boosts (more points), down/S brakes (more reading time)
   const up=R.touchBoost||k.up||($.pad&&$.pad.my<-.5),down=R.touchBrake||k.down||($.pad&&$.pad.my>.5);
-  r.boost=up?1.7:down?.45:1;
+  r.boost=(up?1.7:down?.45:1)*(R.vehicle?R.vehicle().speed:1);
   const base=Z0/(r.dur*60);
   const live=R.phase==='fight';
   const want=live?base*r.boost:base*.25;
@@ -4917,17 +4962,21 @@ function draw(){
   c.save();c.translate(ax,ay);c.rotate(tilt);
   c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(0,chh*.52,cw*.62,chh*.12,0,0,Math.PI*2);c.fill();
   c.fillStyle='#111';c.fillRect(-cw*.48,chh*.30,cw*.18,chh*.22);c.fillRect(cw*.30,chh*.30,cw*.18,chh*.22);
-  const body=c.createLinearGradient(-cw/2,0,cw/2,0);body.addColorStop(0,'#8ca4af');body.addColorStop(.12,'#edf0e8');body.addColorStop(.7,'#d5dfdf');body.addColorStop(1,'#718c9f');c.fillStyle=body;c.fillRect(-cw/2,-chh*.5,cw,chh*.86);c.strokeStyle='#e5efff';c.lineWidth=1;c.strokeRect(-cw/2,-chh*.5,cw,chh*.86);
+  const selectedVehicle=R.vehicle?R.vehicle():{id:'ambulance',color:'#d9dfda'};
+  c.scale(selectedVehicle.id==='coupe'?1.15:1,selectedVehicle.id==='coupe'?.67:1);
+  const body=c.createLinearGradient(-cw/2,0,cw/2,0);body.addColorStop(0,'#8ca4af');body.addColorStop(.12,'#edf0e8');body.addColorStop(.7,selectedVehicle.color);body.addColorStop(1,'#718c9f');c.fillStyle=body;c.fillRect(-cw/2,-chh*.5,cw,chh*.86);c.strokeStyle='#e5efff';c.lineWidth=1;c.strokeRect(-cw/2,-chh*.5,cw,chh*.86);
   c.fillStyle='#d01f3c';c.fillRect(-cw/2,chh*.02,cw,chh*.1);
   c.fillStyle='#1c2a3a';c.fillRect(-cw*.36,-chh*.40,cw*.3,chh*.28);c.fillRect(cw*.06,-chh*.40,cw*.3,chh*.28);
-  c.fillStyle='#d01f3c';c.fillRect(-cw*.05,-chh*.36,cw*.1,chh*.22);c.fillRect(-cw*.11,-chh*.3,cw*.22,chh*.09);
+  if(selectedVehicle.id==='ambulance'){c.fillStyle='#d01f3c';c.fillRect(-cw*.05,-chh*.36,cw*.1,chh*.22);c.fillRect(-cw*.11,-chh*.3,cw*.22,chh*.09);}
   c.strokeStyle='#bad2e177';c.lineWidth=1;c.beginPath();c.moveTo(0,-chh*.46);c.lineTo(0,chh*.3);c.moveTo(-cw*.36,-chh*.39);c.lineTo(-cw*.09,-chh*.18);c.moveTo(cw*.07,-chh*.39);c.lineTo(cw*.34,-chh*.18);c.stroke();
+  if(selectedVehicle.id==='ambulance'){
   const blink=(Date.now()/180|0)%2;
   c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.fillRect(-cw*.42,-chh*.62,cw*.3,chh*.12);
   c.fillStyle=blink?'#ff2a3d':'#2f7bff';c.fillRect(cw*.12,-chh*.62,cw*.3,chh*.12);
   c.globalAlpha=.18;c.fillStyle=blink?'#2f7bff':'#ff2a3d';c.beginPath();c.ellipse(blink?-cw*.27:cw*.27,-chh*.56,cw*.32,chh*.16,0,0,Math.PI*2);c.fill();c.globalAlpha=1;
+  }
   c.fillStyle=r.boost>1.2?'#ffb03a':'#ff4040';c.fillRect(-cw*.48,chh*.14,cw*.12,chh*.08);c.fillRect(cw*.36,chh*.14,cw*.12,chh*.08);
-  c.fillStyle='#0b0e14';c.font='800 '+(cw*.09|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText('FNPH',0,chh*.3);
+  c.fillStyle='#0b0e14';c.font='800 '+(cw*.09|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText(selectedVehicle.id==='ambulance'?'FNPH':selectedVehicle.id==='coupe'?'APEX':'BASTION',0,chh*.3);
   c.restore();
   }
   // lane marker under the ambulance
@@ -5089,7 +5138,7 @@ function shoot(){
   r.tracers.push({x0:gun.x,y0:gun.y,x1:ch.x,y1:ch.y,life:6,col:($.arsenal&&$.arsenal.color)||'#ffd27a'});
   if(!best)return;
   const dmg=($.hero&&$.hero.weapon&&$.hero.weapon.bullet&&$.hero.weapon.bullet.damage)||1;
-  best.hp-=dmg;best.flash=8;$.audio&&$.audio.play('hit');
+  best.hp-=dmg*(R.runLoadout&&R.runLoadout.weapon&&R.runLoadout.weapon!=='earned'?($.hero.weapon.count||1):1);best.flash=8;$.audio&&$.audio.play('hit');
   burst(ch.x,ch.y,COL[best.i],14,6);
   if(best.hp<=0)pick(best);
 }
@@ -5276,13 +5325,13 @@ function visible(){return R.active&&R.modeName()==='stealth'&&['fight','resolve'
 function init(){if(cv)return;cv=document.createElement('canvas');cv.id='cstealth';cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;z-index:2;display:none;touch-action:none';document.querySelector('#stage').appendChild(cv);c=cv.getContext('2d');
  cv.addEventListener('pointerdown',e=>{if(!run)return;const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;const hit=rects.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h);if(hit){run.goal=hit.i;run.hack=0;return;}
   const pts=run.floorPoints||[];let best=null,d=Infinity;for(const p of pts){const dd=Math.hypot(p.p.x-x,p.p.y-y);if(dd<d){d=dd;best=p;}}if(best&&d<90){run.waypoint={x:best.x,z:best.z};run.goal=null;} });
- window.addEventListener('keydown',e=>{if(!visible())return;if(e.key>='1'&&e.key<='4'){run.goal=+e.key-1;run.hack=0;}if(e.key==='e'||e.key==='E'||e.key===' '){held=true;e.preventDefault();}if(e.key==='Shift')crouch=true;});
+ window.addEventListener('keydown',e=>{if(!visible())return;if(e.key>='1'&&e.key<='4'){run.goal=+e.key-1;run.hack=0;}if(e.key==='e'||e.key==='E'||e.key===' '){held=true;e.preventDefault();}if(e.key==='Shift')crouch=true;if(e.key==='f'||e.key==='F')R.toolRequested=true;});
  window.addEventListener('keyup',e=>{if(e.key==='e'||e.key==='E'||e.key===' ')held=false;if(e.key==='Shift')crouch=false;});
  window.addEventListener('blur',()=>{held=false;crouch=false;});
- const touch=document.createElement('div');touch.id='stealthTouch';touch.innerHTML='<button id="stealthQuiet">Crouch</button><button id="stealthHack">Hold to hack</button>';document.querySelector('#stage').appendChild(touch);
- const bind=(id,set)=>{const el=document.getElementById(id);el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture(e.pointerId);set(true);});for(const event of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(event,()=>set(false));};bind('stealthHack',v=>held=v);bind('stealthQuiet',v=>crouch=v);
+ const touch=document.createElement('div');touch.id='stealthTouch';touch.innerHTML='<button id="stealthTool">Use weapon</button><button id="stealthQuiet">Crouch</button><button id="stealthHack">Hold to hack</button>';document.querySelector('#stage').appendChild(touch);
+ const bind=(id,set)=>{const el=document.getElementById(id);el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture(e.pointerId);set(true);});for(const event of ['pointerup','pointercancel','lostpointercapture'])el.addEventListener(event,()=>set(false));};bind('stealthHack',v=>held=v);bind('stealthQuiet',v=>crouch=v);bind('stealthTool',v=>R.touchTool=v);
 }
-R.stealthStart=function(wave){init();run={opts:wave.opts.slice(),x:0,z:6,heading:Math.PI,t:0,alert:0,hack:0,goal:null,waypoint:null,done:false,hx:$.hero.x,hy:$.hero.y,guards:[],floorPoints:[],terminalRects:[]};held=false;crouch=false;$.enemies.length=0;$.carriers.length=0;};
+R.stealthStart=function(wave){init();run={opts:wave.opts.slice(),x:0,z:6,heading:Math.PI,t:0,alert:0,hack:0,goal:null,waypoint:null,done:false,hx:$.hero.x,hy:$.hero.y,guards:[],stunned:{},nextTool:0,toolFlash:0,floorPoints:[],terminalRects:[]};held=false;crouch=false;R.touchTool=false;R.toolRequested=false;$.enemies.length=0;$.carriers.length=0;};
 function blocked(x,z){return Math.abs(x)>7||z>7||z< -7.5||obstacles.some(o=>Math.abs(x-o.x)<o.w/2+.27&&Math.abs(z-o.z)<o.d/2+.27);}
 const terminal=(i,n)=>({x:-5.7+(i+.5)*11.4/n,z:-6.6});
 function sight(a,b){const d=Math.hypot(a.x-b.x,a.z-b.z),steps=Math.ceil(d*8);for(let i=1;i<steps;i++){const k=i/steps,x=a.x+(b.x-a.x)*k,z=a.z+(b.z-a.z)*k;if(obstacles.some(o=>Math.abs(x-o.x)<o.w/2&&Math.abs(z-o.z)<o.d/2))return false;}return true;}
@@ -5297,7 +5346,10 @@ function update(dt){const r=run;$.hero.x=r.hx;$.hero.y=r.hy;$.hero.vx=$.hero.vy=
  if(goal&&!dx&&!dz){const dd=Math.hypot(goal.x-r.x,goal.z-r.z);if(dd>.12){dx=(goal.x-r.x)/dd;dz=(goal.z-r.z)/dd;}else r.waypoint=null;}
  const length=Math.hypot(dx,dz);if(length>.05){dx/=Math.max(1,length);dz/=Math.max(1,length);const speed=(crouch?1.1:2.4)*dt;const nx=r.x+dx*speed,nz=r.z+dz*speed;if(!blocked(nx,r.z))r.x=nx;if(!blocked(r.x,nz))r.z=nz;r.heading=Math.atan2(dx,dz);}
  r.guards=[{x:-1.4+Math.sin(r.t*.36)*3.8,z:1.7,a:Math.cos(r.t*.36)>0?Math.PI/2:-Math.PI/2},{x:4.8,z:-3.3+Math.sin(r.t*.42)*2,a:Math.cos(r.t*.42)>0?0:Math.PI}];
- let seen=false;for(const g of r.guards){const dx=r.x-g.x,dz=r.z-g.z,d=Math.hypot(dx,dz);if(d<(crouch?3.1:4.8)&&d>.01&&(dx*Math.sin(g.a)+dz*Math.cos(g.a))/d>.76&&sight(g,r))seen=true;}
+ const tool=R.covertTool();if((k.f||R.touchTool||R.toolRequested)&&r.t>=r.nextTool){const targets=r.guards.map((g,i)=>({g,i,d:Math.hypot(r.x-g.x,r.z-g.z)})).filter(o=>o.d<=tool.range&&sight(r,o.g)&&!(r.stunned[o.i]&&r.stunned[o.i].until>r.t)).sort((a,b)=>a.d-b.d);if(targets.length){for(const o of(tool.id==='emp'?targets:targets.slice(0,1)))r.stunned[o.i]={until:r.t+tool.duration,x:o.g.x,z:o.g.z,a:o.g.a};r.nextTool=r.t+tool.cooldown;r.toolFlash=.3;R.toast(tool.name+' deployed',true);}}
+ R.toolRequested=false;
+ r.toolFlash=Math.max(0,r.toolFlash-dt);r.guards.forEach((g,i)=>{const stopped=r.stunned[i];g.disabled=!!stopped&&stopped.until>r.t;if(g.disabled){g.x=stopped.x;g.z=stopped.z;g.a=stopped.a;}});
+ let seen=false;for(const g of r.guards){if(g.disabled)continue;const dx=r.x-g.x,dz=r.z-g.z,d=Math.hypot(dx,dz);if(d<(crouch?3.1:4.8)&&d>.01&&(dx*Math.sin(g.a)+dz*Math.cos(g.a))/d>.76&&sight(g,r))seen=true;}
  r.alert=Math.max(0,Math.min(1,r.alert+dt*(seen?.43:-.25)));if(r.alert>=1){r.done=true;R.overrun();return;}
  let near=-1;for(let i=0;i<r.opts.length;i++){const t=terminal(i,r.opts.length);if(Math.hypot(r.x-t.x,r.z-t.z)<1.25)near=i;}r.near=near;
  const interact=held||$.pad.fire;if(near>=0&&interact&&!seen)r.hack+=dt/1.1;else r.hack=Math.max(0,r.hack-dt*.7);if(r.hack>=1)choose(near);
@@ -5317,12 +5369,12 @@ function draw(){W=cv.width=cv.clientWidth;H=cv.height=cv.clientHeight;const r=ru
   for(const o of obstacles){D.shadow(o.x,o.z,o.w+.2,o.d+.2);D.bevel(o.x,.66,o.z,o.w,1.3,o.d,'#45545b');D.box(o.x,1.34,o.z,o.w+.08,.08,o.d+.08,'#85918c');for(let j=0;j<3;j++)D.box(o.x-o.w*.3+j*o.w*.3,1.4,o.z,.24,.08,o.d*.65,'#263e48');for(let j=0;j<7;j++){D.box(o.x-o.w*.38+j*o.w*.12,.65,o.z+o.d/2+.01,.06,.6,.025,'#263b45');}for(const side of [-1,1]){D.box(o.x+side*(o.w/2-.15),1.43,o.z,.12,.07,.4,'#c6a36b');D.box(o.x+side*o.w*.3,.2,o.z+o.d/2+.02,.18,.09,.025,'#b49460');}}
   for(const s of [-1,1])for(let z=-4;z<7;z+=4){D.box(s*7.5,1.15,z,.4,2.3,.5,'#435e6b');D.box(s*7.5,2.35,z,.9,.08,.9,'#9cc1bf');D.box(s*7.5,2.3,z,.7,.03,.7,'#c1dbcc',0,1);}
   for(let i=0;i<r.opts.length;i++){const p=terminal(i,r.opts.length);D.box(p.x,.55,p.z,.85,1.1,.65,'#273f4a');D.box(p.x,1.15,p.z,.9,.12,.7,'#80918e');D.box(p.x,1.36,p.z+.05,.66,.36,.08,'#1a343d');D.box(p.x,1.36,p.z+.1,.53,.23,.015,COL[i],0,.9);D.ring(p.x,.014,p.z+.7,.6,COL[i]);}
-  for(const g of r.guards){const radius=4.8;for(let j=0;j<16;j++){const a=g.a-.66+j*1.32/16,b=a+1.32/16;const z=g.z+Math.cos(a)*radius,x=g.x+Math.sin(a)*radius;D.box(x,.013,z,.08,.01,.08,'#8e6639',0,.6);const xx=g.x+Math.sin(b)*radius,zz=g.z+Math.cos(b)*radius;/* floor chevrons keep sightlines readable */if(j%2===0)D.box((x+g.x)/2,.014,(z+g.z)/2,.12,.01,1.5,'#605339',-g.a,.3);}agent(D,g.x,g.z,g.a,'#826e55',false);}
+  for(const g of r.guards){if(g.disabled){agent(D,g.x,g.z,g.a,'#354854',false);continue;}const radius=4.8;for(let j=0;j<16;j++){const a=g.a-.66+j*1.32/16,b=a+1.32/16;const z=g.z+Math.cos(a)*radius,x=g.x+Math.sin(a)*radius;D.box(x,.013,z,.08,.01,.08,'#8e6639',0,.6);const xx=g.x+Math.sin(b)*radius,zz=g.z+Math.cos(b)*radius;/* floor chevrons keep sightlines readable */if(j%2===0)D.box((x+g.x)/2,.014,(z+g.z)/2,.12,.01,1.5,'#605339',-g.a,.3);}agent(D,g.x,g.z,g.a,'#826e55',false);}
   agent(D,r.x,r.z,r.heading,'#334d59',true);D.end(c);
   r.floorPoints=[];for(let x=-7;x<8;x+=.5)for(let z=-7;z<8;z+=.5)if(!blocked(x,z))r.floorPoints.push({x,z,p:D.project([x,0,z])});
   for(let i=0;i<r.opts.length;i++){const t=terminal(i,r.opts.length),p=D.project([t.x,1.8,t.z]);c.fillStyle=COL[i];c.font='bold 14px monospace';c.textAlign='center';c.fillText(String(i+1).padStart(2,'0'),p.x,p.y);}
   // Visible angular fields of view, clipped by actual cover tests.
-  for(const g of r.guards){const origin=D.project([g.x,.035,g.z]);c.beginPath();c.moveTo(origin.x,origin.y);for(let k=0;k<=25;k++){const a=g.a-.68+k*1.36/25;let dist=0;while(dist<4.8&&sight(g,{x:g.x+Math.sin(a)*dist,z:g.z+Math.cos(a)*dist}))dist+=.15;const p=D.project([g.x+Math.sin(a)*dist,.035,g.z+Math.cos(a)*dist]);c.lineTo(p.x,p.y);}c.closePath();c.fillStyle=r.alert>.5?'#ec77552c':'#e5bc6830';c.fill();c.strokeStyle='#d8ad6355';c.lineWidth=1;c.stroke();}
+  for(const g of r.guards){if(g.disabled)continue;const origin=D.project([g.x,.035,g.z]);c.beginPath();c.moveTo(origin.x,origin.y);for(let k=0;k<=25;k++){const a=g.a-.68+k*1.36/25;let dist=0;while(dist<4.8&&sight(g,{x:g.x+Math.sin(a)*dist,z:g.z+Math.cos(a)*dist}))dist+=.15;const p=D.project([g.x+Math.sin(a)*dist,.035,g.z+Math.cos(a)*dist]);c.lineTo(p.x,p.y);}c.closePath();c.fillStyle=r.alert>.5?'#ec77552c':'#e5bc6830';c.fill();c.strokeStyle='#d8ad6355';c.lineWidth=1;c.stroke();}
  }else{c.fillStyle='#12232c';c.fillRect(0,0,W,H);const s=Math.min(W/18,H/22),ox=W/2,oy=H*.49;r.floorPoints=[];for(let x=-7;x<8;x+=.5)for(let z=-7;z<8;z+=.5)if(!blocked(x,z))r.floorPoints.push({x,z,p:{x:ox+x*s,y:oy+z*s}});
   c.strokeStyle='#45606b';c.strokeRect(ox-8*s,oy-8*s,16*s,16*s);for(const o of obstacles){c.fillStyle='#61737b';c.fillRect(ox+(o.x-o.w/2)*s,oy+(o.z-o.d/2)*s,o.w*s,o.d*s);}for(const g of r.guards){c.fillStyle='#c6a879';c.beginPath();c.arc(ox+g.x*s,oy+g.z*s,5,0,7);c.fill();}for(let i=0;i<r.opts.length;i++){const p=terminal(i,r.opts.length);c.fillStyle=COL[i];c.fillRect(ox+p.x*s-8,oy+p.z*s-8,16,16);}c.fillStyle='#8cd8cb';c.beginPath();c.arc(ox+r.x*s,oy+r.z*s,6,0,7);c.fill();}
  const panelY=W<700?Math.max(H*.21,document.querySelector('#qbar').getBoundingClientRect().bottom+10):H*.21;
@@ -5330,6 +5382,8 @@ function draw(){W=cv.width=cv.clientWidth;H=cv.height=cv.clientHeight;const r=ru
  c.textAlign='left';c.fillStyle='#07131ee6';c.fillRect(18,panelY,240,76);c.fillStyle='#d4b77e';c.font='11px monospace';c.fillText('BLACKSITE / COVERT OPERATIONS',30,panelY+20);c.fillStyle='#c8d6d3';c.fillText(crouch?'CROUCHED · LOW SIGNATURE':'PATROL LINK · STAY IN COVER',30,panelY+40);c.fillStyle='#38515c';c.fillRect(30,panelY+51,210,4);c.fillStyle=r.alert>.5?'#e49b73':'#9ac5bc';c.fillRect(30,panelY+51,210*r.alert,4);
  for(let i=0;i<r.opts.length;i++){const x=pad+i%cols*((W-pad)/cols),y=top+Math.floor(i/cols)*(ch+pad),w=(W-pad*(cols+1))/cols;rects.push({i,x,y,w,h:ch});c.fillStyle='#08141feb';c.fillRect(x,y,w,ch);c.strokeStyle=COL[i];c.lineWidth=r.goal===i?3:1;c.strokeRect(x,y,w,ch);c.fillStyle=COL[i];c.font='bold 12px monospace';c.fillText('0'+(i+1)+' / TERMINAL',x+13,y+20);c.fillStyle='#e1e7df';c.font='13px sans-serif';wrap(R.optionLabel(r.opts[i]),x+13,y+41,w-26,Math.max(2,Math.floor((ch-37)/16)));}
  c.fillStyle='#d0dcd8';c.font='12px monospace';c.fillText(small?'Tap terminal · hold Hack nearby':'WASD / stick move · click floor to move · 1–4 route to terminal · Shift crouch · hold E / Space / trigger to hack',16,top-(small?8:20));
+ c.fillStyle='#adcac8';c.font='11px monospace';c.fillText(R.covertTool().name+' · '+(r.t>=r.nextTool?'READY [F]':Math.ceil(r.nextTool-r.t)+'s recharge'),16,top-(small?62:47));
+ if(r.toolFlash>0){c.fillStyle='#b4e5ce22';c.fillRect(0,0,W,H);}
  if(r.near>=0){const lift=small?45:0;c.save();c.translate(0,-lift);c.fillStyle='#0a1a24ed';c.fillRect(W/2-130,top-80,260,42);c.textAlign='center';c.fillStyle='#d2e3d7';c.fillText('HOLD INTERACT · TERMINAL '+(r.near+1),W/2,top-60);c.fillStyle='#76bfb6';c.fillRect(W/2-115,top-49,230*r.hack,3);c.textAlign='left';c.restore();}
 }
 function wrap(text,x,y,width,max){let line='',rows=0;for(const word of text.split(/\s+/)){if(c.measureText(line+' '+word).width>width&&line){c.fillText(line,x,y+rows++*16);line=word;if(rows>=max)return;}else line+=(line?' ':'')+word;}if(rows<max)c.fillText(line,x,y+rows*16);}
@@ -5386,7 +5440,7 @@ const KEY='fnphraid.campaign.v1';let save;
 try{save=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
 if(!save||!Array.isArray(save.done))save={done:[],partial:null};
 if(save.partial&&(!Array.isArray(save.partial.cleared)||typeof save.partial.mission!=='string'))save.partial=null;
-let complete=new Set(save.done),active=null,lastTier=0,ribbonKey='';
+let complete=new Set(save.done),active=null,lastTier=0,ribbonKey='',selectedSector=0,selectedMission=null,topicRun=false;
 const FRAME_HITS=[0,5,15,30,60];
 if(!Number.isFinite(save.visualXP))save.visualXP=Object.values(R.itemStats()).reduce((n,s)=>n+(s.right||0),0);
 let refitTimer=0;
@@ -5436,7 +5490,7 @@ function weakTransfer(m){const stats=R.itemStats(),now=Date.now(),past=chapters(
  return pool.slice().sort((a,b)=>{const rank=i=>{const s=stats[i.id]||{};return(s.wrong||0)*5-(s.box||0)*2+(s.due&&s.due<=now?8:0);};return rank(b)-rank(a);}).slice(0,8);
 }
 function launch(){
- const m=next();if(!m){render();return;}launchMission(m);
+ topicRun=false;const m=next();if(!m){render();return;}launchMission(m);
 }
 function launchMission(m){
  active=m;lastTier=frameTier();
@@ -5449,13 +5503,13 @@ function showBriefing(){if(!active||!R.active)return;const m=active,notes=m.conc
  R.showCard('cinema','Mission briefing',body,'Return to combat',()=>{},0);
 }
 const originalStart=R.start;
-R.start=function(rooms,si,options){R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
+R.start=function(rooms,si,options){R.runLoadout=options&&options.loadout||null;R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
 R.onCampaignClear=function(){
  if(!R.campaignRun||!active)return false;
- const finished=active;complete.add(finished.id);save.partial=null;persist();const tier=frameTier(),upgrade=tier>lastTier,m=next(),f=frameLook();
+ const finished=active;complete.add(finished.id);save.partial=null;persist();const tier=frameTier(),upgrade=tier>lastTier,m=topicRun?sectorMission(finished.chapter,false):next(),f=frameLook();
  const list=timeline(),done=list.filter(x=>complete.has(x.id)).length;
- const body='<div class="cinemaTop"><span>TRANSMISSION CONFIRMED</span><span>'+done+' / '+list.length+' MISSIONS</span></div><p class="cinemaEyebrow">'+(upgrade?'FRAME EVOLUTION UNLOCKED':'SIGNAL RESTORED')+'</p><h2 class="cinemaTitle">'+esc(upgrade?f.name:finished.kind==='transfer'?'Arrival confirmed':'Objective secured')+'</h2><p class="cinemaStory">'+esc(upgrade?f.code+' · '+f.role+'. Your new frame is waiting in the hangar and is equipped for the next combat mission.':finished.title)+'</p><div class="missionDossier"><span>'+(m?'NEXT IN THE STORY':'NETWORK RESTORED')+'</span><h3>'+esc(m?m.title:'Operation Nightingale complete')+'</h3><p>'+clearedChapters()+' / 20 chapters restored · '+(R.correct||0)+' correct choices this mission</p></div><div class="cinemaBottom"><span>Progress saved automatically</span><button class="btn ghost" id="campaignHangar">Return to hangar</button></div>';
- R.showCard('cinema',upgrade?'Mecha refit complete':'Mission complete',body,m?'Continue the story':'Return to hangar',()=>m?launchMission(m):home(),300);
+ const body='<div class="cinemaTop"><span>TRANSMISSION CONFIRMED</span><span>'+done+' / '+list.length+' MISSIONS</span></div><p class="cinemaEyebrow">'+(upgrade?'FRAME EVOLUTION UNLOCKED':'SIGNAL RESTORED')+'</p><h2 class="cinemaTitle">'+esc(upgrade?f.name:finished.kind==='transfer'?'Arrival confirmed':'Objective secured')+'</h2><p class="cinemaStory">'+esc(upgrade?f.code+' · '+f.role+'. Your new frame is waiting in the hangar and is equipped for the next combat mission.':finished.title)+'</p><div class="missionDossier"><span>'+(m?(topicRun?'NEXT IN THIS TOPIC':'NEXT IN THE STORY'):(topicRun?'TOPIC TRAVERSED':'NETWORK RESTORED'))+'</span><h3>'+esc(m?m.title:topicRun?'Topic missions complete':'Operation Nightingale complete')+'</h3><p>'+clearedChapters()+' / 20 chapters restored · '+(R.correct||0)+' correct choices this mission</p></div><div class="cinemaBottom"><span>Progress saved automatically</span><button class="btn ghost" id="campaignHangar">Return to hangar</button></div>';
+ R.showCard('cinema',upgrade?'Mecha refit complete':'Mission complete',body,m?(topicRun?'Continue this topic':'Continue the story'):'Return to hangar',()=>m?launchMission(m):home(),300);
  Q('#campaignHangar').onclick=home;render();updateRibbon();return true;
 };
 function home(){active=null;R.campaignRun=false;R.active=false;R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#cardWrap').hidden=true;$.setState('idle');R.toHome();render();}
@@ -5464,7 +5518,7 @@ function missionItems(items){if(!R.campaignRun||!active||!save.partial||save.par
 function render(){
  const m=next(),tier=frameTier(),f=frameLook(),list=timeline(),done=list.filter(x=>complete.has(x.id)).length,percent=list.length?Math.round(done/list.length*100):0;
  const chapter=m?m.chapter:19;Q('#campaignChapter').textContent='CHAPTER '+String(chapter+1).padStart(2,'0')+' / 20';Q('#campaignTitle').textContent=m?m.ch.story[0]:'Network restored';Q('#campaignStory').textContent=m?m.ch.story[1]:'The course has been traversed. Keep building mastery through daily review and free-flight missions.';
- Q('#campaignObjective').textContent=m?m.title:'Operation Nightingale complete';Q('#campaignLaunch').textContent='Open war map / deploy →';Q('#campaignLaunch').disabled=false;
+ Q('#campaignObjective').textContent=m?m.title:topicRun?'Topic missions complete':'Operation Nightingale complete';Q('#campaignLaunch').textContent='Open war map / deploy →';Q('#campaignLaunch').disabled=false;
  Q('#frameName').textContent=f.name;Q('#frameCode').textContent=f.code+' / '+f.role;Q('#campaignProgress').textContent=done+' / '+list.length+' missions · '+clearedChapters()+' / 20 chapters';Q('#campaignFill').style.width=percent+'%';
  Q('#frameNext').textContent=R.frames[tier+1]?'Next refit: '+R.frames[tier+1].name+' · '+Math.max(0,FRAME_HITS[tier+1]-save.visualXP)+' correct hits to refit':'Reactor livery evolves every 10 further correct hits';
  Q('#chapterRail').innerHTML=chapters().map(ch=>{const n=ch.concepts.filter(c=>complete.has('concept::'+ch.room.topic+'::'+c.title)).length,status=n===ch.concepts.length?'done':ch.index===chapter?'current':'locked';return '<div class="chapterNode '+status+'" title="'+esc(ch.room.topic)+'"><span>'+String(ch.index+1).padStart(2,'0')+'</span><b>'+esc(ch.story[0])+'</b><small>'+n+'/'+ch.concepts.length+' missions</small></div>';}).join('');
@@ -5473,19 +5527,35 @@ function render(){
 }
 function updateRibbon(){const el=Q('#missionRibbon');el.hidden=!R.campaignRun||!R.active||!active||!!R.modeName();if(el.hidden){ribbonKey='';return;}const key=active.id+'::'+frameTier();if(key===ribbonKey)return;ribbonKey=key;const f=frameLook();el.innerHTML='<span>CH '+String(active.chapter+1).padStart(2,'0')+' · '+(active.kind==='transfer'?'DISPATCH':'NIGHTINGALE')+'</span><b>'+esc(active.title)+'</b><small>'+esc(f.name)+' · progress saves as you answer</small>';}
 function drawLoadout(){const cv=Q('#loadoutShip'),g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.strokeStyle='#66b9c533';g.lineWidth=1;for(let x=0;x<cv.width;x+=20){g.beginPath();g.moveTo(x,0);g.lineTo(x,cv.height);g.stroke();}for(let y=0;y<cv.height;y+=20){g.beginPath();g.moveTo(0,y);g.lineTo(cv.width,y);g.stroke();}R.drawFrame(g,180,90,2,frameTier(),save.visualXP*.1,true,-Math.PI/2,0);}
-function openWarMap(){R.showScreen('warRoom');renderWarMap();}
-function renderWarMap(){
- const m=next(),all=R.deckRooms(),items=all.flatMap(r=>r.items),retired=items.filter(R.isMastered).length,selected=m?m.chapter:0;
- Q('#warCount').textContent=all.length+' SECTORS / '+all.reduce((n,r)=>n+r.concepts.length,0)+' CONCEPTS';Q('#warMastery').textContent=retired+' / '+items.length+' ITEMS RETIRED';
- Q('#warNext').textContent=m?m.ch.room.topic+' · '+m.title:'All campaign objectives secured';Q('#warDeploy').disabled=!m;
- const positions=all.map((r,i)=>{const row=Math.floor(i/4),col=row%2?3-i%4:i%4;return{x:125+250*col,y:64+128*row};});
- Q('#warPaths').innerHTML=positions.slice(1).map((p,i)=>{const a=positions[i];return '<path d="M'+a.x+' '+a.y+' L'+p.x+' '+p.y+'" fill="none" stroke="'+(i<selected?'#a5d3ad':'#416c79')+'" stroke-width="2" stroke-dasharray="5 7"/>';}).join('');
- Q('#warNodes').innerHTML=all.map((r,i)=>{const done=r.items.filter(R.isMastered).length,p=positions[i],status=done===r.items.length?'secured':i===selected?'active':'pending';return '<button class="warNode '+status+'" data-sector="'+i+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%"><span>SECTOR '+String(i+1).padStart(2,'0')+' / '+(status==='secured'?'SECURED':i===selected?'NEXT OBJECTIVE':'INTEL')+'</span><b>'+esc(r.topic)+'</b><small>'+done+' / '+r.items.length+' retired</small><i style="--sectorFill:'+(done/r.items.length*100)+'%"></i></button>';}).join('');
- Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selected);
+function topicProgress(r){
+ const stats=R.itemStats(),total=r.items.length,retired=r.items.filter(R.isMastered).length;
+ const units=r.items.reduce((sum,it)=>sum+(R.isMastered(it)?3:Math.max(0,Math.min(3,(stats[it.id]||{}).box||0))),0);
+ const started=r.items.some(it=>{const st=stats[it.id]||{};return(st.seen||st.right||st.wrong||0)>0;});
+ const raw=total?units/(total*3):0,percent=retired===total?100:Math.min(99,Math.round(raw*100));
+ return {retired,total,percent,started,state:retired===total?'full':!started&&units===0?'empty':percent<34?'started':percent<67?'half':'advanced'};
 }
-function inspectSector(i){const r=R.deckRooms()[i];Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';const retired=r.items.filter(R.isMastered).length;Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+r.items.length+'<small>ITEMS</small></b><b>'+retired+'<small>RETIRED</small></b>';Q('#warConcepts').innerHTML=r.concepts.map(c=>'<li class="'+(c.items.every(R.isMastered)?'retired':'')+'">'+esc(c.title)+'<small>'+c.items.filter(R.isMastered).length+'/'+c.items.length+'</small></li>').join('');Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.classList.toggle('selected',+b.dataset.sector===i));}
-R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon};
-Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=launch;Q('#warBack').onclick=()=>R.showScreen('home');
+function sectorMission(i,allowReplay=true){const list=timeline().filter(m=>m.kind==='concept'&&m.chapter===i&&m.concept.items.some(it=>!R.isMastered(it)));return list.find(m=>!complete.has(m.id))||(allowReplay?list[0]:null);}
+function openWarMap(){const m=next();selectedSector=m?m.chapter:0;R.showScreen('warRoom');renderWarMap();}
+function renderWarMap(){
+ const all=R.deckRooms(),items=all.flatMap(r=>r.items),retired=items.filter(R.isMastered).length;
+ Q('#warCount').textContent=all.length+' SECTORS / '+all.reduce((n,r)=>n+r.concepts.length,0)+' CONCEPTS';Q('#warMastery').textContent=retired+' / '+items.length+' ITEMS RETIRED';
+ const positions=all.map((r,i)=>{const row=Math.floor(i/4),col=row%2?3-i%4:i%4;return{x:125+250*col,y:64+128*row};});
+ Q('#warPaths').innerHTML=positions.slice(1).map((p,i)=>{const a=positions[i];return '<path d="M'+a.x+' '+a.y+' L'+p.x+' '+p.y+'" fill="none" stroke="#416c79" stroke-width="2" stroke-dasharray="5 7"/>';}).join('');
+ const labels={empty:'UNTOUCHED',started:'IN PROGRESS',half:'BUILDING MASTERY',advanced:'NEARLY MASTERED',full:'MASTERED'};
+ Q('#warNodes').innerHTML=all.map((r,i)=>{const p=positions[i],st=topicProgress(r);return '<button class="warNode progress-'+st.state+'" data-sector="'+i+'" aria-label="'+esc(r.topic)+', '+st.percent+'% progress, '+labels[st.state].toLowerCase()+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%;--sectorFill:'+st.percent+'%"><span>SECTOR '+String(i+1).padStart(2,'0')+' / '+labels[st.state]+'</span><b>'+esc(r.topic)+'</b><small>'+st.percent+'% progress · '+st.retired+'/'+st.total+' mastered</small><i></i></button>';}).join('');
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selectedSector);
+}
+function selectMission(m){selectedMission=m;const r=R.deckRooms()[selectedSector];Q('#warNext').textContent=m?r.topic+' · '+m.title:r.topic+' · fully mastered';Q('#warDeploy').disabled=!m;Q('#warDeploy').textContent=m?'Deploy selected mission →':'Topic mastered';Q('#warConcepts').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!!m&&b.dataset.mission===m.id)));}
+function inspectSector(i){selectedSector=i;const r=R.deckRooms()[i],st=topicProgress(r);Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';
+ Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+st.percent+'%<small>PROGRESS</small></b><b>'+st.retired+'/'+st.total+'<small>MASTERED</small></b>';
+ const missions=timeline().filter(m=>m.kind==='concept'&&m.chapter===i);
+ Q('#warConcepts').innerHTML=missions.map((m,k)=>{const c=m.concept,retired=c.items.filter(R.isMastered).length;return '<li class="'+(retired===c.items.length?'retired':'')+'"><button data-mission="'+esc(m.id)+'" data-concept="'+k+'"'+(retired===c.items.length?' disabled':'')+'>'+esc(c.title)+'<small>'+retired+'/'+c.items.length+' mastered'+(retired===c.items.length?' · complete':' · select mission')+'</small></button></li>';}).join('');
+ Q('#warConcepts').querySelectorAll('button').forEach(b=>b.onclick=()=>selectMission(missions[+b.dataset.concept]));
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>{b.classList.toggle('selected',+b.dataset.sector===i);b.setAttribute('aria-pressed',String(+b.dataset.sector===i));});selectMission(sectorMission(i));
+}
+function deploySelected(){if(!selectedMission)return;topicRun=true;launchMission(selectedMission);}
+R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon,topicProgress,renderWarMap,inspectSector};
+Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=deploySelected;Q('#warBack').onclick=()=>R.showScreen('home');
 // Animated hangar, drawn at a bounded resolution and paused when it is off screen.
 let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
 function hangar(now){requestAnimationFrame(hangar);if(now-last<(reduced?1000:33)||Q('#home').hidden)return;const rect=canvas.getBoundingClientRect();if(rect.bottom<0||rect.top>window.innerHeight)return;last=now;
@@ -5525,13 +5595,29 @@ root.innerHTML=`<div class="opsHeading"><div><span class="opsKicker">CHOOSE YOUR
 <div class="opsSetup" id="opsSetup" hidden><div><span class="opsKicker">MISSION CONFIGURATION</span><h3 id="opsName"></h3><p id="opsBrief"></p></div><div class="opsFields"><label>Syllabus sector<select id="opsSector"></select></label><label>Mission / concept<select id="opsConcept"></select></label><label id="opsRouteLabel">Environment<select id="opsRoute"><option value="0">Hospital perimeter · dusk</option><option value="1">City arterial · rain</option><option value="2">Underpass · night</option><option value="3">Inter-hospital · blue hour</option></select></label><p id="opsStatus" role="status"></p><button class="btn launchBtn" id="opsDeploy">Deploy operation →</button></div></div>`;
 Q('#home .freeFlight').before(root);
 let mode='race';
+const randomButton=document.createElement('button');randomButton.id='opsRandom';randomButton.className='btn launchBtn';randomButton.textContent='Random free run ↗';root.querySelector('.opsHeading').appendChild(randomButton);
+const fields=Q('#opsSetup .opsFields');
+fields.insertAdjacentHTML('afterbegin',`<label>Run type<select id="opsRunType"><option value="concept">Choose a concept</option><option value="random">Random free run</option></select></label><label>Game mode<select id="opsMode"><option value="race">Car racing · Night Dispatch</option><option value="stealth">007 · Blacksite</option><option value="fps">First-person shooter · Ward Breach</option></select></label>`);
+Q('#opsRouteLabel').insertAdjacentHTML('beforebegin',`<label id="opsCountLabel" hidden>Run length<select id="opsCount"><option value="10">10 random items</option><option value="20" selected>20 random items</option><option value="40">40 random items</option><option value="0">Continuous · play until I leave</option></select></label><label id="opsVehicleLabel">Vehicle<select id="opsVehicle"></select></label><label id="opsWeaponLabel">Weapon<select id="opsWeapon"><option value="earned">My earned campaign weapon</option></select></label><label id="opsToolLabel">Covert weapon<select id="opsTool"></select></label><div class="opsEquipment"><canvas id="opsEquipmentArt" width="600" height="260" aria-label="Selected vehicle or weapon preview"></canvas><b id="opsEquipmentName"></b><small id="opsEquipmentInfo"></small></div>`);
+for(const v of R.vehicles)Q('#opsVehicle').add(new Option(v.name,v.id));for(const w of R.weaponCatalog)Q('#opsWeapon').add(new Option(w.name,w.id));for(const t of R.covertTools)Q('#opsTool').add(new Option(t.name,t.id));
+const isRandom=()=>Q('#opsRunType').value==='random';
+function pool(){const scope=Q('#opsSector').value,rooms=scope==='all'?R.deckRooms():[R.deckRooms()[+scope]];return [...new Map(rooms.flatMap(r=>r.items).filter(i=>!R.isMastered(i)).map(i=>[i.id,i])).values()];}
+function shuffle(items){const out=items.slice();for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
+function equipment(){Q('#opsVehicleLabel').hidden=mode!=='race';Q('#opsWeaponLabel').hidden=mode!=='fps';Q('#opsToolLabel').hidden=mode!=='stealth';const kind=mode==='race'?'vehicle':mode==='fps'?'weapon':'tool',id=kind==='vehicle'?Q('#opsVehicle').value:kind==='weapon'?Q('#opsWeapon').value:Q('#opsTool').value;
+ const item=(kind==='vehicle'?R.vehicles:kind==='weapon'?R.weaponCatalog:R.covertTools).find(x=>x.id===id)||{name:R.loadout().name,description:'Your mastery-based campaign loadout'};Q('#opsEquipmentName').textContent=item.name;Q('#opsEquipmentInfo').textContent=item.description;const cv=Q('#opsEquipmentArt');if(R.stage3d&&R.stage3d.available&&R.stage3d.loadout)R.stage3d.loadout(cv.getContext('2d'),cv.width,cv.height,kind,id);else{const c=cv.getContext('2d');c.fillStyle='#112631';c.fillRect(0,0,cv.width,cv.height);c.fillStyle='#d7e5de';c.font='24px monospace';c.fillText(item.name,25,70);}}
+function config(){Q('#opsConcept').parentElement.hidden=isRandom();Q('#opsCountLabel').hidden=!isRandom();Q('#opsRouteLabel').hidden=mode!=='race';equipment();}
+
 function available(c){return c.items.some(i=>!R.isMastered(i));}
-function sectors(){const select=Q('#opsSector');select.replaceChildren();for(const [i,r] of R.deckRooms().entries()){const o=new Option(String(i+1).padStart(2,'0')+' / '+r.topic,i);select.add(o);}if(mode==='race'){const i=R.deckRooms().findIndex(r=>r.mode==='race');if(i>=0)select.value=i;}else if(mode==='fps'){select.value=0;}concepts();}
-function concepts(){const r=R.deckRooms()[+Q('#opsSector').value],s=Q('#opsConcept');s.replaceChildren();const sorted=r.concepts.map((c,i)=>({c,i})).filter(x=>x.c.items.length).sort((a,b)=>mode==='fps'?(b.c.mode==='fps')-(a.c.mode==='fps'):0);for(const {c,i} of sorted){const left=c.items.filter(i=>!R.isMastered(i)).length;s.add(new Option(c.title+' · '+left+' remaining',i));}const first=sorted.find(x=>available(x.c));if(first)s.value=first.i;status();}
-function status(){const r=R.deckRooms()[+Q('#opsSector').value],c=r.concepts[+Q('#opsConcept').value],left=c?c.items.filter(i=>!R.isMastered(i)).length:0;Q('#opsDeploy').disabled=!left;Q('#opsStatus').textContent=left?left+' active items · three consecutive correct retires each item': 'This concept is mastered. Choose another mission; retired questions stay retired.';}
-function choose(m){mode=m;Q('#opsSetup').hidden=false;Q('#opsName').textContent=names[m];Q('#opsBrief').textContent=m==='race'?'Steer into the answer lane. Boost with ↑, brake with ↓. Keys 1–4 select a lane.':m==='fps'?'Aim with the mouse or stick. Click / Space fires. Keys 1–4 lock on; each target takes three hits.':'Avoid amber sight cones. Use WASD / stick or click the floor. Keys 1–4 plot a route. Hold Shift to crouch; hold E / Space / trigger at a terminal to hack.';Q('#opsRouteLabel').hidden=m!=='race';root.querySelectorAll('[data-operation]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.operation===m)));sectors();Q('#opsSetup').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});}
-root.querySelectorAll('[data-operation]').forEach(b=>b.onclick=()=>choose(b.dataset.operation));Q('#opsSector').onchange=concepts;Q('#opsConcept').onchange=status;
-Q('#opsDeploy').onclick=()=>{const r=R.deckRooms()[+Q('#opsSector').value],c=r.concepts[+Q('#opsConcept').value];if(!c||!available(c))return;const room={...r,mode,missionConcept:{...c,mode}};R.start([room],0);R.routeTheme=R.campaign.routeFor(+Q('#opsRoute').value);const p=SLOTS[r.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();R.operation=mode;};
+function sectors(){const select=Q('#opsSector');select.replaceChildren();if(isRandom())select.add(new Option('All syllabus topics · mixed','all'));for(const [i,r] of R.deckRooms().entries())select.add(new Option(String(i+1).padStart(2,'0')+' / '+r.topic,i));if(!isRandom()&&mode==='race'){const i=R.deckRooms().findIndex(r=>r.mode==='race');if(i>=0)select.value=i;}concepts();}
+function concepts(){const scope=Q('#opsSector').value,r=R.deckRooms()[scope==='all'?0:+scope],s=Q('#opsConcept');s.replaceChildren();const sorted=r.concepts.map((c,i)=>({c,i})).filter(x=>x.c.items.length).sort((a,b)=>mode==='fps'?(b.c.mode==='fps')-(a.c.mode==='fps'):0);for(const {c,i} of sorted){const left=c.items.filter(i=>!R.isMastered(i)).length;s.add(new Option(c.title+' · '+left+' remaining',i));}const first=sorted.find(x=>available(x.c));if(first)s.value=first.i;status();}
+function status(){let left;if(isRandom())left=pool().length;else{const r=R.deckRooms()[+Q('#opsSector').value],c=r&&r.concepts[+Q('#opsConcept').value];left=c?c.items.filter(i=>!R.isMastered(i)).length:0;}
+ Q('#opsDeploy').disabled=!left;const count=+Q('#opsCount').value;Q('#opsStatus').textContent=left?(isRandom()?(count?Math.min(count,left)+' randomly selected from '+left+' active items':'Continuous random rounds from '+left+' active items') :left+' active items')+' · mastery saves across every mode':'No active items here. Choose another topic; mastered questions stay retired.';
+ Q('#opsDeploy').textContent=isRandom()?'Start random free run →':'Deploy operation →';}
+function choose(m){mode=m;Q('#opsMode').value=m;Q('#opsSetup').hidden=false;Q('#opsName').textContent=names[m];Q('#opsBrief').textContent=m==='race'?'Steer into the answer lane. Boost with ↑, brake with ↓. Keys 1–4 select a lane. Your vehicle changes speed and handling.':m==='fps'?'Aim with the mouse or stick. Click / Space fires. Keys 1–4 lock on. Your selected weapon changes fire rate and damage.':'Evade sight cones, use cover and crouch with Shift. Keys 1–4 plot a route. F deploys your covert weapon; hold E / Space at a terminal to hack.';root.querySelectorAll('[data-operation]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.operation===m)));config();sectors();Q('#opsSetup').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});}
+root.querySelectorAll('[data-operation]').forEach(b=>b.onclick=()=>{Q('#opsRunType').value='concept';choose(b.dataset.operation);});randomButton.onclick=()=>{Q('#opsRunType').value='random';choose(Q('#opsMode').value);};Q('#opsMode').onchange=()=>choose(Q('#opsMode').value);Q('#opsRunType').onchange=()=>{config();sectors();};Q('#opsSector').onchange=concepts;Q('#opsConcept').onchange=status;Q('#opsCount').onchange=status;for(const id of ['#opsVehicle','#opsWeapon','#opsTool'])Q(id).onchange=equipment;
+Q('#opsDeploy').onclick=()=>{let room;if(isRandom()){const items=shuffle(pool()),count=+Q('#opsCount').value;if(!items.length)return;const base=items[0].room;room={...base,locus:'Random free run',topic:Q('#opsSector').value==='all'?'Mixed syllabus':base.topic,mode,review:true,randomFree:true,endless:count===0,randomScope:Q('#opsSector').value,missionConcept:null,concepts:[],items:items.slice(0,count||20),note:['Random practice across your selected syllabus topics. Original mastery progress is saved.']};}else{const r=R.deckRooms()[+Q('#opsSector').value],c=r.concepts[+Q('#opsConcept').value];if(!c||!available(c))return;room={...r,mode,missionConcept:{...c,mode}};}
+ const loadout={vehicle:Q('#opsVehicle').value,weapon:Q('#opsWeapon').value,tool:Q('#opsTool').value};R.start([room],0,{loadout});R.routeTheme=R.campaign.routeFor(+Q('#opsRoute').value);const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();R.operation=mode;};
+R.onFreeRunClear=room=>{if(!room.randomFree||!room.endless)return false;const rooms=room.randomScope==='all'?R.deckRooms():[R.deckRooms()[+room.randomScope]],items=shuffle(rooms.flatMap(r=>r.items).filter(i=>!R.isMastered(i)));if(!items.length)return false;room.items=items.slice(0,20);R.beginCombat();R.toast('Next random round · '+items.length+' items still to master',true);return true;};
 function previews(){const D=R.stage3d;if(!D||!D.available){root.classList.add('opsCompatibility');root.querySelectorAll('.opsCard canvas').forEach(c=>{const g=c.getContext('2d');g.fillStyle='#213c49';g.fillRect(0,0,c.width,c.height);g.fillStyle='#b7d2cf';g.font='20px monospace';g.fillText('TACTICAL COMPATIBILITY VIEW',35,80);});return;}
  const a=Q('#opsRace'),b=Q('#opsFps'),s=Q('#opsStealth');D.race(a.getContext('2d'),a.width,a.height,{x:-.12,curveT:3,pos:20,n:4,z:360,boost:1,target:0},R.campaign.routeFor(1));D.fps(b.getContext('2d'),b.width,b.height,{ang:-Math.PI/2,t:[],recoil:0});
  D.begin(s.width,s.height,[12,16,18],[0,0,0],.8,'#132b34',.018);D.box(0,-.15,0,14,.3,15,'#3b5056');for(let k=-5;k<7;k+=2){D.box(k,1,-5,1.6,2,.7,'#233d49');for(let j=0;j<5;j++)D.box(k,.4+j*.3,-4.63,1.2,.12,.03,'#789c9f');}for(const [x,z] of [[-3,0],[3,-2],[1,3]]){D.box(x,.6,z,2,1.2,1.8,'#52666b');D.box(x,1.25,z,2.1,.1,1.9,'#8da09a');}D.box(-1,.6,4,.45,1.2,.3,'#31525c');D.ring(-1,.015,4,.5,'#8fd8c7');D.box(4,.6,1,.45,1.2,.3,'#a78f65');for(let k=0;k<12;k++)D.box(4-k*.2,.015,1+k*.2,.06,.015,.8,'#d0ac70',-.7,.6);D.end(s.getContext('2d'));

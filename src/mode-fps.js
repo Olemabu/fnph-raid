@@ -108,7 +108,7 @@ function shoot(){
   r.tracers.push({x0:gun.x,y0:gun.y,x1:ch.x,y1:ch.y,life:6,col:($.arsenal&&$.arsenal.color)||'#ffd27a'});
   if(!best)return;
   const dmg=($.hero&&$.hero.weapon&&$.hero.weapon.bullet&&$.hero.weapon.bullet.damage)||1;
-  best.hp-=dmg;best.flash=8;$.audio&&$.audio.play('hit');
+  best.hp-=dmg*(R.runLoadout&&R.runLoadout.weapon&&R.runLoadout.weapon!=='earned'?($.hero.weapon.count||1):1);best.flash=8;$.audio&&$.audio.play('hit');
   burst(ch.x,ch.y,COL[best.i],14,6);
   if(best.hp<=0)pick(best);
 }
