@@ -430,9 +430,10 @@ function showAnswerSplash(term){
 }
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
-const MODES=['race','fps','stealth'];
-function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':/\bOSCE\b/i.test(r.topic)?'fps':'';}
-R.modeName=()=>{if(!(R.active&&R.rooms&&R.rooms[R.si]))return'';const c=R.concept;if(c&&MODES.includes(c.mode))return c.mode;return roomMode(R.rooms[R.si]);};
+// All syllabus content uses the original spaceship combat.
+const MODES=[];
+function roomMode(){return '';}
+R.modeName=()=>'';
 R.swarmOn=()=>R.active&&(R.phase==='travel'||((R.phase==='fight'||R.phase==='resolve')&&!R.modeName()));
 R.swarmRate=()=>R.phase==='fight'?2.2:R.phase==='travel'?1.1:1.6;
 R.aimTarget=()=>$.aimLock&&$.aimLock.alive?$.aimLock:(R.hover&&R.hover.alive?R.hover:null);

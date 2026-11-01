@@ -32,11 +32,6 @@ $order = @(
     'vendor/radius-raid/levelpop.js',
     'src/core.js',
     'src/raid.js',
-    'src/loadouts.js',
-    'src/stage3d.js',
-    'src/mode-race.js',
-    'src/mode-fps.js',
-    'src/mode-stealth.js',
     'src/mecha.js',
     'src/campaign.js',
     'src/operations.js'

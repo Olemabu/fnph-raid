@@ -60,7 +60,7 @@ function launch(){
 }
 function launchMission(m){
  active=m;lastTier=frameTier();
- const room=m.kind==='transfer'?{...m.ch.room,mode:'race',review:true,missionConcept:null,concepts:[],items:weakTransfer(m),locus:m.ch.room.locus,topic:'Transfer to '+m.ch.room.topic,note:['Dispatch route: '+routeFor(m.chapter).name+'.','Answer lanes rehearse material from the chapter you just completed. Brake for reading time; the route has no speed deadline.'] }:{...m.ch.room,missionConcept:m.concept};
+ const room=m.kind==='transfer'?{...m.ch.room,mode:'',review:true,missionConcept:null,concepts:[],items:weakTransfer(m),locus:m.ch.room.locus,topic:'Transfer to '+m.ch.room.topic,note:['Spaceship review: rehearse material from the chapter you just completed.'] }:{...m.ch.room,missionConcept:m.concept};
  R.start([room],0,{campaign:true});R.routeTheme=routeFor(m.chapter);
  const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();updateRibbon();
 }
