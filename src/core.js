@@ -4,6 +4,7 @@ Changes: full-window canvas, FNPH map battlefield, station-driven levels,
 DOM menus instead of canvas menus, controller and lock-on aiming hooks.
 ==============================================================================*/
 $.init = function() {
+	if( $.initialized ) { return; }
 	$.setupStorage();
 	$.cmg = document.getElementById( 'cmg' );
 	$.cfg = document.getElementById( 'cfg' );
@@ -31,6 +32,7 @@ $.init = function() {
 	$.setupStates();
 	$.reset();
 	$.setState( 'idle' );
+	$.initialized = true;
 	$.loop();
 };
 

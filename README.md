@@ -8,7 +8,7 @@ An arcade shooter (a fork of **Radius Raid** by Jack Rugile, MIT licence) rebuil
 2. In this folder, run `python build.py`.
 3. Open `dist/fnph-raid.html` in Chrome and play.
 
-Rebuild after every change. The game is a single HTML file with no server or internet needed, apart from Google Fonts.
+Rebuild after every change. The game is a single HTML file with no server or internet needed, including fonts.
 
 ## Where things live
 
@@ -104,7 +104,7 @@ Progress is saved in the browser's localStorage under keys starting `fnphraid.` 
 
 ## Operation Nightingale campaign
 
-Chapter and OSCE introductions use cinematic dispatch cards; ordinary concepts within a chapter go straight to their source briefing. The home hangar opens a saved, linear campaign with 20 chapters, all 339 existing concepts, and 19 inter-chapter ambulance transfers (358 missions). The story is fictional; clinical questions, OSCE checklists, source order and question IDs are retained in `src/deck.txt`.
+Deploy starts combat directly. The in-game Briefing button opens the story and concept notes on demand. The home hangar opens a saved, linear campaign with 20 chapters, all 339 existing concepts, and 19 inter-chapter ambulance transfers (358 missions). The story is fictional; clinical questions, OSCE checklists, source order and question IDs are retained in `src/deck.txt`.
 
 - **Continue mission** resumes the first incomplete mission. Successful whole questions/processes save immediately to `fnphraid.campaign.v1`, so reloading resumes that mission without replaying already secured items. An unfinished process restarts its sequence. Existing mastery and free-flight progress are separate and preserved.
 - All questions in the current concept that are not yet mastered are played; mastered items are never reviewed or replayed. OSCE process drills go first. Correct choices keep the campaign moving; wrong choices open the existing teaching card and repeat until right, then reinforce later in the run.
@@ -120,3 +120,5 @@ Mastery requires **three consecutive correct answers** per item. On mastery, the
 The command deck shows the actual combat-ship silhouette, current mastery-based weapon, projectiles per burst and unlimited energy ammunition. Its deployment button opens the 20-sector syllabus war map first. The map shows all 339 concepts and 2,740 learning items, per-topic retirement progress, inspectable concept lists and the next linear objective. Future sectors are inspectable but do not bypass campaign order.
 
 Live cosmetic refits happen at 5, 15, 30 and 60 correct hits, without leaving combat or blocking input. Existing correct-answer totals seed the career-hit credit. At the highest frame, reactor livery keeps changing every 10 further correct hits. These visual rewards are separate from learning mastery and the existing weapon arsenal.
+
+Startup is fully self-contained. External Google Fonts stylesheets have been removed, and engine boot uses DOMContentLoaded with idempotent initialisation. The war-map Deploy button enters combat directly; mission notes remain available through the optional Briefing control.

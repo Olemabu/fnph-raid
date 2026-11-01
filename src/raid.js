@@ -438,6 +438,7 @@ R.leadPoint=function(c,fx,fy){
 R.lockOn=function(c){$.aimLock=c;R.lockAnchor={x:$.mouse.sx||0,y:$.mouse.sy||0};};
 
 R.start=function(rooms,si){
+  if(!$.initialized)$.init();
   clearAnswerSplash();
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
@@ -1093,6 +1094,7 @@ Q('#bEdit').addEventListener('click',()=>{Q('#deckText').value=deckText;Q('#deck
 Q('#bSound').addEventListener('click',()=>{soundOn=!soundOn;store.set('sound',soundOn);ac();applySound();});
 Q('#bMusic').addEventListener('click',()=>{musicOn=!musicOn;store.set('music',musicOn);ac();applySound();if(musicOn)startMusic();});
 Q('#bPause').addEventListener('click',()=>R.pause());
+Q('#bBrief').addEventListener('click',()=>{if(R.campaignRun&&R.campaign)R.campaign.showBriefing();else R.pause();});
 
 /* ---------- study (walk) ---------- */
 let walkIdx=0;
@@ -1232,10 +1234,10 @@ function drawTactical(ctx){
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
   ctx.restore();
 }
-R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
+R.beginCombat=()=>{openBriefing();cardReadyAt=0;closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
-window.addEventListener('load',()=>{
-  $.init();buildMap();renderHome();showScreen('home');
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{buildMap();renderHome();});
-});
+function boot(){
+  $.init();buildMap();renderHome();if(!R.active)showScreen('home');
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

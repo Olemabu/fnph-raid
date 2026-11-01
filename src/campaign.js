@@ -62,13 +62,11 @@ function launchMission(m){
  active=m;lastTier=frameTier();
  const room=m.kind==='transfer'?{...m.ch.room,mode:'race',review:true,missionConcept:null,concepts:[],items:weakTransfer(m),locus:m.ch.room.locus,topic:'Transfer to '+m.ch.room.topic,note:['Dispatch route: '+routeFor(m.chapter).name+'.','Answer lanes rehearse material from the chapter you just completed. Brake for reading time; the route has no speed deadline.'] }:{...m.ch.room,missionConcept:m.concept};
  R.start([room],0,{campaign:true});R.routeTheme=routeFor(m.chapter);
- const enter=()=>{const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.openBriefing();};
- const alreadyInChapter=m.kind==='concept'&&timeline().some(x=>x.kind==='concept'&&x.chapter===m.chapter&&complete.has(x.id));
- if(alreadyInChapter&&!m.concept.title.startsWith('OSCE:')){enter();updateRibbon();return;}
- const f=frameLook(),title=m.ch.story[0],route=m.kind==='transfer';
- const body='<div class="cinemaTop"><span>OPERATION NIGHTINGALE</span><span>CHAPTER '+String(m.chapter+1).padStart(2,'0')+' / 20</span></div><p class="cinemaEyebrow">'+(route?'AMBULANCE DISPATCH':'SECTOR '+String(m.chapter+1).padStart(2,'0'))+'</p><h2 class="cinemaTitle">'+esc(route?R.routeTheme.name:title)+'</h2><p class="cinemaStory">'+esc(route?'The next relay is waiting. Take the ambulance through '+R.routeTheme.label.toLowerCase()+'. The questions on this road come from the chapter you just cleared.':m.ch.story[1])+'</p><div class="missionDossier"><span>YOUR NEXT OBJECTIVE</span><h3>'+esc(route?'Reach '+m.ch.room.locus:m.title)+'</h3><p>'+esc(route?'Eight review checkpoints · steer into the correct answer lane':m.ch.room.topic+' · '+m.concept.items.length+' course items · '+(m.concept.mode==='fps'?'ward-round simulation':'combat drill'))+'</p></div><div class="cinemaBottom"><span>'+esc(f.code+' '+f.name)+'</span><span>'+esc(m.ch.story[2])+'</span></div>';
- R.showCard('cinema','Incoming transmission',body,route?'Accept dispatch':'Enter mission',enter,300);
- updateRibbon();
+ const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();updateRibbon();
+}
+function showBriefing(){if(!active||!R.active)return;const m=active,notes=m.concept?m.concept.note:[];
+ const body='<p class="cinemaEyebrow">CHAPTER '+String(m.chapter+1).padStart(2,'0')+'</p><h2 class="cinemaTitle">'+esc(m.title)+'</h2><p class="cinemaStory">'+esc(m.ch.story[1])+'</p><div class="missionDossier">'+notes.map(n=>'<p>'+esc(n)+'</p>').join('')+'</div>';
+ R.showCard('cinema','Mission briefing',body,'Return to combat',()=>{},0);
 }
 const originalStart=R.start;
 R.start=function(rooms,si,options){R.campaignRun=!!(options&&options.campaign);Q('#play').classList.toggle('campaignPlay',R.campaignRun);if(!R.campaignRun){active=null;R.routeTheme=null;}originalStart(rooms,si);};
@@ -106,7 +104,7 @@ function renderWarMap(){
  Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selected);
 }
 function inspectSector(i){const r=R.deckRooms()[i];Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';const retired=r.items.filter(R.isMastered).length;Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+r.items.length+'<small>ITEMS</small></b><b>'+retired+'<small>RETIRED</small></b>';Q('#warConcepts').innerHTML=r.concepts.map(c=>'<li class="'+(c.items.every(R.isMastered)?'retired':'')+'">'+esc(c.title)+'<small>'+c.items.filter(R.isMastered).length+'/'+c.items.length+'</small></li>').join('');Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.classList.toggle('selected',+b.dataset.sector===i));}
-R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon};
+R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:openWarMap,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,missionItems,timeline,next,clearedChapters,updateRibbon};
 Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=launch;Q('#warBack').onclick=()=>R.showScreen('home');
 // Animated hangar, drawn at a bounded resolution and paused when it is off screen.
 let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
