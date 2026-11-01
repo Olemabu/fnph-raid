@@ -294,6 +294,10 @@ html[data-theme=light] .others li{background:#e7ebe6}html[data-theme=light] .oth
 .appToolActions a.btn{color:var(--text)}
 
 @media(min-width:901px){#home :is(.campaignMast,.campaignTag,.campaignObjective small,.campaignFootnote,.campaignLedger p,.frameSteps,.framePlaque p,.framePlaque small,.combatLoadout span,.combatLoadout small,.opsKicker,.opsFields label,.opsFields p){font-size:14px}#home :is(.chapterNode span,.chapterNode small){font-size:13px}#home .chapterNode b{font-size:15px}#home .campaignCopy>p{font-size:17px}}
+
+#orbIntel{position:absolute;z-index:6;right:14px;top:200px;bottom:75px;width:260px;overflow:auto;padding:16px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-sizing:border-box}#orbIntel>b{font:700 15px var(--ui);letter-spacing:.1em;color:var(--gold)}#orbHint{font-size:13px;line-height:1.6;color:var(--muted)}#orbChoices{display:grid;gap:8px}#orbChoices button{padding:12px;text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:600 14px/1.5 var(--ui);cursor:pointer}#orbChoices button:hover{border-color:var(--gold)}#orbToggle{display:none}.orbIntro{margin:0 0 18px;color:var(--muted);font-size:15px;line-height:1.6}#play.orbAssault .keys{display:none}#play.orbAssault #qChain{display:none}
+@media(max-width:1000px){#orbIntel{top:auto;bottom:145px;left:50%;right:auto;transform:translateX(-50%);width:min(320px,calc(100% - 24px));height:auto;max-height:220px;padding:0;background:var(--panel)}#orbToggle{display:block;padding:9px 12px;width:100%;font:600 12px var(--ui);background:var(--panel2);color:var(--text);border:1px solid var(--line)}#orbIntel>b,#orbHint{display:none}#orbChoices{display:none;padding:8px}#orbIntel.expanded #orbChoices{display:grid;max-height:150px;overflow:auto}#orbChoices button{font-size:13px;padding:7px}}
+@media(max-width:1000px) and (max-height:500px){#orbIntel{left:auto;right:6px;transform:none;top:150px;bottom:115px;width:145px;max-height:none}#orbToggle{font-size:10px;padding:7px}#orbIntel.expanded #orbChoices{max-height:90px}#orbChoices button{font-size:11px}}
 </style>
 
 <section id="home" class="page">

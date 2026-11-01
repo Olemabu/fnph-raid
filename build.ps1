@@ -19,7 +19,7 @@ $parts.Add('<script>var $ = {};var gameStyle=document.createElement("style");gam
 $parts.Add('<script>window.FNPH_DECK='+$deckJson+';</script>')
 $parts.Add("<script>(function(){`n"+(J 'vendor/radius-raid/jsfxr.js')+"`nwindow.jsfxr=jsfxr;})();</script>")
 $parts.Add('<script>'+(J 'src/mapgeo.js')+'</script>')
-$order=@('vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mecha.js','src/campaign.js','src/operations.js','src/mobile.js','src/app.js')
+$order=@('vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mecha.js','src/campaign.js','src/operations.js','src/mode-orbs.js','src/mobile.js','src/app.js')
 foreach($file in $order){$parts.Add('<script>'+(J $file)+"`n</script>")}
 $parts.Add('<script>window.FNPHBoot.finish();</script>')
 $runtime=($parts | ForEach-Object {$_.Substring(8,$_.Length-17)}) -join "`n;`n"

@@ -549,6 +549,7 @@ function nextQuestion(){
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
+  if(R.orbAssault&&R.orbs){R.orbs.stage(R.cur);return;}
   clearAnswerSplash();
   const it=R.cur;let opts,correct,chip;
   if(it.type==='q'){opts=qOptions(it);correct=[it.answer];chip='Shoot the correct answer';}
@@ -604,6 +605,7 @@ R.reconsider=function(guessed){
  if(!R.canReconsider())return;
  const last=R.lastAnswer,it=last.it,current=R.cur,wasCurrent=current===it&&R.phase!=='fight';
  R.lastAnswer=null;
+ if(R.orbAssault)R.orbs.prepareRetry();
  if(last.stats)stats[it.id]={...last.stats};else delete stats[it.id];
  if(guessed){const s=st(it.id);s.mcqDone=false;s.mcqRemaining=3;s.box=0;s.guessed=(s.guessed||0)+1;}
  store.set('stats',stats);R.correct=Math.max(0,R.correct-1);R.answered=Math.max(0,R.answered-1);R.cleared=Math.max(0,R.cleared-1);R.streak=last.streak;$.score=Math.max(0,$.score-last.points);
@@ -1310,6 +1312,7 @@ function drawTactical(ctx){
   ctx.restore();
 }
 R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
+R.orbOptions=it=>({opts:qOptions(it),correct:[it.answer],chip:'Destroy the correct answer orb',t:0,r0:300});R.advanceQuestion=nextQuestion;R.swarmDeath=swarmDown;
 R.beginCombat=()=>{openBriefing();cardReadyAt=0;closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 function boot(){

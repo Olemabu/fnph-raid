@@ -15,7 +15,7 @@ parts=[
  '<script>/* jsfxr */\n(function(){\n'+J('vendor/radius-raid/jsfxr.js')+'\nwindow.jsfxr = jsfxr;\n})();</script>',
  '<script>/* map geometry */\n'+J('src/mapgeo.js')+'</script>',
 ]
-order=['vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mecha.js','src/campaign.js','src/operations.js','src/mobile.js','src/app.js']
+order=['vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mecha.js','src/campaign.js','src/operations.js','src/mode-orbs.js','src/mobile.js','src/app.js']
 for f in order: parts.append('<script>/* '+f+' */\n'+J(f)+'\n</script>')
 parts.append('<script>window.FNPHBoot.finish();</script>')
 # Compress all executable content, including the syllabus, into the same HTML.
