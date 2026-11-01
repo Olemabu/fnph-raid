@@ -65,7 +65,18 @@ let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.g
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 /* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
 const SRS_DAYS=[0,1,3,7,16,35];
-function grade(id,ok){const s=st(id);s.seen++;if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}store.set('stats',stats);}
+function grade(id,ok){
+ const s=st(id),it=deck.rooms.flatMap(r=>r.items).find(i=>i.id===id);s.seen++;
+ if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}
+ if(it&&it.type==='q'){
+  if(ok){s.mcqRemaining=Math.max(0,(s.mcqRemaining||0)-1);s.mcqDone=s.mcqRemaining===0;if(s.mcqDone)s.box=Math.max(MASTER_AT,s.box);}
+  else{s.mcqRemaining=3;s.mcqDone=false;}
+ }
+ store.set('stats',stats);
+}
+// Preserve prior answers: first-time successes retire; missed MCQs retain their outstanding practice.
+for(const it of deck.rooms.flatMap(r=>r.items)){const s=stats[it.id];if(it.type!=='q'||!s||s.mcqDone!==undefined)continue;s.mcqDone=s.box>=MASTER_AT||((s.right||0)>0&&!(s.wrong||0));s.mcqRemaining=s.mcqDone?0:(s.wrong?Math.max(1,3-(s.box||0)):0);}
+store.set('stats',stats);
 function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return !mastered(it)&&s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
 function reviewRoom(){
   const items=dueItems(30);if(!items.length)return null;
@@ -74,7 +85,7 @@ function reviewRoom(){
   return{review:true,locus:'Daily review',topic:'Daily review · spaced repetition',mode:'',idx:Math.min(idx,SLOTS.length-1),concepts:[],
     note:['These are the items due today across every station, mixed together. Choose the correct answer in play; missed items return automatically.','- Right: it comes back in 1, 3, 7, 16, then 35 days.','- Wrong: it comes back within the hour.'],items};
 }
-function mastered(it){return !!stats[it.id]&&stats[it.id].box>=MASTER_AT;}
+function mastered(it){const s=stats[it.id];return !!s&&(it.type==='q'?s.mcqDone===true:s.box>=MASTER_AT);}
 function masteredCount(room){return room.items.filter(mastered).length;}
 function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=Math.min(MASTER_AT,stats[it.id]?stats[it.id].box:0));return t/(room.items.length*MASTER_AT);}
 const mapRooms=()=>deck.rooms.slice(0,SLOTS.length);
@@ -498,6 +509,7 @@ function openBriefing(){
   const review=[];
   R.phase='briefing';R.queue=mixQueue(fresh);
   if(R.campaignRun&&r.review)R.queue=mixQueue(pool.filter(i=>!mastered(i)));
+  for(const it of R.queue.slice())if(it.type==='q')for(let n=1;n<(st(it.id).mcqRemaining||0);n++)insertMcqRepeat(it);
   if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
@@ -506,7 +518,7 @@ function openBriefing(){
   card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
     (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
     mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
@@ -522,6 +534,10 @@ function timerLoop(now){
   requestAnimationFrame(timerLoop);
 }
 requestAnimationFrame(timerLoop);
+function insertMcqRepeat(it){
+ const positions=Array.from({length:R.queue.length+1},(_,i)=>i).filter(i=>(i===0||R.queue[i-1].id!==it.id)&&(i===R.queue.length||R.queue[i].id!==it.id));
+ const pos=positions.length?pickOne(positions):R.queue.length;R.queue.splice(pos,0,it);
+}
 function nextQuestion(){
   const eligible=R.queue.filter(it=>!mastered(it));R.total=Math.max(R.cleared,R.total-(R.queue.length-eligible.length));R.queue=eligible;
   if(!R.queue.length){stationCleared();return;}
@@ -580,6 +596,7 @@ R.carrierDown=function(c){
 };
 /* drill mode: once a missed question is finally answered right, it comes back once more 2 to 3 questions later */
 function reinforce(it){
+  if(it.type==='q')return;
   if(mastered(it)||(!R.campaignRun&&deathMode!=='drill')||!it.drillMiss)return;
   it.drillMiss=false;
   const pos=Math.min(R.queue.length,2+Math.floor(Math.random()*2));
@@ -641,17 +658,22 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(it.type==='q'?'This missed MCQ returns three times at random points in the remaining sequence. Another miss resets its remaining repeats to three.':dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
   const it=R.cur,dm=R.campaignRun?'drill':deathMode;it.found=[];
-  if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items.filter(i=>!mastered(i)));R.total=R.queue.length;R.cleared=0;}
+  if(it.type==='q'){
+    const before=R.queue.length;R.queue=R.queue.filter(q=>q.id!==it.id);
+    for(let n=0;n<3;n++)insertMcqRepeat(it);
+    R.total+=R.queue.length-before;
+  }else if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items.filter(i=>!mastered(i)));R.total=R.queue.length;R.cleared=0;}
   else if(dm==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
-  if(dm==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
+  if(it.type==='q')setTimeout(()=>R.toast('Three repeats mixed into the remaining questions.',true),400);
+  else if(dm==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
   else if(dm==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
 function swarmDown(){

@@ -148,3 +148,6 @@ Weapon reports and a ward ambience loop use the Sound/Music controls and browser
 
 ## Current game scope: spaceship only
 Racing, 007 infiltration and the first-person ward shooter have been removed. All topics, OSCEs and campaign reviews use the original interceptor combat. The home screen offers spaceship random practice by topic or across the syllabus; the map supports direct concept selection. Saved mastery and earned ship upgrades are preserved. Earlier references to driving and first-person panels describe removed features.
+
+## MCQ repetition rule
+An MCQ appears once and retires if answered correctly. A failed MCQ is inserted three times at random points among the remaining questions. Each correct repeat reduces its saved outstanding count; another miss resets the count to three without adding duplicate batches. Unfinished repeats survive reload. Procedures and list drills retain their previous mastery rule.
