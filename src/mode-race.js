@@ -66,7 +66,7 @@ function update(dt){
   else if(r.target!=null)r.x+=(r.target-r.x)*Math.min(1,.12*dt);
   r.x=Math.max(-1.05,Math.min(1.05,r.x));
   // throttle: up/W boosts (more points), down/S brakes (more reading time)
-  const up=k.up||($.pad&&$.pad.my<-.5),down=k.down||($.pad&&$.pad.my>.5);
+  const up=R.touchBoost||k.up||($.pad&&$.pad.my<-.5),down=R.touchBrake||k.down||($.pad&&$.pad.my>.5);
   r.boost=up?1.7:down?.45:1;
   const base=Z0/(r.dur*60);
   const live=R.phase==='fight';
@@ -92,10 +92,11 @@ function choose(){
 
 /* ------------------------------ rendering ------------------------------ */
 function draw(){
-  const r=run;resize();const theme=R.routeTheme||(R.campaign?R.campaign.routeFor((R.rooms&&R.rooms[R.si]?R.rooms[R.si].idx:0)):{name:'Night dispatch',label:'Hospital perimeter',sky:['#05060f','#1a1036','#4a1d4f'],ground:'#0b1a10',edge:'#62e6ff'});const c=cx,hor=Math.round(H*.40),camH=1.0,focal=H*.9;
+  const r=run;resize();const theme=R.routeTheme||(R.campaign?R.campaign.routeFor((R.rooms&&R.rooms[R.si]?R.rooms[R.si].idx:0)):{name:'Night dispatch',label:'Hospital perimeter',sky:['#05060f','#1a1036','#4a1d4f'],ground:'#0b1a10',edge:'#62e6ff'});const c=cx,hor=Math.round(H*.40),camH=1.0,focal=H*.9,n=r.n;
   const sh=r&&r.shake?(Math.random()-.5)*r.shake:0;
   c.save();c.translate(sh,sh*.6);
   if(r){const dx=r.x-(r.px==null?r.x:r.px);r.px=r.x;r.roll=(r.roll||0)*.9+dx*.9;c.translate(W/2,H*.6);c.rotate(-r.roll);c.translate(-W/2,-H*.6);}
+  if(!(R.stage3d&&R.stage3d.available)){
   // sky
   let g=c.createLinearGradient(0,0,0,hor);g.addColorStop(0,theme.sky[0]);g.addColorStop(.6,theme.sky[1]);g.addColorStop(1,theme.sky[2]);
   c.fillStyle=g;c.fillRect(-20,-20,W+40,hor+20);
@@ -112,7 +113,7 @@ function draw(){
   c.fillStyle=theme.ground;c.fillRect(-20,hor,W+40,H-hor+20);
   if(!r){c.restore();return;}
   // road by scanlines (perspective: screen offset and width both scale with ZR/z)
-  const pos=r.pos,n=r.n,ZR=10,span=H-hor;
+  const pos=r.pos,ZR=10,span=H-hor;
   const proj=(lx,z)=>{const sc=ZR/z,half=W*.6*sc;return{x:W/2+(curveAt(z,r)-r.x+lx)*half,y:hor+span*sc,half};};
   for(let y=hor+1;y<H+2;y+=2){
     const sc=(y-hor)/span,z=ZR/sc;if(z>Z0*1.6)continue;
@@ -181,12 +182,14 @@ function draw(){
   // burst when passing the gantry
   if(r.parts){r.parts=r.parts.filter(q=>(q.l-=1)>0);r.parts.forEach(q=>{q.x+=q.vx;q.y+=q.vy;q.vy+=.25;c.globalAlpha=Math.min(1,q.l/30);c.fillStyle=q.c;c.fillRect(q.x,q.y,q.s,q.s);});c.globalAlpha=1;}
   if(theme.wet){c.strokeStyle='#d5edff33';c.lineWidth=1;const tm=Date.now()/16;for(let k=0;k<65;k++){const x=(k*157.7+tm*1.3)%W,y=(k*79.1+tm*4)%H;c.beginPath();c.moveTo(x,y);c.lineTo(x-5,y+15);c.stroke();}}
+  }else{R.stage3d.race(c,W,H,r,theme);}
   // Cinematic route identity and progress to the destination.
   c.fillStyle='#06101dd9';c.fillRect(16,hor-56,Math.min(310,W*.43),48);c.fillStyle=theme.edge;c.font='600 10px "JetBrains Mono", monospace';c.fillText(theme.label.toUpperCase(),28,hor-37);c.fillStyle='#eef5ec';c.font='600 15px "Chakra Petch", sans-serif';c.fillText(theme.name,28,hor-16);
   const progress=R.total?Math.min(1,(R.cleared+(R.wave?R.wave.t:0))/R.total):0;c.fillStyle='#a4c7c733';c.fillRect(16,hor-6,Math.min(310,W*.43),2);c.fillStyle=theme.edge;c.fillRect(16,hor-6,Math.min(310,W*.43)*progress,2);
   // ambulance (rear view)
   const lane=laneOf(r.x,n),tilt=(r.target!=null?(r.target-r.x):0)*.25+((($.keys&&$.keys.state.right)?1:0)-(($.keys&&$.keys.state.left)?1:0))*.06;
   const narrow=W<700,cols=narrow?2:n,rows=Math.ceil(n/cols),cardH=narrow?74:Math.max(86,H*.13-10),cardsTop=H-rows*(cardH+10)-10*(narrow?1:0)-(narrow?0:0),cw=Math.min(W*.15,180),chh=cw*.78,ax=W/2,ay=cardsTop-chh*.95;
+  if(!(R.stage3d&&R.stage3d.available)){
   c.save();c.translate(ax,ay);c.rotate(tilt);
   c.fillStyle='rgba(0,0,0,.45)';c.beginPath();c.ellipse(0,chh*.52,cw*.62,chh*.12,0,0,Math.PI*2);c.fill();
   c.fillStyle='#111';c.fillRect(-cw*.48,chh*.30,cw*.18,chh*.22);c.fillRect(cw*.30,chh*.30,cw*.18,chh*.22);
@@ -202,6 +205,7 @@ function draw(){
   c.fillStyle=r.boost>1.2?'#ffb03a':'#ff4040';c.fillRect(-cw*.48,chh*.14,cw*.12,chh*.08);c.fillRect(cw*.36,chh*.14,cw*.12,chh*.08);
   c.fillStyle='#0b0e14';c.font='800 '+(cw*.09|0)+'px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText('FNPH',0,chh*.3);
   c.restore();
+  }
   // lane marker under the ambulance
   c.fillStyle=LANE_COL[lane];c.font='800 14px "Chakra Petch", sans-serif';c.textAlign='center';c.fillText('LANE '+(lane+1),ax,ay-chh*.75);
   // answer cards along the bottom, in lane order
@@ -232,8 +236,10 @@ function wrapText(c,t,x,y,w,maxH){
 }
 function lines(c,t,w){const out=[];let cur='';String(t).split(/\s+/).forEach(word=>{const tst=cur?cur+' '+word:word;if(c.measureText(tst).width>w&&cur){out.push(cur);cur=word;}else cur=tst;});if(cur)out.push(cur);return out;}
 
+let lastDraw=0;
 function loop(now){
   requestAnimationFrame(loop);
+  if(now-lastDraw<30)return;lastDraw=now;
   const dt=Math.min(3,(now-(last||now))/16.667);last=now;
   if(!cv)return;
   const vis=visible();

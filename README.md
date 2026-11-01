@@ -88,7 +88,7 @@ A station can be played as a different mini-game. Add a third field to its deck 
 
 - **race: Ambulance run** (`src/mode-race.js`). This is a pseudo-3D road. Each question is a gantry of colour-coded answer lanes, and the answer text is on cards along the bottom. To pick, steer with ←/→, the left stick, the mouse, keys 1 to 4, or by tapping a card. Hold ↑ to boost (more points) or ↓ to brake (more reading time). The lane you are in when you reach the gantry is your answer. It goes through `R.carrierDown()`, so grading, drill mode and teaching cards work unchanged.
 - **fps: Ward round** (`src/mode-fps.js`). This is a raycast first-person ward. The answer panels walk towards you. Aim with the mouse (the screen edges turn you), ←/→ or the sticks. Fire with click, Space, F or the trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won't pick an answer. If the panels reach you, you are overrun. It is used for OSCE stations (`| fps`, or any topic that mentions OSCE).
-- Planned: `stealth` (007-style). Build each as its own `src/mode-*.js` using the same hook: `setupWave()` calls the mode's start function, and the mode calls `R.carrierDown(fake)` with the chosen option.
+- **stealth: Blacksite** (`src/mode-stealth.js`). Evade patrol sight cones and use cover. Move with WASD/stick or click the floor. Keys 1–4 route to an answer terminal; Shift crouches; hold E, Space or the trigger nearby to hack. Touch controls are provided.
 
 ## Saved progress
 
@@ -125,3 +125,7 @@ Startup is fully self-contained. External Google Fonts stylesheets have been rem
 
 ## Optional 3D prototype (disabled)
 `src/mecha3d.js` renders original bevelled armour meshes, articulated joint housings, cylinders, weapon barrels, wing hardware and emissive elements with WebGL depth testing and lighting. The same renderer supplies the hangar portrait, loadout preview and combat mecha. Pointer movement over the hangar adjusts the viewing angle. The existing frame unlocks and livery remain in effect. If WebGL is unavailable or lost, the original Canvas renderer keeps the game playable. The user requested the previous ship shape, so both build paths now exclude this prototype and use the original vector renderer. This is a lightweight real-3D model renderer inside the existing 2D battlefield, not a HALO-equivalent 3D game engine or AAA asset pipeline.
+
+## Special operations
+Scroll below the command deck to the three operation cards. Select Night Dispatch, Ward Breach or Blacksite, choose a syllabus sector and concept, then Deploy operation. The original question IDs and permanent mastery retirement apply across all modes. The race environment can be selected independently. OSCE concepts are listed first for Ward Breach; other concepts are also available.
+The optional WebGL renderer in `src/stage3d.js` supplies original lit 3D geometry, depth testing, fog, emissive surfaces, material detail and soft contact shadows. The fallback is the existing Canvas race/ward scene and a tactical overhead stealth view. No assets or scripts are fetched at runtime. `src/operations.js` supplies the menu, live scene thumbnails and touch controls. The original interceptor ship remains unchanged.

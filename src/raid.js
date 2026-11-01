@@ -413,7 +413,7 @@ function showAnswerSplash(term){
 }
 R.toast=(msg,plain)=>{const el=Q('#toast');el.textContent=msg;el.className='toast'+(plain?'':' hot');el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800);};
 /* stage modes: a station can be played as a different mini-game ('race' = ambulance run). Set with a third header field: ## Locus | Topic | race */
-const MODES=['race','fps'];
+const MODES=['race','fps','stealth'];
 function roomMode(r){if(!r)return'';if(MODES.includes(r.mode))return r.mode;if(r.mode)return'';return/emergenc/i.test(r.topic)?'race':/\bOSCE\b/i.test(r.topic)?'fps':'';}
 R.modeName=()=>{if(!(R.active&&R.rooms&&R.rooms[R.si]))return'';const c=R.concept;if(c&&MODES.includes(c.mode))return c.mode;return roomMode(R.rooms[R.si]);};
 R.swarmOn=()=>R.active&&(R.phase==='travel'||((R.phase==='fight'||R.phase==='resolve')&&!R.modeName()));
@@ -532,10 +532,12 @@ function setupWave(){
   const cx=Math.max(r0+40,Math.min($.ww-r0-40,$.hero.x)),cy=Math.max(m,Math.min($.wh-m,$.hero.y));
   opts.forEach((text,i)=>{const a=a0+i*$.twopi/opts.length;$.carriers.push(new $.Carrier({text,num:i+1,x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0*.85}));});
   if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
+  if(R.modeName()==='stealth'&&R.stealthStart){$.carriers.length=0;R.stealthStart(R.wave);}
   if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
   Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.cues?it.prompt.replace(': the phases of the station, in order','')+' · '+it.cues[it.found.length]+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose the action':it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
   R.phase='fight';
+  if(R.modeName()==='stealth'){R.wave.chip='Infiltrate and hack the correct terminal';if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
   if(R.modeName()==='race'){R.wave.chip=it.type==='q'?'Drive into the correct lane':chip.replace(/^Procedure · shoot/,'Procedure · drive through');if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}
   synth('wave');hud();
 }
