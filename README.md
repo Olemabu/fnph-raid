@@ -113,3 +113,5 @@ Chapter and OSCE introductions use cinematic dispatch cards; ordinary concepts w
 - Returning to the hangar, pausing or closing the tab keeps earned progress. The original station selection, daily review, question editor, settings and credits are under **Free flight**.
 
 `src/mecha.js` provides the shared vector renderer. `src/campaign.js` provides mission ordering, narrative, checkpoint saving, review transfers and hangar art. Both are included after the original game modes by both build scripts. No server, framework, raster download or external runtime dependency is added.
+
+Mastery requires **four consecutive correct answers** per item. The fourth and later correct answers skip the explanation card immediately; a wrong answer resets the streak and restores teaching feedback. Existing saved streaks are retained.

@@ -57,10 +57,10 @@ function pickConcept(r){
   const cs=(r.concepts||[]).filter(c=>c.items.length);if(!cs.length)return null;
   const next=cs.find(c=>!cdone.has(ckey(r,c)));if(next)return next;
   // all secured once: revisit the weakest concept
-  let best=null,bm=2;cs.forEach(c=>{const m=c.items.filter(i=>stats[i.id]&&stats[i.id].box>=3).length/c.items.length;if(m<bm){bm=m;best=c;}});return best;
+  let best=null,bm=2;cs.forEach(c=>{const m=c.items.filter(mastered).length/c.items.length;if(m<bm){bm=m;best=c;}});return best;
 }
 function conceptsDone(r){const cs=(r.concepts||[]).filter(c=>c.items.length);return cs.filter(c=>cdone.has(ckey(r,c))).length;}
-let timerOn=store.get('timer',true);const MASTER_AT=3;
+let timerOn=store.get('timer',true);const MASTER_AT=4;
 let best=store.get('best',0),teachAll=store.get('teachAll',true),soundOn=store.get('sound',true),musicOn=store.get('music',true),deathMode=store.get('deathMode2','drill');
 function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 /* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
@@ -76,7 +76,7 @@ function reviewRoom(){
 }
 function mastered(it){return !!stats[it.id]&&stats[it.id].box>=MASTER_AT;}
 function masteredCount(room){return room.items.filter(mastered).length;}
-function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=(stats[it.id]?stats[it.id].box:0));return t/(room.items.length*5);}
+function mastery(room){if(!room.items.length)return 0;let t=0;room.items.forEach(it=>t+=Math.min(MASTER_AT,stats[it.id]?stats[it.id].box:0));return t/(room.items.length*MASTER_AT);}
 const mapRooms=()=>deck.rooms.slice(0,SLOTS.length);
 /* ---------- arsenal: the gun upgrades as you master more questions (saved progress, across runs) ---------- */
 const ARSENAL=[
@@ -487,7 +487,7 @@ function openBriefing(){
   card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 3 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. An item is mastered after 4 correct answers in a row. Mastered items drop out (apart from a quick review) and skip their teaching card, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
     (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
     mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
@@ -569,7 +569,7 @@ function afterCorrect(){
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
-  if(R.wasMastered){R.toast('Mastered already · card skipped',true);nextQuestion();return;}
+  if(mastered(it)){nextQuestion();return;}
   if(teachAll&&!R.campaignRun){learnCard(it);}else nextQuestion();
 }
 function learnCard(it){
@@ -1101,7 +1101,7 @@ function renderWalk(){
   const r=deck.rooms[walkIdx];
   Q('#walkHead').innerHTML='<p class="eyebrow">Station '+(walkIdx+1)+' of '+deck.rooms.length+'</p><h2>'+esc(r.locus)+': '+esc(r.topic)+'</h2>'+(r.note.length?'<div class="note brief">'+noteHTML(r.note)+'</div>':'');
   Q('#walkCards').innerHTML=r.items.map(it=>{
-    const s=stats[it.id],box=s?s.box:0,dots=(mastered(it)?'MASTERED ':'')+'●'.repeat(box)+'○'.repeat(5-box),kind=it.type==='q'?'Question':it.type==='l'?'Procedure (in order)':'List (any order)';
+    const s=stats[it.id],box=s?s.box:0,dots=(mastered(it)?'MASTERED ':'')+'●'.repeat(Math.min(MASTER_AT,box))+'○'.repeat(Math.max(0,MASTER_AT-box)),kind=it.type==='q'?'Question':it.type==='l'?'Procedure (in order)':'List (any order)';
     let body='<div class="q">'+esc(it.prompt)+'</div>';
     if(it.type==='q')body+='<div class="a">'+esc(it.answer)+'</div>';
     else body+=(it.type==='l'?'<ol class="a">':'<ul class="a">')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>');
