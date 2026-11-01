@@ -18,7 +18,7 @@ parts.append('<script>window.FNPHBoot.finish();</script>')
 # Script boundaries are retained when joined; modules keep their existing scope.
 runtime='\n;\n'.join(part[8:-9] for part in parts)
 payload=base64.b64encode(gzip.compress(runtime.encode('utf-8'),mtime=0)).decode('ascii')
-bundle='<script>'+J('src/startup.js')+'</script><script type="application/octet-stream" id="fnphPayload">'+payload+'</script><script>'+J('src/unpack.js')+'</script>'
+bundle='<script>'+J('src/theme.js')+'</script><script>'+J('src/startup.js')+'</script><script type="application/octet-stream" id="fnphPayload">'+payload+'</script><script>'+J('src/unpack.js')+'</script>'
 body=J('src/shell.html').replace('/*__SCRIPTS__*/',bundle)
 html='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>'+body+'</body></html>'
 os.makedirs(os.path.join(HERE,'dist'),exist_ok=True)

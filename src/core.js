@@ -61,6 +61,7 @@ Foreground (vignette + scanlines) and HUD
 ==============================================================================*/
 $.renderForeground = function() {
 	$.ctxfg.clearRect( 0, 0, $.cw, $.ch );
+ if(window.FNPHTheme&&FNPHTheme.light)return;
 	var gradient = $.ctxfg.createRadialGradient( $.cw / 2, $.ch / 2, $.ch / 3, $.cw / 2, $.ch / 2, Math.max( $.cw, $.ch ) * 0.8 );
 	gradient.addColorStop( 0, 'hsla(0, 0%, 0%, 0)' );
 	gradient.addColorStop( 1, 'hsla(0, 0%, 0%, 0.55)' );

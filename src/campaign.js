@@ -127,10 +127,10 @@ Q('#campaignLaunch').onclick=openWarMap;Q('#warDeploy').onclick=deploySelected;Q
 let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
 function hangar(now){requestAnimationFrame(hangar);if(now-last<(reduced?1000:33)||Q('#home').hidden)return;const rect=canvas.getBoundingClientRect();if(rect.bottom<0||rect.top>window.innerHeight)return;last=now;
  const dpr=Math.min(window.devicePixelRatio||1,1.5),w=rect.width,h=rect.height;if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}c.setTransform(dpr,0,0,dpr,0,0);const t=reduced?0:now/1000,tier=frameTier(),f=frameLook();
- const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#080f18');bg.addColorStop(.55,'#142c38');bg.addColorStop(1,'#080e16');c.fillStyle=bg;c.fillRect(0,0,w,h);
+ const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,(FNPHTheme.light?'#f7f5ee':'#080f18'));bg.addColorStop(.55,(FNPHTheme.light?'#e4e9e4':'#142c38'));bg.addColorStop(1,(FNPHTheme.light?'#f3f1e9':'#080e16'));c.fillStyle=bg;c.fillRect(0,0,w,h);
  const narrow=w<650,cx=narrow?w*.5:w*.71,cy=narrow?155:h*.48,sc=narrow?Math.min(1.15,w/285):Math.min(h/290,w/450)*.93;
  // Cathedral-like hangar architecture and warm shafts of light.
- for(let k=0;k<9;k++){const x=w*.34+k*w*.1;c.fillStyle=k%2?'#152632':'#1c3440';c.fillRect(x,0,w*.025,h);c.fillStyle='#aacac519';c.fillRect(x+w*.025,0,2,h);}
+ for(let k=0;k<9;k++){const x=w*.34+k*w*.1;c.fillStyle=k%2?(FNPHTheme.light?'#d8dfdc':'#152632'):(FNPHTheme.light?'#e6eae4':'#1c3440');c.fillRect(x,0,w*.025,h);c.fillStyle='#aacac519';c.fillRect(x+w*.025,0,2,h);}
  c.save();c.globalCompositeOperation='screen';for(let k=0;k<3;k++){const x=w*.53+k*w*.17;c.beginPath();c.moveTo(x,-20);c.lineTo(x+30,-20);c.lineTo(x-90,h);c.lineTo(x-210,h);c.closePath();const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#d5e8c22b');g.addColorStop(1,'#d5e8c200');c.fillStyle=g;c.fill();}c.restore();
  c.strokeStyle='#89bbc322';c.lineWidth=1;for(let i=0;i<14;i++){const y=h*.69+Math.pow(i/13,1.7)*h*.4;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}for(let i=-8;i<12;i++){c.beginPath();c.moveTo(cx+i*20,h*.69);c.lineTo(cx+i*120,h);c.stroke();}
  // Refit platform and projected reticle.
@@ -138,10 +138,10 @@ function hangar(now){requestAnimationFrame(hangar);if(now-last<(reduced?1000:33)
  c.save();c.translate(cx,cy);c.strokeStyle=f.core+'1e';c.lineWidth=1;c.setLineDash([4,8]);c.beginPath();c.arc(0,0,sc*125,0,Math.PI*2);c.stroke();c.setLineDash([]);c.restore();
  R.drawFrame(c,cx,cy,sc,tier,t,false);
  // Technical annotation lines, indexing and a scan pass.
- c.font='10px monospace';c.fillStyle=f.core+'bb';c.strokeStyle=f.core+'66';for(const [dy,label] of (narrow?[]:[[-65,'NEURAL LINK / ONLINE'],[20,'ARMOUR / INTEGRITY 100%'],[80,'PROPULSION / STANDBY']])){const yy=cy+dy*sc;c.beginPath();c.moveTo(cx+45*sc,yy);c.lineTo(cx+100*sc,yy-16);c.lineTo(w-22,yy-16);c.stroke();c.fillText(label,Math.min(w-190,cx+95*sc),yy-22);}
+ c.font='10px monospace';c.fillStyle=FNPHTheme.light?'#526874':f.core+'bb';c.strokeStyle=FNPHTheme.light?'#a0aeaa':f.core+'66';for(const [dy,label] of (narrow?[]:[[-65,'NEURAL LINK / ONLINE'],[20,'ARMOUR / INTEGRITY 100%'],[80,'PROPULSION / STANDBY']])){const yy=cy+dy*sc;c.beginPath();c.moveTo(cx+45*sc,yy);c.lineTo(cx+100*sc,yy-16);c.lineTo(w-22,yy-16);c.stroke();c.fillText(label,Math.min(w-190,cx+95*sc),yy-22);}
  const scan=(t*.12%1)*h;c.fillStyle=f.core+'08';c.fillRect(w*.38,scan,w*.62,2);
  for(let i=0;i<36;i++){const x=(i*127.1+t*(i%2?3:-2))%w,y=(i*79.3+t*7)%h;c.fillStyle=i%3?'#b9ebda44':'#ffd9a477';c.fillRect(x,y,1.5,1.5);}
- const shade=narrow?c.createLinearGradient(0,250,0,430):c.createLinearGradient(0,0,w,0);shade.addColorStop(0,narrow?'#050a1200':'#050a12');shade.addColorStop(.35,narrow?'#050a1244':'#050a12ed');shade.addColorStop(narrow?1:.6,narrow?'#050a12':'#050a1200');c.fillStyle=shade;c.fillRect(0,0,w,h);
+ const shade=narrow?c.createLinearGradient(0,250,0,430):c.createLinearGradient(0,0,w,0);shade.addColorStop(0,narrow?(FNPHTheme.light?'#f7f5ee00':'#050a1200'):(FNPHTheme.light?'#f7f5ee':'#050a12'));shade.addColorStop(.35,narrow?(FNPHTheme.light?'#f7f5ee44':'#050a1244'):(FNPHTheme.light?'#f7f5eeed':'#050a12ed'));shade.addColorStop(narrow?1:.6,narrow?(FNPHTheme.light?'#f7f5ee':'#050a12'):(FNPHTheme.light?'#f7f5ee00':'#050a1200'));c.fillStyle=shade;c.fillRect(0,0,w,h);
 }
 render();requestAnimationFrame(hangar);
 })();

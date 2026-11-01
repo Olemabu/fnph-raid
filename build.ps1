@@ -52,7 +52,7 @@ $gzip.Write($runtimeBytes, 0, $runtimeBytes.Length)
 $gzip.Dispose()
 $payload = [Convert]::ToBase64String($compressed.ToArray())
 $compressed.Dispose()
-$scripts = '<script>' + (J('src/startup.js')) + '</script><script type="application/octet-stream" id="fnphPayload">' + $payload + '</script><script>' + (J('src/unpack.js')) + '</script>'
+$scripts = '<script>' + (J('src/theme.js')) + '</script><script>' + (J('src/startup.js')) + '</script><script type="application/octet-stream" id="fnphPayload">' + $payload + '</script><script>' + (J('src/unpack.js')) + '</script>'
 $shell = J('src/shell.html')
 $body = $shell.Replace('/*__SCRIPTS__*/', $scripts)
 $html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + $body + '</body></html>'

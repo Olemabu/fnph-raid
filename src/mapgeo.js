@@ -118,6 +118,7 @@ function drawHazardStripes(c,x,y,w,h,rot){
 }
 
 function drawMapBase(c,opt){
+  if(window.FNPHTheme&&FNPHTheme.light){drawLightMap(c);return;}
   opt=opt||{};
   // Midnight tactical ground
   c.fillStyle='#060908';c.fillRect(0,0,MAPW,MAPH);
@@ -313,3 +314,14 @@ function drawMapBase(c,opt){
 }
 function line(c,pts){c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);c.stroke();}
 function poly(c,pts){c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.lineTo(pts[i][0],pts[i][1]);c.closePath();}
+
+// Daylight architectural map: real palette changes, without filtering sprites.
+function drawLightMap(c){
+ c.save();c.fillStyle='#eeece5';c.fillRect(0,0,MAPW,MAPH);
+ c.strokeStyle='#d7d9d6';c.lineWidth=.6;for(let x=0;x<MAPW;x+=48)line(c,[[x,0],[x,MAPH]]);for(let y=0;y<MAPH;y+=48)line(c,[[0,y],[MAPW,y]]);
+ c.fillStyle='#f9f8f3';poly(c,COMPOUND);c.fill();c.strokeStyle='#b9a777';c.lineWidth=2;poly(c,COMPOUND);c.stroke();
+ for(const road of ROADS_OUT.concat(ROADS_IN)){c.strokeStyle='#c4ccc9';c.lineWidth=16;line(c,road);c.strokeStyle='#e2e5df';c.lineWidth=11;line(c,road);}
+ c.save();c.setLineDash([6,8]);c.strokeStyle='#a99a77';c.lineWidth=.7;for(const road of ROADS_IN)line(c,road);c.restore();
+ for(const [x,y,w,h] of BUILD){c.save();c.translate(x,y);c.rotate(ROT);c.fillStyle='#21354420';c.fillRect(-w/2+3,-h/2+4,w,h);c.fillStyle='#d8ded9';c.fillRect(-w/2,-h/2,w,h);c.strokeStyle='#879b9c';c.lineWidth=.8;c.strokeRect(-w/2,-h/2,w,h);c.fillStyle='#fffdf6';c.fillRect(-w/2+2,-h/2+2,w-4,3);c.strokeStyle='#b7a273';c.strokeRect(-w/2+5,-h/2+6,w-10,h-12);c.restore();}
+ c.fillStyle='#344b59';c.font='10px monospace';c.fillText('FNPH / DAYLIGHT FLIGHT SECTOR',18,26);c.fillStyle='#6c7c81';c.fillText('10.482 N / 07.441 E',18,MAPH-18);c.restore();
+}

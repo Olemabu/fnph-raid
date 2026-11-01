@@ -201,7 +201,7 @@ let mapCanvas=null;
 function buildMap(){
   mapCanvas=document.createElement('canvas');mapCanvas.width=$.ww;mapCanvas.height=$.wh;
   const c=mapCanvas.getContext('2d');c.scale(WS,WS);drawMapBase(c);
-  c.setTransform(1,0,0,1,0,0);c.fillStyle='rgba(4,8,18,.35)';c.fillRect(0,0,$.ww,$.wh);
+  c.setTransform(1,0,0,1,0,0);c.fillStyle=FNPHTheme.light?'rgba(255,255,255,0)':'rgba(4,8,18,.35)';c.fillRect(0,0,$.ww,$.wh);
   c.strokeStyle='rgba(98,230,255,.05)';c.lineWidth=1;
   for(let x=0;x<$.ww;x+=60){c.beginPath();c.moveTo(x,0);c.lineTo(x,$.wh);c.stroke();}
   for(let y=0;y<$.wh;y+=60){c.beginPath();c.moveTo(0,y);c.lineTo($.ww,y);c.stroke();}
@@ -224,7 +224,7 @@ function makeLabel(text,num){
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
 
   // Frosted cyber plate body
-  g.fillStyle='rgba(8,12,20,.95)';
+  g.fillStyle=FNPHTheme.light?'rgba(255,253,247,.98)':'rgba(8,12,20,.95)';
   g.beginPath();
   if(g.roundRect)g.roundRect(1,1,W0-2,H0-2,8);else g.rect(1,1,W0-2,H0-2);
   g.fill();
@@ -239,7 +239,7 @@ function makeLabel(text,num){
 
   // Text
   g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
-  g.fillStyle='#f0f6ff';
+  g.fillStyle=FNPHTheme.light?'#203746':'#f0f6ff';
   g.textBaseline='middle';
   lines.forEach((l,i)=>g.fillText(l,42,H0/2-(lines.length-1)*8.5+i*17));
 
@@ -830,7 +830,7 @@ function drawShockwaves(c){
 }
 
 R.renderMap=function(){
-  const c=$.ctxmg;c.fillStyle='#05080d';c.fillRect(0,0,$.cw,$.ch);
+  const c=$.ctxmg;c.fillStyle=FNPHTheme.light?'#eeece5':'#05080d';c.fillRect(0,0,$.cw,$.ch);
   if(mapCanvas)c.drawImage(mapCanvas,Math.round($.screen.x-$.rumble.x),Math.round($.screen.y-$.rumble.y));
 };
 R.renderWorld=function(){
@@ -864,7 +864,7 @@ R.renderWorld=function(){
     c.strokeStyle='rgba('+col+','+(cur?.9:.55)+')';c.lineWidth=cur?3:2;c.beginPath();c.arc(p.x,p.y,34,0,$.twopi);c.stroke();
     c.beginPath();c.arc(p.x,p.y,90*pulse,t,t+1.4);c.stroke();c.beginPath();c.arc(p.x,p.y,90*pulse,t+$.pi,t+$.pi+1.4);c.stroke();
     c.fillStyle='rgba('+col+',1)';c.font='700 22px "Chakra Petch", sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(r.idx+1),p.x,p.y+1);
-    c.font='600 14px "Chakra Petch", sans-serif';c.lineWidth=4;c.strokeStyle='rgba(4,6,10,.9)';c.strokeText(r.locus+(cap?' · taken':''),p.x,p.y+52);c.fillStyle='rgba(236,241,232,.95)';c.fillText(r.locus+(cap?' · taken':''),p.x,p.y+52);
+    c.font='600 14px "Chakra Petch", sans-serif';c.lineWidth=4;c.strokeStyle=FNPHTheme.light?'#f9f8f3':'rgba(4,6,10,.9)';c.strokeText(r.locus+(cap?' · taken':''),p.x,p.y+52);c.fillStyle=FNPHTheme.light?'#203746':'rgba(236,241,232,.95)';c.fillText(r.locus+(cap?' · taken':''),p.x,p.y+52);
     if(cap){c.strokeStyle='rgba(98,230,255,1)';c.lineWidth=2;c.beginPath();c.moveTo(p.x+20,p.y-20);c.lineTo(p.x+20,p.y-62);c.stroke();c.fillStyle='rgba(98,230,255,.9)';c.beginPath();c.moveTo(p.x+20,p.y-62);c.lineTo(p.x+50,p.y-54+Math.sin(t*4)*3);c.lineTo(p.x+20,p.y-46);c.fill();}
     c.textAlign='left';c.textBaseline='alphabetic';
   });
@@ -883,6 +883,7 @@ R.renderAim=function(){
   }
 };
 R.renderLighting=function(){
+  if(FNPHTheme.light)return;
   const c=$.ctxmg,h=$.hero;
   if(h.life<=0)return;
 
@@ -1304,6 +1305,7 @@ function drawTactical(ctx){
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
   ctx.restore();
 }
+R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
 R.beginCombat=()=>{openBriefing();cardReadyAt=0;closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 function boot(){

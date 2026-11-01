@@ -154,3 +154,6 @@ An MCQ appears once and retires if answered correctly. A failed MCQ is inserted 
 
 ## Reconsider an answer
 During gameplay, Back / Retry reopens the last correctly answered MCQ with shuffled answer positions and reverses its last mastery/score credit. The interrupted question resumes afterward. Guessed it instead schedules three random repeats and keeps the current question running. These controls remain available on the final-question confirmation before finishing the set, and disable after use until another correct MCQ.
+
+## Appearance
+At the top of home, Appearance offers Kestrel Studio Light (ivory, navy and champagne gold) and Original Dark. Your choice is saved locally. Light is the new default and includes the battlefield and teaching cards. The existing interceptor is unchanged; the detailed Kestrel concept has not been added as an in-game asset.
