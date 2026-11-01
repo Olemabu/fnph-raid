@@ -3,7 +3,7 @@
 'use strict';
 const R=$.raid,Q=s=>document.querySelector(s),O=R.orbs={parents:[],parked:[],serial:0,ready:false,focus:null};
 const colours=['#087f9b','#a36e22','#805a9a'];
-const panel=document.createElement('aside');panel.id='orbIntel';panel.hidden=true;panel.innerHTML='<button id="orbToggle" aria-expanded="false">Options / lock target</button><b>ORB ASSAULT</b><p id="orbHint"></p><div id="orbChoices"></div>';Q('#play').appendChild(panel);Q('#orbToggle').onclick=()=>{const open=panel.classList.toggle('expanded');Q('#orbToggle').setAttribute('aria-expanded',String(open));};
+const panel=document.createElement('aside');panel.id='orbIntel';panel.hidden=true;panel.innerHTML='<button id="orbToggle" aria-expanded="false">Options / highlight</button><b>ORB ASSAULT</b><p id="orbHint"></p><div id="orbChoices"></div>';Q('#play').appendChild(panel);Q('#orbToggle').onclick=()=>{const open=panel.classList.toggle('expanded');Q('#orbToggle').setAttribute('aria-expanded',String(open));};
 function active(){return R.active&&R.orbAssault;}
 function area(){return{w:Math.max(280,$.cw-(innerWidth>1000?300:innerHeight<500?160:0)),h:$.ch,top:R.topSafe()+65,bottom:$.ch-(Q('#play').classList.contains('touchPlaying')?145:55)};}
 function blast(x,y,hue=190){$.explosions.push(new $.Explosion({x,y,radius:45,hue,saturation:90}));$.rumble.level=7;$.audio.play('explosionAlt');}
@@ -19,9 +19,9 @@ function add(item){
  p.hit=damage=>{if(!p.alive)return;if(p.open){p.sparks=8;return;}p.armour=O.parents.some(other=>other!==p&&other.open)?5:1;p.life-=damage/p.armour;p.sparks=8;if(p.life<=0)crack(p);};p.update=()=>{};p.explode=()=>{};p.render=()=>renderParent(p);O.parents.push(p);
 }
 function crack(p){
- if(p.open)return;p.open=true;p.life=0;p.wave=R.orbOptions(p.item);p.wave.opts.forEach((text,i)=>{const o={kind:'option',parent:p,text,num:i+1,alive:true,radius:19,life:5,lifeMax:5,x:p.x+(i-1.5)*42,y:p.y+(innerHeight<500?28:90)+Math.floor(i/2)*(innerHeight<500?35:95),goalX:p.x+((i%2)-.5)*(area().w/3)*.48,t:i,label:{w:0,h:0},plate:null};o.hit=damage=>{if(!o.alive)return;o.life-=damage;o.flash=6;if(o.life<=0)answer(p,o);};o.explode=(hue)=>{if(o.alive){o.alive=false;blast(o.x,o.y,hue);}};o.update=()=>{};o.render=()=>renderOption(o);p.options.push(o);});if($.aimLock===p)$.aimLock=null;focus(p);blast(p.x,p.y);sync();
+ if(p.open)return;p.open=true;p.life=0;p.wave=R.orbOptions(p.item);p.wave.opts.forEach((text,i)=>{const o={kind:'option',parent:p,text,num:i+1,alive:true,radius:19,life:5,lifeMax:5,x:p.x+(i-1.5)*42,y:p.y+(innerHeight<500?28:90)+Math.floor(i/2)*(innerHeight<500?35:95),goalX:p.x+(i-1.5)*(area().w/3)*.24,t:i,label:{w:0,h:0},plate:null};o.hit=damage=>{if(!o.alive)return;o.life-=damage;o.flash=6;if(o.life<=0)answer(p,o);};o.explode=(hue)=>{if(o.alive){o.alive=false;blast(o.x,o.y,hue);}};o.update=()=>{};o.render=()=>renderOption(o);p.options.push(o);});if($.aimLock===p)$.aimLock=null;focus(p);blast(p.x,p.y);sync();
 }
-function focus(p){if(!p?.alive)return;O.focus=p;R.cur=p.item;R.wave=p.open?p.wave:null;Q('#qChip').textContent=p.open?p.code+' · destroy the correct answer':p.code+' · crack the shell';Q('#qText').textContent=p.open?p.item.prompt:'Question orbs approaching · fire upwards to crack a shell';Q('#orbHint').textContent=O.parents.some(x=>x.open)?'Other unopened shells: 5× armour. Keep firing; destroy an answer to resolve its parent.':'Crack a large orb to reveal its question and four answer orbs. Distance is your reading time.';
+function focus(p){if(!p?.alive)return;O.focus=p;R.cur=p.item;R.wave=p.open?p.wave:null;Q('#qChip').textContent=p.open?p.code+' · destroy the correct answer':p.code+' · crack the shell';Q('#qText').textContent=p.open?p.item.prompt:'Question orbs approaching · fire upwards to crack a shell';Q('#orbHint').textContent=O.parents.some(x=>x.open)?'Other unopened shells: 5× armour. Keep firing; destroy an answer to resolve its parent.':'Crack a large orb to reveal its question and four answer orbs. Move left/right and fire upwards.';
  const choices=Q('#orbChoices');if(choices.dataset.key!==p.code+':'+p.open){choices.dataset.key=p.code+':'+p.open;choices.replaceChildren();if(p.open)p.options.forEach(o=>{const b=document.createElement('button');b.textContent=o.num+' · '+o.text;b.onclick=()=>{focus(p);R.lockOn(o);};choices.appendChild(b);});}
 }
 function sync(){for(const p of O.parents)p.armour=!p.open&&O.parents.some(other=>other!==p&&other.open)?5:1;const ordered=O.parents.slice().sort((a,b)=>(b===O.focus)-(a===O.focus));$.carriers=ordered.flatMap(p=>p.open?p.options.filter(o=>o.alive).concat(p):[p]);}
@@ -43,7 +43,7 @@ O.update=()=>{
  const a=area(),pace=Math.max(.25,Math.min(1,(a.bottom-R.topSafe())/450)),dt=Math.min(2,$.dt||1),target=$.aimLock||R.hover;
  if(target?.alive)focus(target.parent||target);
  if(O.size.w!==$.cw||O.size.h!==$.ch){const sx=$.cw/O.size.w,sy=$.ch/O.size.h;for(const p of O.parents){p.x*=sx;p.y*=sy;for(const o of p.options){o.x*=sx;o.y*=sy;o.goalX*=sx;}}O.size={w:$.cw,h:$.ch};}
- $.hero.x=Math.max(42,Math.min(a.w-42,$.hero.x));$.hero.y=Math.max(a.h*.55,Math.min(a.bottom-22,$.hero.y));
+ $.hero.x=Math.max(42,Math.min(a.w-42,$.hero.x));$.hero.y=a.bottom-42;$.hero.vy=0;$.hero.direction=-Math.PI/2;
  for(const p of O.parents){p.t+=dt/60;if(p.y<R.topSafe()+40){const shift=R.topSafe()+40-p.y;p.y+=shift;p.options.forEach(o=>o.y+=shift);}p.y+=.13*dt*pace;p.armour=!p.open&&O.parents.some(other=>other!==p&&other.open)?5:1;p.sparks=Math.max(0,p.sparks-dt);
   for(const o of p.options){o.t+=dt/60;o.x+=(o.goalX+Math.sin(o.t*1.3+o.num)*12-o.x)*Math.min(1,.1*dt);o.x=Math.max(24,Math.min(a.w-24,o.x));o.y+=.21*dt*pace;o.flash=Math.max(0,(o.flash||0)-dt);}
   if(p.y>a.bottom-45||p.options.some(o=>o.alive&&o.y>a.bottom-24)){breach(p);break;}

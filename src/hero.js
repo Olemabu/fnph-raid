@@ -36,15 +36,16 @@ Update
 ==============================================================================*/
 $.Hero.prototype.update = function() {
 	if( this.life > 0 ) {
+        const vertical = !!($.raid && $.raid.orbAssault);
 		/*==============================================================================
 		Apply Forces
 		==============================================================================*/
-		if( $.keys.state.up ) {
+		if( !vertical && $.keys.state.up ) {
 			this.vy -= this.accel * $.dt;
 			if( this.vy < -this.vmax ) {
 				this.vy = -this.vmax;
 			}
-		} else if( $.keys.state.down ) {
+		} else if( !vertical && $.keys.state.down ) {
 			this.vy += this.accel * $.dt;
 			if( this.vy > this.vmax ) {
 				this.vy = this.vmax;
@@ -62,11 +63,12 @@ $.Hero.prototype.update = function() {
 			}
 		}
 
-		const driveX=$.touch&&$.touch.mx||$.pad.mx,driveY=$.touch&&$.touch.my||$.pad.my;
+		const driveX=$.touch&&$.touch.mx||$.pad.mx,driveY=vertical?0:($.touch&&$.touch.my||$.pad.my);
 		if( driveX || driveY ) {
 			this.vx += ( driveX * this.vmax * 1.6 - this.vx ) * 0.3 * $.dt;
 			this.vy += ( driveY * this.vmax * 1.6 - this.vy ) * 0.3 * $.dt;
 		}
+		if(vertical) this.vy=0;
 		this.vy *= 0.9;
 		this.vx *= 0.9;	
 		
@@ -92,6 +94,7 @@ $.Hero.prototype.update = function() {
 		/*==============================================================================
 		Update Direction & Turn Rate for Mecha RCS
 		==============================================================================*/
+		if(vertical){ this.direction=-Math.PI/2; this.aimTarget=null; this.turnRate=0; this.prevDirection=this.direction; } else {
 		var lock = ( $.aimLock && $.aimLock.alive ) ? $.aimLock : null;
 		// mouse aim: if the cursor is on (or near) an answer gunship, aim at it
 		if( !lock && (!$.touch||$.touch.aim===null) && ( $.pad.aim === null || $.pad.aim === undefined ) && $.raid && $.raid.hover && $.raid.hover.alive ) { lock = $.raid.hover; }
@@ -115,6 +118,7 @@ $.Hero.prototype.update = function() {
 		while( dDir < -Math.PI ) dDir += Math.PI * 2;
 		this.turnRate = ( this.turnRate || 0 ) * 0.7 + dDir * 0.3;
 		this.prevDirection = this.direction;
+        }
 
 		/*==============================================================================
 		Fire Weapon
@@ -157,14 +161,14 @@ $.Hero.prototype.update = function() {
 						x: gunX,
 						y: gunY,
 						speed: this.weapon.bullet.speed,
-						direction: this.direction + spreadStart + i * spreadStep,
+						direction: vertical ? -Math.PI/2 : this.direction + spreadStart + i * spreadStep,
 						damage: this.weapon.bullet.damage,
 						size: this.weapon.bullet.size,
 						lineWidth: this.weapon.bullet.lineWidth,
 						strokeStyle: color,
 						piercing: this.weapon.bullet.piercing,
-						homing: this.weapon.homing || 0,
-						target: this.aimTarget || ( $.pad.aim != null && $.raid && $.raid.hover && $.raid.hover.alive ? $.raid.hover : null )
+						homing: vertical ? 0 : this.weapon.homing || 0,
+						target: vertical ? null : this.aimTarget || ( $.pad.aim != null && $.raid && $.raid.hover && $.raid.hover.alive ? $.raid.hover : null )
 					} ) );
 				}
 			}
