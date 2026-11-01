@@ -169,3 +169,6 @@ The standalone HTML can also be downloaded and opened locally on a desktop. Phon
 Game updates cache completely before becoming available. Apply **Update game** from home; active gameplay is not reloaded automatically. Interrupted updates leave the previous offline copy intact. Browsers can still evict site data, so retain exported progress backups.
 
 PWA support files live in src/pwa and are generated into dist by both builds. Publish the entire dist directory. The HTML continues to contain all gameplay code, syllabus, ship graphics and synthesised audio; the worker/manifest/icons support installation only.
+
+## Packaged offline edition
+Builds now also produce `dist/FNPH-Raid-Offline.zip` and `dist/fnph-raid-offline.html`. Extract the ZIP and open `FNPH-Raid/fnph-raid.html` in a regular desktop browser. The direct-start edition contains executable code and embedded rendered artwork, so it does not wait for decompression at launch. It makes no game-asset requests. Both build paths produce the same package structure. The web edition remains compressed and installable. The first-byte loader shows startup stages and reports corrupt/timed-out image loads instead of waiting indefinitely. Export/import progress when moving a saved game to a different file location.

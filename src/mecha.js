@@ -1,4 +1,4 @@
-/* Original vector frames for FNPH Raid. Shared hangar and battlefield renderer. */
+/* Rendered Kestrel assets shared by the hangar and battlefield. */
 (function(){
 'use strict';
 const R=$.raid;
@@ -9,10 +9,10 @@ const FRAMES=R.frames=[
  {name:'Archon',code:'RX–04',role:'Prismatic command frame',at:12,ink:'#2e2849',metal:'#9d94c9',light:'#eee6ff',core:'#c5a1ff'},
  {name:'Nightingale',code:'RX–05',role:'Ascendant guardian frame',at:17,ink:'#293342',metal:'#d3bf87',light:'#fff7dd',core:'#ffe392'}
 ];
-const flight=new Image(),hangar=new Image();
-flight.src=window.FNPH_SHIP_ASSETS['kestrel-flight'];hangar.src=window.FNPH_SHIP_ASSETS['kestrel-hangar'];
+const flight=document.getElementById('shipFlightAsset'),hangar=document.getElementById('shipHangarAsset');
 R.shipAssets={flight,hangar,ready:false,draws:0};
-R.shipAssetsReady=Promise.all([flight.decode(),hangar.decode()]).then(()=>{R.shipAssets.ready=true;if(R.campaign)R.campaign.render();}).catch(()=>{throw Error('Ship artwork could not be decoded. Retry the game download.');});
+function loaded(img){return new Promise((resolve,reject)=>{let timer;const done=()=>{clearTimeout(timer);img.onload=img.onerror=null;img.naturalWidth?resolve():reject(Error('A bundled ship image is damaged. Reload the complete package.'));};if(img.complete){done();return;}img.onload=done;img.onerror=done;timer=setTimeout(()=>{img.onload=img.onerror=null;reject(Error('Ship image decoding timed out. Reload the complete package.'));},8000);});}
+R.shipAssetsReady=Promise.all([loaded(flight),loaded(hangar)]).then(()=>{R.shipAssets.ready=true;if(R.campaign)R.campaign.render();});
 function thrust(c,x,y,size,power){
  const g=c.createLinearGradient(x,y,x,y+size);g.addColorStop(0,'#e9fcff');g.addColorStop(.25,'#64dfffbb');g.addColorStop(1,'#1495ff00');c.fillStyle=g;c.beginPath();c.moveTo(x-3*power,y);c.quadraticCurveTo(x-4*power,y+size*.35,x,y+size);c.quadraticCurveTo(x+4*power,y+size*.35,x+3*power,y);c.fill();
 }
