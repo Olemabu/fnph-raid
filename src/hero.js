@@ -62,9 +62,10 @@ $.Hero.prototype.update = function() {
 			}
 		}
 
-		if( $.pad.mx || $.pad.my ) {
-			this.vx += ( $.pad.mx * this.vmax * 1.6 - this.vx ) * 0.3 * $.dt;
-			this.vy += ( $.pad.my * this.vmax * 1.6 - this.vy ) * 0.3 * $.dt;
+		const driveX=$.touch&&$.touch.mx||$.pad.mx,driveY=$.touch&&$.touch.my||$.pad.my;
+		if( driveX || driveY ) {
+			this.vx += ( driveX * this.vmax * 1.6 - this.vx ) * 0.3 * $.dt;
+			this.vy += ( driveY * this.vmax * 1.6 - this.vy ) * 0.3 * $.dt;
 		}
 		this.vy *= 0.9;
 		this.vx *= 0.9;	
@@ -93,12 +94,14 @@ $.Hero.prototype.update = function() {
 		==============================================================================*/
 		var lock = ( $.aimLock && $.aimLock.alive ) ? $.aimLock : null;
 		// mouse aim: if the cursor is on (or near) an answer gunship, aim at it
-		if( !lock && ( $.pad.aim === null || $.pad.aim === undefined ) && $.raid && $.raid.hover && $.raid.hover.alive ) { lock = $.raid.hover; }
+		if( !lock && (!$.touch||$.touch.aim===null) && ( $.pad.aim === null || $.pad.aim === undefined ) && $.raid && $.raid.hover && $.raid.hover.alive ) { lock = $.raid.hover; }
 		this.aimTarget = lock;
 		if( lock ) {
 			// lead the target so the shot meets it where it will be
 			var lp = $.raid && $.raid.leadPoint ? $.raid.leadPoint( lock, this.x, this.y ) : lock;
 			this.direction = Math.atan2( lp.y - this.y, lp.x - this.x );
+		} else if($.touch&&$.touch.aim!==null){
+ this.direction=$.touch.aim;
 		} else if( $.pad.aim !== null && $.pad.aim !== undefined ) {
 			this.direction = $.pad.aim;
 		} else {
@@ -119,7 +122,7 @@ $.Hero.prototype.update = function() {
 		if( this.weapon.fireRateTick < this.weapon.fireRate ){
 			this.weapon.fireRateTick += $.dt;
 		} else {
-			if( $.autofire || $.mouse.down || $.pad.fire || $.keyFire ){
+			if( $.autofire || $.mouse.down || $.pad.fire || ($.touch&&$.touch.fire) || $.keyFire ){
 				$.audio.play( 'shoot' );
 				if( $.powerupTimers[ 2 ] > 0 || $.powerupTimers[ 3 ] > 0 || $.powerupTimers[ 4 ] > 0) {
 					$.audio.play( 'shootAlt' );

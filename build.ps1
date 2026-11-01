@@ -39,7 +39,9 @@ $order = @(
     'src/raid.js',
     'src/mecha.js',
     'src/campaign.js',
-    'src/operations.js'
+    'src/operations.js',
+    'src/mobile.js',
+    'src/app.js'
 )
 
 foreach ($f in $order) {
@@ -67,6 +69,18 @@ if (-not (Test-Path $distDir)) {
     New-Item -ItemType Directory -Path $distDir -Force | Out-Null
 }
 
+$html = $html.Replace('</head>', (J('src/pwa/head.html')) + '</head>')
 $outFile = Join-Path $distDir 'fnph-raid.html'
 [System.IO.File]::WriteAllText($outFile, $html, [System.Text.Encoding]::UTF8)
 Write-Host "Built dist/fnph-raid.html ($([Math]::Floor($html.Length / 1024)) KB)"
+
+$sha = [System.Security.Cryptography.SHA256]::Create()
+$versionBytes = [System.IO.MemoryStream]::new()
+$versionPrefix = [System.Text.Encoding]::UTF8.GetBytes($html + (J('src/pwa/sw.js')))
+$versionBytes.Write($versionPrefix,0,$versionPrefix.Length)
+foreach ($filename in @('manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png')) { $bytes = [System.IO.File]::ReadAllBytes((Join-Path $here ("src/pwa/" + $filename))); $versionBytes.Write($bytes,0,$bytes.Length) }
+$revision = ([BitConverter]::ToString($sha.ComputeHash($versionBytes.ToArray()))).Replace('-', '').ToLower().Substring(0,16)
+$versionBytes.Dispose()
+$sha.Dispose()
+foreach ($filename in @('manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png')) { Copy-Item -LiteralPath (Join-Path $here ("src/pwa/" + $filename)) -Destination (Join-Path $distDir $filename) -Force }
+[System.IO.File]::WriteAllText((Join-Path $distDir 'sw.js'), (J('src/pwa/sw.js')).Replace('__VERSION__',$revision), [System.Text.UTF8Encoding]::new($false))

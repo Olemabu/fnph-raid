@@ -160,3 +160,12 @@ At the top of home, Appearance offers Kestrel Studio Light (ivory, navy and cham
 
 ## Rendered Kestrel ship
 The hangar, loadout and gameplay now use detailed transparent raster artwork matching the approved Kestrel concept. Both images are embedded in the offline HTML; no separate image downloads. Animated engine plumes, muzzle flashes and shield feedback supplement the rendered hull. This is sprite-based rendering, not a live 3D model. The single-file download is approximately 1 MB. Existing flight physics, hitbox, mastery, earned weapons and controller axes are unchanged.
+
+## Mobile and offline installation
+Open the hosted game online and wait for **Ready offline** in Play anywhere. On Android use **Install app** when offered, or the browser install menu. On iPhone/iPad use Safari → Share → Add to Home Screen. Keep the first download online; then reopen from the home-screen icon without internet. Mobile has move/aim sticks and a hold-to-fire button, with portrait and landscape layouts. Rotation/backgrounding pauses gameplay.
+
+The standalone HTML can also be downloaded and opened locally on a desktop. Phones should use the installed web app; handling downloaded HTML varies by mobile browser. Progress is device/browser-local, not automatically synced. Export progress before changing devices or clearing browser data; import the JSON backup on the destination. Some iOS browser/home-screen installations may have separate storage, so use backup import to transfer.
+
+Game updates cache completely before becoming available. Apply **Update game** from home; active gameplay is not reloaded automatically. Interrupted updates leave the previous offline copy intact. Browsers can still evict site data, so retain exported progress backups.
+
+PWA support files live in src/pwa and are generated into dist by both builds. Publish the entire dist directory. The HTML continues to contain all gameplay code, syllabus, ship graphics and synthesised audio; the worker/manifest/icons support installation only.

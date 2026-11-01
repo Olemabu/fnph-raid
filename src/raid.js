@@ -216,9 +216,9 @@ function wrapText(ctx,text,maxW,maxLines){
   return lines;
 }
 function makeLabel(text,num){
-  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=240;
+  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240;
   g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
-  const lines=wrapText(g,text,W0-50,4),H0=20+lines.length*17;
+  const lines=wrapText(g,text,W0-50,innerWidth<900?8:4),H0=20+lines.length*17;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
 
   // Frosted cyber plate body
@@ -366,9 +366,15 @@ $.Carrier.prototype.render=function(){
 
   // 4. Holographic Answer Plate (Positioned above gunship)
   const L=this.label;
-  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-8;
+  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')?145:8);
   let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
+  if(Q('#play').classList.contains('touchPlaying')){
+    const landscape=innerHeight<500,maxH=Math.max(...$.carriers.map(c=>c.label.h)),slot=this.num-1;
+    lx=-$.screen.x+10+(landscape?(slot%2)*(($.cw-180)/2):($.cw-L.w-20)/2);
+    ly=-$.screen.y+R.topSafe()+Math.floor(slot/(landscape?2:1))*(maxH+7);
+  }
+
 
   this.plate={x:lx,y:ly,w:L.w,h:L.h};
   // Cyber plate canvas
@@ -427,7 +433,7 @@ R.combatAudioState=()=>({state:AC?AC.state:'not-started',sound:soundOn,music:mus
 setInterval(()=>{const active=!!(R.active&&!R.paused&&$.state==='play'&&R.modeName&&R.modeName()==='fps');if(active&&!roomBed)R.ensureCombatAudio();if(roomBed&&active!==roomLive){roomLive=active;roomBed.gain.gain.setTargetAtTime(active?.18:0,AC.currentTime,.15);}},120);
 
 let toastT=0;
-R.topSafe=()=>{const qp=Q('#qbar');return qp&&!qp.hidden?qp.getBoundingClientRect().bottom-$.cOffset.top+8:70;};
+R.topSafe=()=>{const qp=Q('#qbar');const menu=Q('#gameMenuBar'),bottom=menu&&!menu.hidden&&!(innerWidth<900&&innerHeight<500)?menu.getBoundingClientRect().bottom:0;return Math.max(bottom,qp&&!qp.hidden?qp.getBoundingClientRect().bottom:62)-$.cOffset.top+8;};
 // The reward reveals the term only after the player selects its description.
 function clearAnswerSplash(){R.answerSplash=false;Q('#answerSplash').hidden=true;Q('#answerSplashText').textContent='';}
 function showAnswerSplash(term){

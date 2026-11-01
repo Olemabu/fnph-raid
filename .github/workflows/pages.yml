@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir -p _site/dist
           cp index.html _site/index.html
-          cp dist/fnph-raid.html _site/dist/fnph-raid.html
+          cp dist/* _site/dist/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -91,6 +91,7 @@ $.renderInterface = function() {
 };
 
 $.renderMinimap = function() {
+ if(document.querySelector('#play').classList.contains('touchPlaying'))return;
 	var m = $.minimap;
 	$.ctxmg.fillStyle = m.color;
 	$.ctxmg.fillRect( m.x, m.y, m.width, m.height );
@@ -140,12 +141,12 @@ $.spawnEnemies = function() {
 /*==============================================================================
 Events
 ==============================================================================*/
-$.mousemovecb = function( e ) { $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mouse.moved = 1; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } };
+$.mousemovecb = function( e ) { if(e.pointerType!=='touch'&&$.touch)$.touch.aim=null; $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mouse.moved = 1; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } };
 $.mousescreen = function() {
 	$.mouse.sx = $.mouse.ax - $.cOffset.left; $.mouse.sy = $.mouse.ay - $.cOffset.top;
 	$.mouse.x = $.mouse.sx - $.screen.x; $.mouse.y = $.mouse.sy - $.screen.y;
 };
-$.mousedowncb = function( e ) { if( e.button === 0 || e.pointerType === 'touch' ) { $.mouse.down = 1; $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } } };
+$.mousedowncb = function( e ) { if( e.button === 0 || e.pointerType === 'touch' ) { $.mouse.down = e.pointerType==='touch'?0:1; if($.touch)$.touch.aim=null; $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } } };
 $.mouseupcb = function( e ) { $.mouse.down = 0; };
 $.keydowncb = function( e ) {
 	if( e.target && /INPUT|TEXTAREA/.test( e.target.tagName ) ) { return; }
