@@ -11,7 +11,7 @@ parts=[
  '<script>/* jsfxr (sound synthesis), wrapped so its globals stay private */\n(function(){\n'+J('vendor/radius-raid/jsfxr.js')+'\nwindow.jsfxr = jsfxr;\n})();</script>',
  '<script>/* FNPH map geometry */\n'+J('src/mapgeo.js')+'</script>',
 ]
-order=['vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mode-race.js','src/mode-fps.js','src/mecha.js','src/campaign.js']
+order=['vendor/radius-raid/util.js','src/storage.js','vendor/radius-raid/definitions.js','vendor/radius-raid/text.js','src/hero.js','vendor/radius-raid/enemy.js','src/bullet.js','vendor/radius-raid/explosion.js','vendor/radius-raid/powerup.js','vendor/radius-raid/particle.js','vendor/radius-raid/particleemitter.js','vendor/radius-raid/textpop.js','vendor/radius-raid/levelpop.js','src/core.js','src/raid.js','src/mode-race.js','src/mode-fps.js','src/mecha.js','src/mecha3d.js','src/campaign.js']
 for f in order: parts.append('<script>/* '+f+' */\n'+J(f)+'\n</script>')
 body=J('src/shell.html').replace('/*__SCRIPTS__*/','\n'.join(parts))
 html='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>'+body+'</body></html>'

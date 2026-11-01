@@ -122,3 +122,6 @@ The command deck shows the actual combat-ship silhouette, current mastery-based 
 Live cosmetic refits happen at 5, 15, 30 and 60 correct hits, without leaving combat or blocking input. Existing correct-answer totals seed the career-hit credit. At the highest frame, reactor livery keeps changing every 10 further correct hits. These visual rewards are separate from learning mastery and the existing weapon arsenal.
 
 Startup is fully self-contained. External Google Fonts stylesheets have been removed, and engine boot uses DOMContentLoaded with idempotent initialisation. The war-map Deploy button enters combat directly; mission notes remain available through the optional Briefing control.
+
+## 3D mecha rendering
+`src/mecha3d.js` renders original bevelled armour meshes, articulated joint housings, cylinders, weapon barrels, wing hardware and emissive elements with WebGL depth testing and lighting. The same renderer supplies the hangar portrait, loadout preview and combat mecha. Pointer movement over the hangar adjusts the viewing angle. The existing frame unlocks and livery remain in effect. If WebGL is unavailable or lost, the original Canvas renderer keeps the game playable. Both build paths include the module. This is a lightweight real-3D model renderer inside the existing 2D battlefield, not a HALO-equivalent 3D game engine or AAA asset pipeline.
