@@ -519,7 +519,7 @@ function openBriefing(){
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
   const head=C?'<p class="meta">'+esc(r.topic)+' · concept '+(cs.indexOf(C)+1)+' of '+cs.length+' · '+conceptsDone(r)+' secured so far</p><h2>'+esc(C.title)+'</h2>'+(C.note.length?'<div class="note">'+noteHTML(C.note)+'</div>':''):'<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'');
-  card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
+  card('brief',r.studyPractice?'Study practice · '+r.items.length+' items':r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
     '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
@@ -1194,6 +1194,22 @@ function renderWalk(){
 Q('#walkPrev').addEventListener('click',()=>{walkIdx--;renderWalk();window.scrollTo(0,0);});
 Q('#walkNext').addEventListener('click',()=>{walkIdx++;renderWalk();window.scrollTo(0,0);});
 Q('#walkSolo').addEventListener('click',()=>{ac();R.start([deck.rooms[walkIdx]],0);});
+
+// Study packs become an isolated practice room; the syllabus and saved deck remain intact.
+R.playStudyPack=function(pack){
+ const p=StudyKit.validate(pack), parsed=parseDeck(StudyKit.deck(p));
+ if(parsed.errors.length)throw Error(parsed.errors.join('; '));
+ const room=parsed.rooms[0];room.idx=0;room.review=true;room.studyPractice=true;room.locus=p.title;
+ R.start([room],0);
+};
+R.findStudy=function(query){
+ const entries=deck.rooms.flatMap(room=>room.items.map(item=>({head:item.prompt,text:(item.note||[]).join(' ')+' '+(item.answer||''),item,room})));
+ return StudyKit.rank(entries,query).slice(0,30);
+};
+R.playStudyMatches=function(query){
+ const hits=R.findStudy(query);if(!hits.length)throw Error('No matching questions. Try fewer clinical keywords.');
+ R.start([{idx:0,locus:'Question search',topic:query,review:true,mode:'',concepts:[],note:[],items:hits.map(x=>x.item)}],0);
+};
 
 /* ---------- edit ---------- */
 Q('#deckSave').addEventListener('click',()=>{
