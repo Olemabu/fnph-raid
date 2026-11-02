@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 function flight(initial){
  const saved={},R={active:true,orbAssault:false,modeName:()=>'',start(){},update(){},beginCombat(){},renderMap(){},renderWorld(){},renderLighting(){},topSafe:()=>180,campaign:{render(){}},toast(){}};
- const $={raid:R,Hero:function(){},Enemy:function(){},spawnEnemy(){return{};},updateScreen(){},renderMinimap(){},screen:{x:0,y:0},cw:1200,ch:800,dt:1,tick:1,rumble:{},mousescreen(){},carriers:[]};$.Enemy.prototype.update=function(){};$.Enemy.prototype.render=function(){};$.Hero.prototype.update=function(){};$.Hero.prototype.render=function(){};
+ const $={raid:R,Hero:function(){},Enemy:function(){},spawnEnemy(){return{};},updateScreen(){},renderMinimap(){},mouse:{moved:1},pad:{aim:1},touch:{aim:1},screen:{x:0,y:0},cw:1200,ch:800,dt:1,tick:1,rumble:{},mousescreen(){},carriers:[]};$.Enemy.prototype.update=function(){};$.Enemy.prototype.render=function(){};$.Hero.prototype.update=function(){};$.Hero.prototype.render=function(){};
  const c={$,Math,Number,document:{createElement:()=>({}),querySelector:s=>s==='#campaignStory'?{}:null},localStorage:{getItem:()=>initial?JSON.stringify(initial):null,setItem:(k,v)=>saved[k]=JSON.parse(v)}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/flight.js'),'utf8'),c);return{R,$,saved};
 }
@@ -28,4 +28,8 @@ test('target selection does not rotate the aircraft; manual right-stick heading 
  const $={ww:1920,wh:1200,dt:1,keys:{state:{}},pad:{mx:0,my:0,aim:null},touch:{mx:0,my:0,aim:null},mouse:{moved:0},raid:{flight:{enabled:()=>true}},enemies:[],powerupTimers:[],aimLock:{alive:true,x:1700,y:600},util:{distance:()=>100}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/hero.js'),'utf8'),{$,Math});const h=new $.Hero();h.weapon.fireRateTick=0;h.prevDirection=h.direction=-Math.PI/2;h.update();assert.equal(h.direction,-Math.PI/2);assert.equal(h.vx,0);assert.equal(h.vy,0);
  $.pad.aim=0;h.update();assert(h.direction>-Math.PI/2);assert(h.direction<=-Math.PI/2+.075001);
+});
+
+test('a fresh flight clears stale aim commands without applying automatic steering',()=>{
+ const {R,$}=flight();$.hero={};R.start();assert.equal($.mouse.moved,0);assert.equal($.pad.aim,null);assert.equal($.touch.aim,null);assert.equal($.hero.direction,-Math.PI/2);
 });

@@ -4979,7 +4979,7 @@ const regions=[['Coastline','#467d89','#c6b78a'],['Farmland','#71835b','#b4a975'
 const enabled=()=>R.active&&!R.orbAssault&&!R.modeName();
 function completeSet(){if(!enabled()||runDone)return;runDone=true;sets++;try{localStorage.setItem(KEY,JSON.stringify({sets}));}catch(e){}R.toast('Flight checkpoint '+sets+' saved · '+regions[Math.floor(sets/3)%regions.length][0],true);}
 const F=R.flight={enabled,completeSet,progress:()=>({sets,region:Math.floor(sets/3)%regions.length,stretch:sets%3})};
-const start=R.start;R.start=function(){runDone=false;start.apply(this,arguments);if(enabled()){$.hero.direction=$.hero.prevDirection=-Math.PI/2;$.hero.flightBank=0;}};
+const start=R.start;R.start=function(){runDone=false;start.apply(this,arguments);if(enabled()){$.mouse.moved=0;$.pad.aim=null;if($.touch)$.touch.aim=null;$.aimLock=null;$.hero.direction=$.hero.prevDirection=-Math.PI/2;$.hero.flightBank=0;}};
 // Start the teaching encounter directly: no return trip to a hospital map marker.
 const update=R.update;R.update=function(){if(enabled()&&R.phase==='travel'){R.beginCombat();return;}const result=update.apply(this,arguments);if(enabled()){const loc=document.querySelector('#hLoc');if(loc)loc.textContent=regions[Math.floor(sets/3)%regions.length][0]+' · stretch '+(sets%3+1)+'/3';}return result;};
 const begin=R.beginCombat;R.beginCombat=function(){runDone=false;return begin.apply(this,arguments);};
