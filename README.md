@@ -183,3 +183,5 @@ Correct first-time MCQs retire as usual. Misses and Guessed it schedule three re
 In the home screen's **Turn a question into a game** panel, paste your question, enter your existing Nebula **study access code**, and choose **Build my learning session**. Review the sourced model answer and choose **Play my session**. Research and generation use Nebula's authenticated server; provider API keys never belong in the game. New sessions need internet; saved sessions play offline. Generated answers are educational drafts.
 
 Teaching cards and repeated questions cover the answer and examiner checklist. Session progress is separate from syllabus progress. Clear each item through repeated practice, or choose **Practise this session again** after completion. See [DIRECT_QUESTION_FLOW.md](DIRECT_QUESTION_FLOW.md) for deployment and test details.
+
+Select **OSCE** to learn station phases, candidate wording and patient/relative responses in order, or **Essay** to learn an answer outline and key points. See [OSCE_MODE.md](OSCE_MODE.md). Existing general sessions need to be rebuilt with the selected format to gain this structure.

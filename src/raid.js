@@ -515,6 +515,7 @@ function openBriefing(){
   if(R.campaignRun&&r.review)R.queue=mixQueue(pool.filter(i=>!mastered(i)));
   for(const it of R.queue.slice())if(it.type==='q')for(let n=1;n<(st(it.id).mcqRemaining||0);n++)insertMcqRepeat(it);
   if(r.studyPractice)for(const it of R.queue.slice())if(it.type!=='q')for(let n=1;n<MASTER_AT-(st(it.id).box||0);n++)insertMcqRepeat(it);
+  if(r.studyMode==='osce')R.queue=fresh.slice();
   if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
@@ -523,7 +524,7 @@ function openBriefing(){
   card('brief',r.studyPractice?'Study practice · '+r.items.length+' items':r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+(r.studyMode==='osce'?'Learn each station in order: read the script, practise the next action, say the candidate words and respond to a simulated cue. Missed responses repeat before you advance. Rehearse the full phase order at the end. Teaching cards pause the clock.':m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.')+'</p>'+
     (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
     mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
@@ -540,13 +541,18 @@ function timerLoop(now){
 }
 requestAnimationFrame(timerLoop);
 function insertMcqRepeat(it){
+ if(R.rooms?.[R.si]?.studyMode==='osce'){R.queue.unshift(it);return;}
  const positions=Array.from({length:R.queue.length+1},(_,i)=>i).filter(i=>(i===0||R.queue[i-1].id!==it.id)&&(i===R.queue.length||R.queue[i].id!==it.id));
  const pos=positions.length?pickOne(positions):R.queue.length;R.queue.splice(pos,0,it);
 }
 function nextQuestion(){
   const eligible=R.queue.filter(it=>!mastered(it));R.total=Math.max(R.cleared,R.total-(R.queue.length-eligible.length));R.queue=eligible;
   if(!R.queue.length){if(R.lastAnswer){R.phase='reviewEnd';card('learn','Questions complete','<p>You can retry the last MCQ or mark it as guessed before finishing.</p>','Finish question set',()=>{R.lastAnswer=null;stationCleared();},0);}else stationCleared();return;}
-  R.cur=R.queue.shift();R.cur.found=R.retryResume&&R.retryResume.it===R.cur?R.retryResume.found:[];if(R.retryResume&&R.retryResume.it===R.cur)R.retryResume=null;setupWave();
+  R.cur=R.queue.shift();R.cur.found=R.retryResume&&R.retryResume.it===R.cur?R.retryResume.found:[];if(R.retryResume&&R.retryResume.it===R.cur)R.retryResume=null;
+  const lesson=R.cur.osceLesson;
+  if(lesson&&R.osceLessonKey!==lesson.key){R.osceLessonKey=lesson.key;R.phase='briefing';card('brief','OSCE · Station '+lesson.stationNumber+' · Step '+lesson.step+' of '+lesson.total,
+    '<h2>'+esc(lesson.station)+' — '+esc(lesson.title)+'</h2><p><b>Do:</b> '+esc(lesson.action)+'</p><p><b>Say aloud:</b> “'+esc(lesson.say)+'”</p><p><b>They may say:</b> “'+esc(lesson.expect)+'”</p><p><b>Your reply:</b> “'+esc(lesson.reply)+'”</p><p><b>Why:</b> '+esc(lesson.reason)+'</p>'+(lesson.critical?'<p class="ans bad">Critical safety step — do not omit this.</p>':''), 'Practise this step',()=>{R.phase='fight';setupWave();},300);return;}
+  setupWave();
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
@@ -639,6 +645,7 @@ function afterCorrect(){
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
+  if(R.rooms[R.si]?.studyMode==='osce'&&!mastered(it)&&!R.queue.some(q=>q.id===it.id))R.queue.unshift(it);
   if(R.rooms[R.si]?.studyPractice){learnCard(it);return;}
   if(mastered(it)){nextQuestion();return;}
   if(teachAll&&!R.campaignRun&&!R.rooms[R.si].randomFree){learnCard(it);}else nextQuestion();
@@ -689,7 +696,7 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(it.type==='q'?'This missed MCQ returns three times at random points in the remaining sequence. Another miss resets its remaining repeats to three.':dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(it.type==='q'?'This missed question returns three times for practice. In an OSCE session, you repeat it before advancing to the next step.':dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
@@ -1201,15 +1208,16 @@ Q('#walkSolo').addEventListener('click',()=>{ac();R.start([deck.rooms[walkIdx]],
 function studyRoom(pack){
  const p=StudyKit.validate(pack),parsed=parseDeck(StudyKit.deck(p));
  if(parsed.errors.length)throw Error(parsed.errors.join('; '));
- const room=parsed.rooms[0];room.idx=0;room.review=true;room.studyPractice=true;room.locus=p.title;
- room.items.forEach(it=>{it.id='study:'+hash(p.question+'::'+it.type+'::'+it.prompt);});
+ const room=parsed.rooms[0];room.idx=0;room.review=true;room.studyPractice=true;room.locus=p.title;room.studyMode=p.mode||'general';
+ if(p.mode==='osce'){room.concepts=[];const lessons=new Map(StudyKit.osceDrills(p).map(d=>[d.prompt,d.lesson]));room.items.forEach(it=>{it.osceLesson=lessons.get(it.prompt);});}
+ room.items.forEach(it=>{it.id='study:'+hash((p.mode?p.mode+'::':'')+p.question+'::'+it.type+'::'+it.prompt+(p.version===2?'::'+JSON.stringify(it.seq||[it.answer,...it.wrongs]):''));});
  return room;
 }
 R.studyProgress=function(pack){const room=studyRoom(pack);return{done:room.items.filter(mastered).length,total:room.items.length};};
 R.playStudyPack=function(pack,restart=false){
  const room=studyRoom(pack);
- for(const it of room.items){if(restart)delete stats[it.id];const state=st(it.id);if(it.type==='q'&&state.mcqDone===undefined){state.mcqDone=false;state.mcqRemaining=3;}}
- store.set('stats',stats);R.campaignRun=false;R.start([room],0);
+ for(const it of room.items){if(restart)delete stats[it.id];const state=st(it.id);if(it.type==='q'&&state.mcqDone===undefined){state.mcqDone=false;state.mcqRemaining=room.studyMode==='osce'?1:3;}}
+ store.set('stats',stats);R.osceLessonKey=null;R.campaignRun=false;R.start([room],0);
 };
 R.findStudy=function(query){
  const entries=deck.rooms.flatMap(room=>room.items.map(item=>({head:item.prompt,text:(item.note||[]).join(' ')+' '+(item.answer||''),item,room})));

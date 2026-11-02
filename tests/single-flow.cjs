@@ -6,7 +6,7 @@ let requests=[],mode='ok';await page.route('https://nebula-study.pages.dev/api/s
 await page.goto(pathToFileURL(path.join(__dirname,'../dist/fnph-raid-offline.html')).href);await page.waitForTimeout(500);
 await page.locator('#studyQuery').fill(example.question);await page.locator('#studyGenerate').click();assert.match(await page.locator('#studyStatus').innerText(),/access code/);assert.equal(requests.length,0);
 await page.locator('#studyCode').fill('test-code');await page.locator('#studyGenerate').click();await page.waitForFunction(()=>document.querySelector('#studyStatus').textContent.startsWith('Session ready'));
-assert.deepEqual(requests[0],{question:example.question,research:true});assert.equal(await page.locator('#studyNotes').getAttribute('open'),'');assert.equal(await page.locator('#studyAnswer a').count(),2);
+assert.deepEqual(requests[0],{question:example.question,research:true,mode:'osce'});assert.equal(await page.locator('#studyNotes').getAttribute('open'),'');assert.equal(await page.locator('#studyAnswer a').count(),2);
 assert(!(await page.evaluate(()=>JSON.stringify({...localStorage}))).includes('test-code'));
 mode='auth';await page.locator('#studyGenerate').click();await page.waitForFunction(()=>document.querySelector('#studyCodeError').textContent.startsWith('Wrong access code.'));assert.equal(await page.locator('#studyCodeError').isVisible(),true);assert.equal(await page.locator('#studyCode').getAttribute('aria-invalid'),'true');assert.equal(await page.evaluate(()=>document.activeElement.id),'studyCode');assert.equal(await page.locator('#studyPlay').isVisible(),true);await page.locator('#studyCode').fill('test-code');assert.equal(await page.locator('#studyCodeError').isVisible(),false);
 // All provider responses in this check are simulated; no API key is used.
@@ -25,3 +25,4 @@ for(let i=0;i<20;i++){
 assert.equal(await page.evaluate(p=>$.raid.studyProgress(p).done,pack),2);assert(answers>=9);assert.deepEqual(errors,[]);
 console.log('PASS single flow: arbitrary pasted question, automatic research request, sourced teaching, playable session, repeated mastery, saved offline session, cancel/error recovery, access-code privacy; '+answers+' correct gameplay actions');await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});
+
