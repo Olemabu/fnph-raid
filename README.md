@@ -177,3 +177,9 @@ Builds now also produce `dist/FNPH-Raid-Offline.zip` and `dist/fnph-raid-offline
 In **Random free run**, choose **Orb Assault** under Flight mode, then a syllabus topic and run length. The original Standard spaceship and campaign remain available. Orb Assault uses MCQs only. Shoot descending large question shells until they crack and release four small answer orbs. Destroy the correct answer to clear that parent and its family. Unopened parents gain 5× armour while any question is exposed, but continue advancing and can still be cracked. There is no forced interruption to firing. Answer orbs require multiple hits. Colour, question ID and tethers link families; aim at a family to focus its question. The answer dock can lock a target, then you still need to fire. Mobile: Options / lock target expands the dock.
 
 Correct first-time MCQs retire as usual. Misses and Guessed it schedule three repeats; Back revisits the previous MCQ. An unopened shell breaching the line loses a life without grading its unseen question. Pause freezes every orb. Lists/procedures remain in Standard mode.
+
+## Turn a school question into a learning session
+
+In the home screen's **Turn a question into a game** panel, paste your question, enter your existing Nebula **study access code**, and choose **Build my learning session**. Review the sourced model answer and choose **Play my session**. Research and generation use Nebula's authenticated server; provider API keys never belong in the game. New sessions need internet; saved sessions play offline. Generated answers are educational drafts.
+
+Teaching cards and repeated questions cover the answer and examiner checklist. Session progress is separate from syllabus progress. Clear each item through repeated practice, or choose **Practise this session again** after completion. See [DIRECT_QUESTION_FLOW.md](DIRECT_QUESTION_FLOW.md) for deployment and test details.

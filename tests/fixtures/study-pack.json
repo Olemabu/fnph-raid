@@ -1,0 +1,71 @@
+{
+  "format": "nebula-study-pack",
+  "version": 1,
+  "status": "reviewed",
+  "title": "Enuresis before university",
+  "question": "A 17-year-old adolescent about to commence university has persistent enuresis. Discuss a proposed management plan with the mother.",
+  "modelAnswer": "Acknowledge embarrassment and explore the young personâ€™s goals. Involve the adolescent, seek permission to discuss with the mother and offer private conversation. Explain that wetting is involuntary; avoid blame. Clarify lifelong wetting versus recurrence after six dry months; ask about daytime symptoms, constipation, urinary infection, thirst, weight loss, snoring and psychosocial stress. Use a bladder/bowel diary and focused examination. Investigate red flags; do not order routine imaging for uncomplicated primary enuresis. Address constipation and daytime symptoms. Encourage normal daytime drinking, regular toileting and voiding before bed; reward helpful behaviours. Agree a practical university plan for privacy, laundry and follow-up. Offer an alarm when acceptable and feasible. Consider oral desmopressin when rapid short-term dryness matters or an alarm is unsuitable. Explain relapse and fluid restriction from one hour before until eight hours after the dose; avoid use when restriction cannot be followed. Discuss hyponatraemia symptoms and urgent assessment for severe headache, vomiting, confusion or seizures. Review response at four weeks. Refer for red flags or failure of alarm/desmopressin treatment. Check understanding and agree the next appointment.",
+  "role": "Play the mother. Ask whether this is laziness, whether an alarm will disturb roommates, and what can help before university. Reveal no additional symptoms unless asked; do not invent test results. End with the adolescentâ€™s preferences and a shared plan.",
+  "checklist": [
+    "Involve adolescent; discuss privacy and consent",
+    "Clarify primary/secondary and daytime symptoms",
+    "Screen constipation and medical red flags",
+    "Offer diary and targeted assessment",
+    "Explain involuntary wetting without blame",
+    "Discuss fluids, toileting and positive reinforcement",
+    "Compare alarm with short-term desmopressin",
+    "Explain desmopressin fluid restriction and safety",
+    "Plan university privacy and practical support",
+    "Arrange review, referral and teach-back"
+  ],
+  "critical": [
+    "Do not blame or punish",
+    "Do not give desmopressin without fluid-safety counselling",
+    "Escalate suspected diabetes or neurological disease"
+  ],
+  "sources": [
+    {
+      "title": "NICE CG111: Bedwetting in under 19s",
+      "url": "https://www.nice.org.uk/guidance/cg111/chapter/Recommendations"
+    },
+    {
+      "title": "Royal Childrenâ€™s Hospital: Enuresis",
+      "url": "https://www.rch.org.au/clinicalguide/guideline_index/Enuresis_-_Bed_wetting_and_Monosymptomatic_Enuresis/"
+    }
+  ],
+  "mcqs": [
+    {
+      "q": "Rapid short-term dryness before university is the priority. Which treatment should be considered if an alarm is unsuitable?",
+      "options": [
+        "Oral desmopressin with fluid-safety counselling",
+        "Punishment",
+        "Routine intranasal desmopressin",
+        "No daytime fluids"
+      ],
+      "answer": 0,
+      "explain": "Desmopressin can provide short-term improvement; fluid restriction is essential. Intranasal treatment is not recommended for enuresis."
+    },
+    {
+      "q": "What fluid advice accompanies desmopressin for enuresis?",
+      "options": [
+        "Restrict fluid from one hour before until eight hours after the dose",
+        "Drink extra water with each dose",
+        "Restrict all daytime fluid",
+        "No fluid precautions"
+      ],
+      "answer": 0,
+      "explain": "The overnight restriction reduces hyponatraemia risk; maintain appropriate daytime hydration."
+    },
+    {
+      "q": "Which new symptom requires medical assessment rather than assuming uncomplicated bedwetting?",
+      "options": [
+        "Thirst with weight loss",
+        "Embarrassment about laundry",
+        "Concern about roommates",
+        "Family history of bedwetting alone"
+      ],
+      "answer": 0,
+      "explain": "Thirst and weight loss raise concern for diabetes and require prompt assessment."
+    }
+  ]
+}

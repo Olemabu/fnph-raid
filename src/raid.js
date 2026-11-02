@@ -66,7 +66,7 @@ function st(id){return stats[id]||(stats[id]={box:0,right:0,wrong:0,seen:0});}
 /* spaced repetition: each grade schedules the next review (days per Leitner box); a miss comes back within the hour */
 const SRS_DAYS=[0,1,3,7,16,35];
 function grade(id,ok){
- const s=st(id),it=deck.rooms.flatMap(r=>r.items).find(i=>i.id===id);s.seen++;
+ const s=st(id),it=deck.rooms.flatMap(r=>r.items).find(i=>i.id===id)||(R.cur?.id===id?R.cur:null);s.seen++;
  if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}
  if(it&&it.type==='q'){
   if(ok){s.mcqRemaining=Math.max(0,(s.mcqRemaining||0)-1);s.mcqDone=s.mcqRemaining===0;if(s.mcqDone)s.box=Math.max(MASTER_AT,s.box);}
@@ -514,12 +514,13 @@ function openBriefing(){
   R.phase='briefing';R.queue=mixQueue(fresh);
   if(R.campaignRun&&r.review)R.queue=mixQueue(pool.filter(i=>!mastered(i)));
   for(const it of R.queue.slice())if(it.type==='q')for(let n=1;n<(st(it.id).mcqRemaining||0);n++)insertMcqRepeat(it);
+  if(r.studyPractice)for(const it of R.queue.slice())if(it.type!=='q')for(let n=1;n<MASTER_AT-(st(it.id).box||0);n++)insertMcqRepeat(it);
   if(R.campaignRun&&C&&C.title.startsWith('OSCE:'))R.queue=R.queue.filter(i=>i.type!=='q').concat(R.queue.filter(i=>i.type==='q'));R.total=R.queue.length;R.cleared=0;
   R.par=Math.max(60,fresh.length*30+review.length*15);R.clock=0;R.m0=masteredCount(r);R.d0=R.deaths;R.timeMax=R.par;
   $.setDifficulty(R.si);
   const m=Math.round(masteredCount(r)/r.items.length*100),mode=R.modeName(),cs=(r.concepts||[]).filter(c=>c.items.length);
   const head=C?'<p class="meta">'+esc(r.topic)+' · concept '+(cs.indexOf(C)+1)+' of '+cs.length+' · '+conceptsDone(r)+' secured so far</p><h2>'+esc(C.title)+'</h2>'+(C.note.length?'<div class="note">'+noteHTML(C.note)+'</div>':''):'<h2>'+esc(r.topic)+'</h2>'+(r.note&&r.note.length?'<div class="note">'+noteHTML(r.note)+'</div>':'');
-  card('brief',r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
+  card('brief',r.studyPractice?'Study practice · '+r.items.length+' items':r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
     '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.</p>'+
@@ -638,6 +639,7 @@ function afterCorrect(){
   const it=R.cur;
   $.carriers.length=0;$.aimLock=null;
   if(R.after==='step'){setupWave();return;}
+  if(R.rooms[R.si]?.studyPractice){learnCard(it);return;}
   if(mastered(it)){nextQuestion();return;}
   if(teachAll&&!R.campaignRun&&!R.rooms[R.si].randomFree){learnCard(it);}else nextQuestion();
 }
@@ -1194,6 +1196,29 @@ function renderWalk(){
 Q('#walkPrev').addEventListener('click',()=>{walkIdx--;renderWalk();window.scrollTo(0,0);});
 Q('#walkNext').addEventListener('click',()=>{walkIdx++;renderWalk();window.scrollTo(0,0);});
 Q('#walkSolo').addEventListener('click',()=>{ac();R.start([deck.rooms[walkIdx]],0);});
+
+// Study packs become an isolated practice room; the syllabus and saved deck remain intact.
+function studyRoom(pack){
+ const p=StudyKit.validate(pack),parsed=parseDeck(StudyKit.deck(p));
+ if(parsed.errors.length)throw Error(parsed.errors.join('; '));
+ const room=parsed.rooms[0];room.idx=0;room.review=true;room.studyPractice=true;room.locus=p.title;
+ room.items.forEach(it=>{it.id='study:'+hash(p.question+'::'+it.type+'::'+it.prompt);});
+ return room;
+}
+R.studyProgress=function(pack){const room=studyRoom(pack);return{done:room.items.filter(mastered).length,total:room.items.length};};
+R.playStudyPack=function(pack,restart=false){
+ const room=studyRoom(pack);
+ for(const it of room.items){if(restart)delete stats[it.id];const state=st(it.id);if(it.type==='q'&&state.mcqDone===undefined){state.mcqDone=false;state.mcqRemaining=3;}}
+ store.set('stats',stats);R.campaignRun=false;R.start([room],0);
+};
+R.findStudy=function(query){
+ const entries=deck.rooms.flatMap(room=>room.items.map(item=>({head:item.prompt,text:(item.note||[]).join(' ')+' '+(item.answer||''),item,room})));
+ return StudyKit.rank(entries,query).slice(0,30);
+};
+R.playStudyMatches=function(query){
+ const hits=R.findStudy(query);if(!hits.length)throw Error('No matching questions. Try fewer clinical keywords.');
+ R.start([{idx:0,locus:'Question search',topic:query,review:true,mode:'',concepts:[],note:[],items:hits.map(x=>x.item)}],0);
+};
 
 /* ---------- edit ---------- */
 Q('#deckSave').addEventListener('click',()=>{
