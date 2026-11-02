@@ -65,12 +65,12 @@ $.Hero.prototype.update = function() {
 
 		const driveX=$.touch&&$.touch.mx||$.pad.mx,driveY=vertical?0:($.touch&&$.touch.my||$.pad.my);
 		if( driveX || driveY ) {
-			this.vx += ( driveX * this.vmax * 1.6 - this.vx ) * 0.3 * $.dt;
-			this.vy += ( driveY * this.vmax * 1.6 - this.vy ) * 0.3 * $.dt;
+			this.vx += ( driveX * this.vmax * 1.6 - this.vx ) * (1-Math.exp(-0.3*$.dt));
+			this.vy += ( driveY * this.vmax * 1.6 - this.vy ) * (1-Math.exp(-0.3*$.dt));
 		}
 		if(vertical) this.vy=0;
-		this.vy *= 0.9;
-		this.vx *= 0.9;	
+		this.vy *= Math.pow(0.9,$.dt);
+		this.vx *= Math.pow(0.9,$.dt);	
 		
 		this.x += this.vx * $.dt;
 		this.y += this.vy * $.dt;
@@ -99,7 +99,7 @@ $.Hero.prototype.update = function() {
 		// mouse aim: if the cursor is on (or near) an answer gunship, aim at it
 		if( !lock && (!$.touch||$.touch.aim===null) && ( $.pad.aim === null || $.pad.aim === undefined ) && $.raid && $.raid.hover && $.raid.hover.alive ) { lock = $.raid.hover; }
 		this.aimTarget = lock;
-		if( lock ) {
+		if( lock && !($.raid.flight && $.raid.flight.enabled()) ) {
 			// lead the target so the shot meets it where it will be
 			var lp = $.raid && $.raid.leadPoint ? $.raid.leadPoint( lock, this.x, this.y ) : lock;
 			this.direction = Math.atan2( lp.y - this.y, lp.x - this.x );
@@ -110,10 +110,15 @@ $.Hero.prototype.update = function() {
 		} else {
 			var dx = $.mouse.x - this.x,
 				dy = $.mouse.y - this.y;
-			this.direction = Math.atan2( dy, dx );
+			this.direction = $.raid.flight&&$.raid.flight.enabled()&&!$.mouse.moved ? (this.prevDirection===undefined?-Math.PI/2:this.prevDirection) : Math.atan2( dy, dx );
 		}
 
-		var dDir = this.direction - ( this.prevDirection !== undefined ? this.prevDirection : this.direction );
+		if($.raid.flight&&$.raid.flight.enabled()){
+            var desired=this.direction,previous=this.prevDirection===undefined?-Math.PI/2:this.prevDirection;
+            var delta=Math.atan2(Math.sin(desired-previous),Math.cos(desired-previous));
+            this.direction=previous+Math.max(-.075*$.dt,Math.min(.075*$.dt,delta));
+        }
+        var dDir = this.direction - ( this.prevDirection !== undefined ? this.prevDirection : this.direction );
 		while( dDir > Math.PI ) dDir -= Math.PI * 2;
 		while( dDir < -Math.PI ) dDir += Math.PI * 2;
 		this.turnRate = ( this.turnRate || 0 ) * 0.7 + dDir * 0.3;
@@ -158,8 +163,8 @@ $.Hero.prototype.update = function() {
 						color = colors[ Math.floor( $.util.rand( 0, colors.length ) ) ];
 					}
 					$.bullets.push( new $.Bullet( {					
-						x: gunX,
-						y: gunY,
+						x: gunX + ($.raid.flight&&$.raid.flight.enabled()?Math.cos(this.direction+Math.PI/2)*((this.gunSide=(this.gunSide||1)*-1)*13):0),
+						y: gunY + ($.raid.flight&&$.raid.flight.enabled()?Math.sin(this.direction+Math.PI/2)*(this.gunSide*13):0),
 						speed: this.weapon.bullet.speed,
 						direction: vertical ? -Math.PI/2 : this.direction + spreadStart + i * spreadStep,
 						damage: this.weapon.bullet.damage,

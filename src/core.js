@@ -146,7 +146,7 @@ $.mousescreen = function() {
 	$.mouse.sx = $.mouse.ax - $.cOffset.left; $.mouse.sy = $.mouse.ay - $.cOffset.top;
 	$.mouse.x = $.mouse.sx - $.screen.x; $.mouse.y = $.mouse.sy - $.screen.y;
 };
-$.mousedowncb = function( e ) { if( e.button === 0 || e.pointerType === 'touch' ) { $.mouse.down = e.pointerType==='touch'?0:1; if($.touch)$.touch.aim=null; $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } } };
+$.mousedowncb = function( e ) { if( e.button === 0 || e.pointerType === 'touch' ) { $.mouse.down = e.pointerType==='touch'?0:1; $.mouse.moved=e.pointerType==='touch'?0:1; if($.touch)$.touch.aim=null; $.mouse.ax = e.clientX; $.mouse.ay = e.clientY; $.mousescreen(); if( $.raid ) { $.raid.onMouseMove(); } } };
 $.mouseupcb = function( e ) { $.mouse.down = 0; };
 $.keydowncb = function( e ) {
 	if( e.target && /INPUT|TEXTAREA/.test( e.target.tagName ) ) { return; }
