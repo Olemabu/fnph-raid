@@ -185,3 +185,12 @@ In the home screen's **Turn a question into a game** panel, paste your question,
 Teaching cards and repeated questions cover the answer and examiner checklist. Session progress is separate from syllabus progress. Clear each item through repeated practice, or choose **Practise this session again** after completion. See [DIRECT_QUESTION_FLOW.md](DIRECT_QUESTION_FLOW.md) for deployment and test details.
 
 Select **OSCE** to learn station phases, candidate wording and patient/relative responses in order, or **Essay** to learn an answer outline and key points. See [OSCE_MODE.md](OSCE_MODE.md). Existing general sessions need to be rebuilt with the selected format to gain this structure.
+
+
+## Aircraft flight (November 2026)
+
+The main campaign now launches with Continue flight, without a hospital map trip. Standard combat uses scrolling ground, clouds, banking aircraft, limited heading changes, and approaching enemy formations. Left stick / movement joystick still moves; right stick / aim joystick sets heading. Existing measured controller axes remain unchanged. Target locking marks the enemy and never rotates the aircraft. The two aircraft-to-target sight lines have been removed.
+
+Each fully completed question set or campaign mission advances one stretch. Three completed sets enter the next landscape: coastline, farmland, city, mountains, then a new circuit. A set means the current mission or selected free-run length, not each repeat. Failed answers and abandoned missions do not advance it. Checkpoints persist under fnphraid.flight.v1 and are included in normal progress backups. Teaching cards freeze flight. Orb Assault remains a separate optional mode.
+
+Run `node --test tests/flight.cjs tests/osce-engine.cjs`, then `python build.py`. Real physical controller and phone feel still benefit from user testing.

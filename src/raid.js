@@ -250,6 +250,7 @@ $.Carrier=function(o){
 $.Carrier.prototype.update=function(i){
   if(!this.alive)return;
   const h=$.hero,dx=h.x-this.x,dy=h.y-this.y,d=Math.hypot(dx,dy)||1;
+  if(R.flight&&R.flight.enabled())return R.flight.moveEnemy(this);
   this.t+=.03*$.dt;
   const sp=R.wave&&R.phase==='fight'?R.wave.speed*($.slow?.4:1):0;
   const px=-dy/d,py=dx/d,wob=Math.sin(this.t+this.num)*.35;
@@ -279,6 +280,7 @@ $.Carrier.prototype.render=function(){
   ctx.beginPath();ctx.ellipse(0,0,this.radius+6,this.radius*.65,0,0,$.twopi);ctx.fill();
   ctx.restore();
 
+  if(R.flight&&R.flight.enabled()){R.flight.drawEnemy(ctx,this,aim);}else{
   // 2. VTOL Hover Thruster Pods (4 corners)
   const pods=[[-20,-16],[20,-16],[-20,16],[20,16]];
   for(let k=0;k<pods.length;k++){
@@ -364,11 +366,13 @@ $.Carrier.prototype.render=function(){
   }
   ctx.restore();
 
+  }
   // 4. Holographic Answer Plate (Positioned above gunship)
   const L=this.label;
   const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')?145:8);
   let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
+  if(R.flight&&R.flight.enabled()&&this.flightAnchor){lx=Math.max(minX,Math.min(maxX,this.flightAnchor.x-L.w/2));ly=Math.max(minY,Math.min(maxY,this.flightAnchor.y-L.h-45));}
   if(Q('#play').classList.contains('touchPlaying')){
     const landscape=innerHeight<500,maxH=Math.max(...$.carriers.map(c=>c.label.h)),slot=this.num-1;
     lx=-$.screen.x+10+(landscape?(slot%2)*(($.cw-180)/2):($.cw-L.w-20)/2);
@@ -727,6 +731,7 @@ function swarmDown(){
 }
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
+  if(R.flight)R.flight.completeSet();
   if(R.onFreeRunClear&&R.onFreeRunClear(r))return;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
   const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
@@ -892,10 +897,7 @@ R.renderAim=function(){
   if(R.phase==='travel'){const s=SP(R.rooms[R.si].idx),dx=s.x-h.x,dy=s.y-h.y,d=Math.hypot(dx,dy);
     if(d>140){const a=Math.atan2(dy,dx),r0=46;c.save();c.translate(h.x+Math.cos(a)*r0,h.y+Math.sin(a)*r0);c.rotate(a);c.fillStyle='rgba(255,90,60,'+(.6+.4*Math.sin($.tick/6))+')';c.beginPath();c.moveTo(14,0);c.lineTo(-6,-9);c.lineTo(-2,0);c.lineTo(-6,9);c.closePath();c.fill();c.restore();
       c.font='600 13px "Chakra Petch", sans-serif';c.fillStyle='rgba(255,200,180,.9)';c.textAlign='center';c.fillText(Math.round(d/10)+' m',h.x+Math.cos(a)*74,h.y+Math.sin(a)*74+4);c.textAlign='left';}}
-  // aim line to locked / hovered answer
-  const tg=R.aimTarget();
-  if(tg&&h.life>0){c.save();c.setLineDash([4,6]);c.strokeStyle='rgba(98,230,255,.5)';c.lineWidth=1.5;c.beginPath();c.moveTo(h.x,h.y);c.lineTo(tg.x,tg.y);c.stroke();c.restore();
-  }
+
 };
 R.renderLighting=function(){
   if(FNPHTheme.light)return;
@@ -1072,7 +1074,7 @@ R.pollPad=function(){
     const prev=R.hover&&R.hover.alive?R.hover:null;
     R.hover=prev&&ang(prev)<.5&&(!best||best===prev||bd>ang(prev)*.6)?prev:best;
   }
-  if(R.hover&&R.hover.alive&&$.pad.aim!=null){const ta=Math.atan2(R.hover.y-$.hero.y,R.hover.x-$.hero.x);$.pad.aim+=(((ta-$.pad.aim)+$.pi*3)%$.twopi-$.pi)*.35;}
+  if(!(R.flight&&R.flight.enabled())&&R.hover&&R.hover.alive&&$.pad.aim!=null){const ta=Math.atan2(R.hover.y-$.hero.y,R.hover.x-$.hero.x);$.pad.aim+=(((ta-$.pad.aim)+$.pi*3)%$.twopi-$.pi)*.35;}
   // fire (buttons, or a trigger that reports as an axis)
   let firing=fireBtns.some(i=>cur[i]);
   if(M&&M.fireAxis!=null&&Math.abs(dev(M.fireAxis))>.5)firing=true;
@@ -1328,17 +1330,12 @@ function aimPoint(){
 }
 function drawTactical(ctx){
   const h=$.hero;if(h.life<=0)return;
-  const p=aimPoint(),a=h.direction,mx=h.x+Math.cos(a)*44,my=h.y+Math.sin(a)*44;
-  const d=Math.min(900,Math.hypot(p.x-mx,p.y-my));
-  // laser sight
-  const g=ctx.createLinearGradient(mx,my,mx+Math.cos(a)*d,my+Math.sin(a)*d);g.addColorStop(0,'rgba(255,40,40,.55)');g.addColorStop(1,'rgba(255,40,40,.12)');
-  ctx.strokeStyle=g;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(mx+Math.cos(a)*d,my+Math.sin(a)*d);ctx.stroke();
-  ctx.fillStyle='rgba(255,60,60,.95)';ctx.beginPath();ctx.arc(mx+Math.cos(a)*d,my+Math.sin(a)*d,2.2,0,$.twopi);ctx.fill();
+  const p=aimPoint();
   // reticle
   const over=R.aimTarget(),col=over?'98,230,255':'235,245,235',r=over?over.radius+12:14,t=$.tick/20;
   ctx.save();ctx.translate(over?over.x:p.x,over?over.y:p.y);
   ctx.strokeStyle='rgba('+col+',.95)';ctx.lineWidth=2;
-  for(let k=0;k<4;k++){ctx.save();ctx.rotate(k*$.pi/2+(over?t:0));ctx.beginPath();ctx.moveTo(r,-r+7);ctx.lineTo(r,-r);ctx.lineTo(r-7,-r);ctx.stroke();ctx.restore();}
+  for(let k=0;k<4;k++){ctx.save();ctx.rotate(k*$.pi/2);ctx.beginPath();ctx.moveTo(r,-r+7);ctx.lineTo(r,-r);ctx.lineTo(r-7,-r);ctx.stroke();ctx.restore();}
   if(!over){ctx.beginPath();ctx.moveTo(-5,0);ctx.lineTo(-2,0);ctx.moveTo(5,0);ctx.lineTo(2,0);ctx.moveTo(0,-5);ctx.lineTo(0,-2);ctx.moveTo(0,5);ctx.lineTo(0,2);ctx.stroke();}
   ctx.fillStyle='rgba('+col+',1)';ctx.beginPath();ctx.arc(0,0,1.5,0,$.twopi);ctx.fill();
   if(over){ctx.font='700 11px "JetBrains Mono", monospace';ctx.textAlign='center';ctx.fillText('LOCK '+over.num,0,r+14);ctx.textAlign='left';}
