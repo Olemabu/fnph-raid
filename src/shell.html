@@ -298,6 +298,65 @@ html[data-theme=light] .others li{background:#e7ebe6}html[data-theme=light] .oth
 #orbIntel{position:absolute;z-index:6;right:14px;top:200px;bottom:75px;width:260px;overflow:auto;padding:16px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-sizing:border-box}#orbIntel>b{font:700 15px var(--ui);letter-spacing:.1em;color:var(--gold)}#orbHint{font-size:13px;line-height:1.6;color:var(--muted)}#orbChoices{display:grid;gap:8px}#orbChoices button{padding:12px;text-align:left;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:600 14px/1.5 var(--ui);cursor:pointer}#orbChoices button:hover{border-color:var(--gold)}#orbToggle{display:none}.orbIntro{margin:0 0 18px;color:var(--muted);font-size:15px;line-height:1.6}#play.orbAssault .keys{display:none}#play.orbAssault #qChain{display:none}
 @media(max-width:1000px){#orbIntel{top:auto;bottom:145px;left:50%;right:auto;transform:translateX(-50%);width:min(320px,calc(100% - 24px));height:auto;max-height:220px;padding:0;background:var(--panel)}#orbToggle{display:block;padding:9px 12px;width:100%;font:600 12px var(--ui);background:var(--panel2);color:var(--text);border:1px solid var(--line)}#orbIntel>b,#orbHint{display:none}#orbChoices{display:none;padding:8px}#orbIntel.expanded #orbChoices{display:grid;max-height:150px;overflow:auto}#orbChoices button{font-size:13px;padding:7px}}
 @media(max-width:1000px) and (max-height:500px){#orbIntel{left:auto;right:6px;transform:none;top:150px;bottom:115px;width:145px;max-height:none}#orbToggle{font-size:10px;padding:7px}#orbIntel.expanded #orbChoices{max-height:90px}#orbChoices button{font-size:11px}}
+
+/* Start page fits the viewport; only opened menus scroll. */
+#home.compactHome{box-sizing:border-box;height:100vh;height:100dvh;max-width:none;width:100%;padding:12px max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));gap:10px;overflow:hidden}
+.compactHome>.campaignPanel{flex:1;min-height:0;display:flex;flex-direction:column;margin:0}
+.compactHome .hangar{flex:1;min-height:0;overflow:hidden}
+.compactHome .campaignCopy{padding:22px 28px;width:44%;box-sizing:border-box}
+.compactHome .campaignCopy h1{font-size:clamp(28px,5vh,58px);margin:8px 0 12px}
+.compactHome .campaignCopy>p,.compactHome .campaignFootnote{display:none}
+.compactHome .campaignObjective{margin:12px 0}
+.compactHome .combatLoadout{margin:10px 0;padding:10px;grid-template-columns:90px 1fr auto}
+.compactHome .combatLoadout canvas{max-width:90px;height:60px}
+.homeDock{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
+.homeDock .btn{min-height:44px;flex:1;max-width:260px}
+#homeOptions{box-sizing:border-box;width:min(1050px,calc(100% - 24px));height:min(90dvh,850px);max-height:calc(100dvh - 20px);padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);overflow:hidden}
+#homeOptions[open]{display:flex;flex-direction:column}
+#homeOptions::backdrop{background:#06101dbb;backdrop-filter:blur(5px)}
+.homeMenuHeader{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);gap:12px;flex-shrink:0}
+.homeMenuHeader h2{font-size:22px;margin:0}
+.homeMenuTabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px 18px;flex-shrink:0;border-bottom:1px solid var(--line)}
+.homeMenuTabs .btn{padding:7px 11px;font-size:13px}
+.homeMenuTabs .btn[aria-expanded=true]{border-color:var(--gold)}
+.homeMenuBody{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:18px}
+.homeMenuPane[hidden]{display:none!important}
+#homeOptions .appTools,#homeOptions .operations,#homeOptions .themeSettings{margin:0 0 14px}
+#homeOptions .freeFlight>summary{display:none}
+#homeOptions .hero{grid-template-columns:1fr}
+#homeOptions .mapbox{display:none}
+#homeOptions .campaignLedger{display:block}
+#homeOptions #chapterRail{display:flex;overflow:auto}
+html[data-theme=light] #homeOptions{background:#fffdf7;color:#203746}
+@media(max-width:800px){
+ .compactHome .campaignMast{padding:9px 12px;font-size:8px}
+ .compactHome .hangar{align-items:flex-end}
+ .compactHome .campaignCopy{width:100%;max-width:none;padding:18px;background:linear-gradient(transparent,#050a12ed 18%)}
+ .compactHome .campaignCopy h1{font-size:30px;margin:6px 0}
+ .compactHome .campaignCopy .campaignTag{font-size:10px}
+ .compactHome .campaignObjective{margin:8px 0}
+ .compactHome .combatLoadout{display:none}
+ .compactHome .framePlaque{top:14px;right:14px}
+ .homeDock{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .homeDock .btn{font-size:12px;padding:8px 5px;min-height:42px;max-width:none}
+ .homeMenuHeader{padding:10px 12px}.homeMenuTabs{padding:8px;gap:4px}.homeMenuTabs .btn{font-size:12px;padding:6px 8px}.homeMenuBody{padding:12px}
+}
+@media(max-height:560px){
+ #home.compactHome{padding:6px;gap:6px}
+ .compactHome .campaignMast{padding:6px 12px}
+ .compactHome .hangar{align-items:center}
+ .compactHome .campaignCopy{width:48%;padding:12px 18px;background:transparent}
+ .compactHome .campaignCopy h1,.compactHome .combatLoadout,.compactHome #campaignTitle{display:none}
+ .compactHome .campaignObjective{margin:8px 0}
+ .compactHome .campaignObjective b{font-size:14px}
+ .compactHome .campaignCopy .campaignTag{font-size:9px}
+ .compactHome .framePlaque{top:12px;bottom:auto;right:12px}
+ .homeDock{display:flex;flex-wrap:nowrap}
+ .homeDock .btn{min-height:36px;font-size:11px;padding:6px}
+ #homeOptions{height:calc(100dvh - 12px);max-height:calc(100dvh - 12px)}
+ .homeMenuHeader{padding:7px 12px}.homeMenuHeader h2{font-size:18px}.homeMenuTabs{padding:6px 10px}
+}
+
 </style>
 
 <section id="home" class="page">

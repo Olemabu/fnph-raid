@@ -1173,7 +1173,7 @@ R.pollPad=function(){
   // overlays and menus: any fire or pause button presses the main button
   if(R.active&&anyPauseEdge){R.pause();padPrev=cur;return;}
   if(!Q('#cardWrap').hidden){if(R.paused){const x=dev(0),y=dev(1),dir=cur[12]?'u':cur[13]?'d':cur[14]?'l':cur[15]?'r':Math.abs(x)>.5?(x>0?'r':'l'):Math.abs(y)>.5?(y>0?'d':'u'):'';if(dir&&performance.now()-navT>220){padNav(Q('#cardWrap'),dir);navT=performance.now();}if(selectEdge){const focused=document.activeElement;if(focused&&Q('#cardWrap').contains(focused)&&focused.matches('button:not(:disabled)'))focused.click();else closeCard();}}else if(anyFireEdge||selectEdge)closeCard();padPrev=cur;return;}
-  {const scr=['warRoom','home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
+  {const scr=(R.homeMenu?.isOpen()?Q('#homeOptions'):null)||['warRoom','home','walk','edit','debrief'].map(id=>Q('#'+id)).find(e=>e&&!e.hidden);
    if(scr){let nx=0,ny=0;if(M){nx=dev(M.drive.x)*M.drive.sx;ny=dev(M.drive.y)*M.drive.sy;}else{nx=dev(0);ny=dev(1);}
      if(cur[14])nx=-1;if(cur[15])nx=1;if(cur[12])ny=-1;if(cur[13])ny=1;
      {const hi=M&&M.hat!=null?M.hat:(p.axes.length>9?9:null);if(hi!=null){const h=p.axes[hi];const H=[[-1,0,-1],[-.71,1,-1],[-.43,1,0],[-.14,1,1],[.14,0,1],[.43,-1,1],[.71,-1,0],[1,-1,-1]];for(const [v,hx,hy] of H)if(Math.abs(h-v)<.08){nx=hx;ny=hy;}}}
@@ -1182,6 +1182,7 @@ R.pollPad=function(){
      if(dir&&(dir!==navLast||now-navT>(navRep?140:380))){navRep=dir===navLast;navLast=dir;navT=now;padNav(scr,dir);}
      if(!dir){navLast='';navRep=false;}
      if(selectEdge||edge(0)||(!M&&edge(2))){const f=document.querySelector('.padf');if(f&&scr.contains(f))f.click();else if(scr.id==='home'){if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
+     else if(edge(1)&&scr.id==='homeOptions'){R.homeMenu.close();}
      else if(edge(1)&&scr.id!=='home'){const back=scr.querySelector('[data-go="home"]');if(back)back.click();}
      else if(anyPauseEdge){if(scr.id==='home'){if(Q('#opsSetup')&&!Q('#opsSetup').hidden&&!Q('#opsDeploy').disabled)Q('#opsDeploy').click();else if(R.campaign)R.campaign.launch();else Q('#bStart').click();}else if(scr.id==='warRoom')Q('#warDeploy').click();else if(scr.id==='debrief')Q('#dAgain').click();}
      padPrev=cur;return;}}
