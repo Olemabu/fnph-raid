@@ -36,7 +36,7 @@ Update
 ==============================================================================*/
 $.Hero.prototype.update = function() {
 	if( this.life > 0 ) {
-        const vertical = !!($.raid && $.raid.orbAssault);
+        const vertical = !!($.raid && ($.raid.orbAssault || $.raid.flight?.enabled()));
 		/*==============================================================================
 		Apply Forces
 		==============================================================================*/

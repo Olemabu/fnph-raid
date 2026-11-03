@@ -1263,7 +1263,7 @@ function renderWiz(p){
   if(p){h+='<div class="padLive"><span class="lbl">Live readout: what your controller is sending</span><div class="axes">'+p.axes.map((v,i)=>{const d=(v||0)-((padBase&&padBase.v[i])||0);return '<div class="ax"><span>Axis '+i+'</span><b><i style="left:'+(50+Math.max(-1,Math.min(1,d))*50)+'%"></i></b></div>';}).join('')+'</div><div class="btns">'+p.buttons.map((b,i)=>'<span class="'+((b.pressed||b.value>.5)?'on':'')+'">'+i+'</span>').join('')+'</div></div>';}
   body.innerHTML=h;
 }
-function padStatus(){const el=Q('#padStatus');if(el){el.textContent=padId?'Controller connected: '+padId.replace(/\(.*?\)/g,'').trim().slice(0,46)+(padMap&&padMap.id===padId?' · your custom layout is set':(/0810/.test(padId)&&/0001/.test(padId)?' · your controller profile is loaded: left stick moves, right stick turns. Keep the ANALOG light on.':' · default: left stick moves, right stick turns. If the right stick does nothing, press the ANALOG button on the controller (red light on).')):'No controller detected. Plug it in and press a button.';el.classList.toggle('on',!!padId);}}
+function padStatus(){const el=Q('#padStatus');if(el){el.textContent=padId?'Controller connected: '+padId.replace(/\(.*?\)/g,'').trim().slice(0,46)+(padMap&&padMap.id===padId?' · your custom layout is set':(/0810/.test(padId)&&/0001/.test(padId)?' · your controller profile is loaded: left stick moves sideways; ship stays facing forward. Keep the ANALOG light on.':' · default: left stick moves sideways; ship stays facing forward. If the right stick does nothing, press the ANALOG button on the controller (red light on).')):'No controller detected. Plug it in and press a button.';el.classList.toggle('on',!!padId);}}
 
 /* ================= Screens ================= */
 const SCREENS=['home','warRoom','play','walk','edit','debrief'];
@@ -1291,7 +1291,7 @@ function renderHome(){
   Q('#bTimer').textContent='Par-time clock: '+(timerOn?'on':'off');
   Q('#bOrder').textContent='Full raid order: '+ORDER_LABEL[routeOrder];
   {const nd=dueItems().length;const b=Q('#bReview');b.textContent=nd?'Daily review ('+Math.min(nd,30)+(nd>30?' of '+nd:'')+' due)':'Daily review (nothing due)';b.disabled=!nd;}
-  Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
+  Q('#bSens').hidden=true;Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
   {const g=globalBar();Q('#homeSegs').innerHTML=g.html;Q('#homeGLabel').textContent=g.label;gKey='';}
   if(!mapCanvas)buildMap();
   const mc=Q('#homeMap'),c=mc.getContext('2d');c.drawImage(mapCanvas,0,0,mc.width,mc.height);

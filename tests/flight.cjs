@@ -24,10 +24,10 @@ test('interceptors enter ahead, fly through and leave the field rather than orbi
  const {R,$}=flight();const e=$.spawnEnemy();Object.assign(e,{index:1,speed:2,radius:12});$.enemies=[e];
  assert(e.y<0);for(let i=0;i<60;i++)$.Enemy.prototype.update.call(e,0);assert(e.y>0);assert(e.inView);for(let i=0;i<500;i++)$.Enemy.prototype.update.call(e,0);assert.equal($.enemies.length,0);
 });
-test('target selection does not rotate the aircraft; manual right-stick heading turns at a limited rate',()=>{
+test('ship stays forward-facing and only moves sideways despite mouse, right-stick and vertical input',()=>{
  const $={ww:1920,wh:1200,dt:1,keys:{state:{}},pad:{mx:0,my:0,aim:null},touch:{mx:0,my:0,aim:null},mouse:{moved:0},raid:{flight:{enabled:()=>true}},enemies:[],powerupTimers:[],aimLock:{alive:true,x:1700,y:600},util:{distance:()=>100}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/hero.js'),'utf8'),{$,Math});const h=new $.Hero();h.weapon.fireRateTick=0;h.prevDirection=h.direction=-Math.PI/2;h.update();assert.equal(h.direction,-Math.PI/2);assert.equal(h.vx,0);assert.equal(h.vy,0);
- $.pad.aim=0;h.update();assert(h.direction>-Math.PI/2);assert(h.direction<=-Math.PI/2+.075001);
+ $.pad.aim=0;$.mouse.moved=1;$.mouse.x=0;$.mouse.y=600;$.keys.state.up=1;$.pad.my=1;h.weapon.fireRateTick=0;h.update();assert.equal(h.direction,-Math.PI/2);assert.equal(h.vy,0);$.pad.mx=1;h.weapon.fireRateTick=0;h.update();assert(h.vx>0);assert.equal(h.direction,-Math.PI/2);assert.equal(h.vy,0);
 });
 
 test('a fresh flight clears stale aim commands without applying automatic steering',()=>{

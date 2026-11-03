@@ -70,5 +70,5 @@ $.Enemy.prototype.update=function(i){if(!enabled())return enemyUpdate.call(this,
  this.x=this.flightX+Math.sin(this.flightT+this.index)*45;this.y+=Math.max(1.2,Math.min(3,this.speed||1.6))*$.dt;this.vx=(this.x-ox)/($.dt||1);this.vy=(this.y-oy)/($.dt||1);this.inView=this.y+$.screen.y>-40&&this.y+$.screen.y<$.ch+40;
  if(this.y+$.screen.y>$.ch+80)$.enemies.splice(i,1);
 };
-const help=document.createElement('p');help.className='meta';help.textContent='Manual flight: arrows / WASD or left joystick steer; right joystick controls heading. Hold FIRE / Space to shoot. Target brackets mark the selected enemy; locking does not steer your aircraft. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
+const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Hold FIRE / Space to shoot. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
 })();

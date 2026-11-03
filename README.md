@@ -202,3 +202,6 @@ Wrong or guessed MCQs now need two correct repeats, including outstanding saved 
 
 
 The start page is a single viewport with the existing hangar artwork and Continue flight. Study session, Free flight, Options, Progress, and Install & saves open modal menus; only their contents scroll. Controls retain their original handlers, menus close before starting play, and controller navigation targets the open menu. Verified at desktop, phone portrait and phone landscape dimensions.
+
+
+Current flight controls: ship orientation stays forward, movement is left/right only, and weapons fire straight ahead. Mouse aim and the right stick cannot rotate the ship; the unused touch aim joystick is hidden. The original ship artwork remains unchanged. This replaces the earlier turning-control description above.

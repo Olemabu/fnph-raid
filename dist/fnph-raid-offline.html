@@ -68,8 +68,8 @@ window.FNPHBoot={stage,fail,stages,finish(){const complete=()=>{const R=window.$
         <div><b>Procedures</b><p>For steps in order, destroy step 1, then step 2, and so on. Shooting a step out of order kills you and shows the full sequence.</p></div>
       </div>
       <div class="how">
-        <div><b>Keyboard and mouse</b><p><kbd>WASD</kbd> move · mouse aims, hold click to fire · <kbd>1</kbd>–<kbd>4</kbd> lock onto an answer, <kbd>Space</kbd> fires · <kbd>Tab</kbd> switches lock · <kbd>P</kbd> pause · <kbd>M</kbd> mute</p></div>
-        <div><b>USB controller</b><p>Left stick moves the machine left, right, forward and back. Right stick turns the whole machine on its axis to face where you point, and it snaps onto an answer you point near. Any face button or trigger fires · Start pauses. Different controller? Use <b>Set up controller</b>.</p></div>
+        <div><b>Keyboard and mouse</b><p><kbd>A</kbd> / <kbd>D</kbd> or Left / Right move sideways · hold click to fire straight ahead · <kbd>1</kbd>–<kbd>4</kbd> lock onto an answer, <kbd>Space</kbd> fires · <kbd>Tab</kbd> switches lock · <kbd>P</kbd> pause · <kbd>M</kbd> mute</p></div>
+        <div><b>USB controller</b><p>Left stick moves the ship sideways. The ship stays facing forward and fires straight ahead. The right stick does not rotate it. Any face button or trigger fires · Start pauses. Different controller? Use <b>Set up controller</b>.</p></div>
       </div>
       <details class="credits"><summary>Credits and licence</summary>
         <p>Game engine: <b>Radius Raid</b> by Jack Rugile (js13kGames 2013), used and modified under the MIT licence. Sound effects: jsfxr. Exam content, FNPH map, answer gunships, teaching cards and controller support were added for this version.</p>
@@ -1582,7 +1582,7 @@ Update
 ==============================================================================*/
 $.Hero.prototype.update = function() {
 	if( this.life > 0 ) {
-        const vertical = !!($.raid && $.raid.orbAssault);
+        const vertical = !!($.raid && ($.raid.orbAssault || $.raid.flight?.enabled()));
 		/*==============================================================================
 		Apply Forces
 		==============================================================================*/
@@ -4400,7 +4400,7 @@ function renderWiz(p){
   if(p){h+='<div class="padLive"><span class="lbl">Live readout: what your controller is sending</span><div class="axes">'+p.axes.map((v,i)=>{const d=(v||0)-((padBase&&padBase.v[i])||0);return '<div class="ax"><span>Axis '+i+'</span><b><i style="left:'+(50+Math.max(-1,Math.min(1,d))*50)+'%"></i></b></div>';}).join('')+'</div><div class="btns">'+p.buttons.map((b,i)=>'<span class="'+((b.pressed||b.value>.5)?'on':'')+'">'+i+'</span>').join('')+'</div></div>';}
   body.innerHTML=h;
 }
-function padStatus(){const el=Q('#padStatus');if(el){el.textContent=padId?'Controller connected: '+padId.replace(/\(.*?\)/g,'').trim().slice(0,46)+(padMap&&padMap.id===padId?' · your custom layout is set':(/0810/.test(padId)&&/0001/.test(padId)?' · your controller profile is loaded: left stick moves, right stick turns. Keep the ANALOG light on.':' · default: left stick moves, right stick turns. If the right stick does nothing, press the ANALOG button on the controller (red light on).')):'No controller detected. Plug it in and press a button.';el.classList.toggle('on',!!padId);}}
+function padStatus(){const el=Q('#padStatus');if(el){el.textContent=padId?'Controller connected: '+padId.replace(/\(.*?\)/g,'').trim().slice(0,46)+(padMap&&padMap.id===padId?' · your custom layout is set':(/0810/.test(padId)&&/0001/.test(padId)?' · your controller profile is loaded: left stick moves sideways; ship stays facing forward. Keep the ANALOG light on.':' · default: left stick moves sideways; ship stays facing forward. If the right stick does nothing, press the ANALOG button on the controller (red light on).')):'No controller detected. Plug it in and press a button.';el.classList.toggle('on',!!padId);}}
 
 /* ================= Screens ================= */
 const SCREENS=['home','warRoom','play','walk','edit','debrief'];
@@ -4428,7 +4428,7 @@ function renderHome(){
   Q('#bTimer').textContent='Par-time clock: '+(timerOn?'on':'off');
   Q('#bOrder').textContent='Full raid order: '+ORDER_LABEL[routeOrder];
   {const nd=dueItems().length;const b=Q('#bReview');b.textContent=nd?'Daily review ('+Math.min(nd,30)+(nd>30?' of '+nd:'')+' due)':'Daily review (nothing due)';b.disabled=!nd;}
-  Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
+  Q('#bSens').hidden=true;Q('#bSens').textContent='Controller aim turn speed: '+({0.6:'slow',1:'medium',1.5:'fast'}[padSens]||'medium');
   {const g=globalBar();Q('#homeSegs').innerHTML=g.html;Q('#homeGLabel').textContent=g.label;gKey='';}
   if(!mapCanvas)buildMap();
   const mc=Q('#homeMap'),c=mc.getContext('2d');c.drawImage(mapCanvas,0,0,mc.width,mc.height);
@@ -4953,7 +4953,7 @@ stick('touchMove',(x,y)=>{T.mx=x;T.my=y;});stick('touchAim',(x,y)=>{if(Math.hypo
 const fire=document.getElementById('touchFire');let firePointer=null;fire.onpointerdown=e=>{e.preventDefault();e.stopPropagation();firePointer=e.pointerId;fire.setPointerCapture(e.pointerId);T.fire=true;};for(const type of ['pointerup','pointercancel','lostpointercapture'])fire.addEventListener(type,e=>{if(e.pointerId===firePointer){T.fire=false;firePointer=null;}});
 function reset(){T.mx=T.my=0;T.fire=false;resets.forEach(f=>f());firePointer=null;}
 R.resetTouch=reset;window.addEventListener('blur',reset);document.addEventListener('visibilitychange',()=>{if(document.hidden){reset();if(R.active&&!R.paused&&$.state==='play')R.pause();}});window.addEventListener('orientationchange',()=>{reset();if(R.active&&!R.paused&&$.state==='play')R.pause();});
-function loop(){requestAnimationFrame(loop);const show=(matchMedia('(pointer:coarse)').matches||innerWidth<900)&&R.active&&!R.paused&&$.state==='play'&&document.querySelector('#cardWrap').hidden;el.hidden=!show;document.getElementById('touchAim').hidden=!!R.orbAssault;document.querySelector('#touchMove span').textContent=R.orbAssault?'LEFT / RIGHT':'MOVE';document.querySelector('#play').classList.toggle('touchPlaying',show);if(!show)reset();}requestAnimationFrame(loop);
+function loop(){requestAnimationFrame(loop);const show=(matchMedia('(pointer:coarse)').matches||innerWidth<900)&&R.active&&!R.paused&&$.state==='play'&&document.querySelector('#cardWrap').hidden;el.hidden=!show;const sideways=!!(R.orbAssault||R.flight?.enabled());document.getElementById('touchAim').hidden=sideways;document.querySelector('#touchMove span').textContent=sideways?'LEFT / RIGHT':'MOVE';document.querySelector('#play').classList.toggle('touchPlaying',show);if(!show)reset();}requestAnimationFrame(loop);
 })();
 
 
@@ -5204,7 +5204,7 @@ $.Enemy.prototype.update=function(i){if(!enabled())return enemyUpdate.call(this,
  this.x=this.flightX+Math.sin(this.flightT+this.index)*45;this.y+=Math.max(1.2,Math.min(3,this.speed||1.6))*$.dt;this.vx=(this.x-ox)/($.dt||1);this.vy=(this.y-oy)/($.dt||1);this.inView=this.y+$.screen.y>-40&&this.y+$.screen.y<$.ch+40;
  if(this.y+$.screen.y>$.ch+80)$.enemies.splice(i,1);
 };
-const help=document.createElement('p');help.className='meta';help.textContent='Manual flight: arrows / WASD or left joystick steer; right joystick controls heading. Hold FIRE / Space to shoot. Target brackets mark the selected enemy; locking does not steer your aircraft. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
+const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Hold FIRE / Space to shoot. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
 })();
 
 
