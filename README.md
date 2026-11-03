@@ -196,3 +196,6 @@ Each fully completed question set or campaign mission advances one stretch. Thre
 Run `node --test tests/flight.cjs tests/osce-engine.cjs`, then `python build.py`. Real physical controller and phone feel still benefit from user testing.
 
 The original rendered player ship, enemy artwork and answer gunship/option visuals are restored. Flight scenery and manual handling remain; the flight module does not replace vehicle renderers.
+
+
+Wrong or guessed MCQs now need two correct repeats, including outstanding saved misses. Next set is available in the flight controls and pause menu. It advances campaign selection without marking skipped work complete, saves that selection for the next launch, and leaves unfinished mastery records intact. Free flight selects a fresh batch within the chosen topic; multi-station study sessions advance to the next OSCE station. Single-station sessions report when no other station is available. Advancing manually also advances the scenery checkpoint.

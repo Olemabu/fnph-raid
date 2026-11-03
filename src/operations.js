@@ -12,8 +12,26 @@ function status(){const n=pool().length;Q('#opsStatus').textContent=n+' active q
 Q('#opsFlightMode').onchange=status;Q('#opsSector').onchange=status;Q('#opsCount').onchange=status;
 Q('#opsDeploy').onclick=()=>{const items=shuffle(pool()),count=+Q('#opsCount').value;if(!items.length)return;const base=items[0].room,room={...base,locus:'Spaceship free run',topic:Q('#opsSector').value==='all'?'Mixed syllabus':base.topic,mode:'',review:true,randomFree:true,endless:count===0,randomScope:Q('#opsSector').value,missionConcept:null,concepts:[],items:items.slice(0,count||20),note:['Shoot the correct answer with your interceptor. Mastery progress saves automatically.']};R.start([room],0,{orbAssault:Q('#opsFlightMode').value==='orbs'});const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();};
 R.onFreeRunClear=room=>{if(!room.randomFree||!room.endless)return false;const rooms=room.randomScope==='all'?R.deckRooms():[R.deckRooms()[+room.randomScope]],items=shuffle(rooms.flatMap(r=>r.items).filter(i=>!R.isMastered(i)&&(!R.orbAssault||i.type==='q')));if(!items.length)return false;room.items=items.slice(0,20);R.beginCombat();R.toast('Next spaceship round',true);return true;};
+R.nextSet=function(){
+ if(!R.active)return false;
+ if(R.campaignRun&&R.campaign)return R.campaign.advanceSet();
+ const current=R.rooms[R.si],scope=current.randomScope;
+ if(current.studyMode==='osce'){
+  const all=current.nextSetPool||current.items,groups=[];let group=null;for(const it of all){if(it.osceLesson&&it.osceLesson.stationNumber!==group?.number){group={number:it.osceLesson.stationNumber,items:[]};groups.push(group);}if(group)group.items.push(it);}
+  const number=R.cur?.osceLesson?.stationNumber||current.items.find(i=>i.osceLesson)?.osceLesson.stationNumber,index=groups.findIndex(g=>g.number===number);
+  const next=groups.slice(index+1).concat(groups.slice(0,index)).find(g=>g.items.some(i=>!R.isMastered(i)));
+  if(!next){R.toast('No other OSCE stations in this session. Import or build another session.',true);return false;}
+  const room={...current,nextSetPool:all,items:next.items,concepts:[]};if(R.flight)R.flight.completeSet();R.toHome();R.start([room],0);R.beginCombat();return true;
+ }
+ const source=current.randomFree?(scope==='all'?R.deckRooms():[R.deckRooms()[+scope]]).flatMap(r=>r.items):(current.nextSetPool||current.items);
+ const excluded=new Set(current.items.map(i=>i.id));let fresh=source.filter(i=>!R.isMastered(i)&&!excluded.has(i.id)&&(!R.orbAssault||i.type==='q'));
+ if(!fresh.length&&!current.randomFree&&R.si+1<R.rooms.length){const rooms=R.rooms.slice(),index=R.si+1;if(R.flight)R.flight.completeSet();R.toHome();R.start(rooms,index);R.beginCombat();return true;}
+ if(!fresh.length){R.toast('No fresh set left in this selection. Choose another topic or study session.',true);return false;}
+ const items=shuffle(fresh).slice(0,current.randomFree?current.items.length:10),room={...current,nextSetPool:source,items,concepts:[]},orbs=!!R.orbAssault;
+ if(R.flight)R.flight.completeSet();R.toHome();R.start([room],0,{orbAssault:orbs});R.beginCombat();R.toast('Next set · unfinished questions saved for later practice',true);return true;
+};
 R.operations={refresh:status};status();
-const menus=document.createElement('nav');menus.id='gameMenuBar';menus.setAttribute('aria-label','Gameplay menu');menus.innerHTML='<button id="gameBack" disabled>Back / Retry</button><button id="gameGuessed" disabled>Guessed it</button><button id="gamePause">Pause · Esc / Start</button><button id="gameHome">Main menu</button>';Q('#play').appendChild(menus);Q('#gameBack').onclick=()=>R.reconsider(false);Q('#gameGuessed').onclick=()=>R.reconsider(true);Q('#gamePause').onclick=()=>R.pause();Q('#gameHome').onclick=()=>R.toHome();
-function menuLoop(){requestAnimationFrame(menuLoop);Q('#gameBack').disabled=Q('#gameGuessed').disabled=!R.canReconsider();menus.hidden=!R.active||Q('#play').hidden||(!Q('#cardWrap').hidden&&R.phase!=='reviewEnd');menus.style.top=innerWidth<900?(innerHeight<500?'35px':Math.max(112,Q('#qbar').getBoundingClientRect().bottom+8)+'px'):'146px';}
+const menus=document.createElement('nav');menus.id='gameMenuBar';menus.setAttribute('aria-label','Gameplay menu');menus.innerHTML='<button id="gameBack" disabled>Back / Retry</button><button id="gameGuessed" disabled>Guessed it</button><button id="gamePause">Pause · Esc / Start</button><button id="gameNextSet">Next set</button><button id="gameHome">Main menu</button>';Q('#play').appendChild(menus);Q('#gameBack').onclick=()=>R.reconsider(false);Q('#gameGuessed').onclick=()=>R.reconsider(true);Q('#gamePause').onclick=()=>R.pause();Q('#gameHome').onclick=()=>R.toHome();Q('#gameNextSet').onclick=()=>R.nextSet();
+function menuLoop(){requestAnimationFrame(menuLoop);Q('#gameBack').disabled=Q('#gameGuessed').disabled=!R.canReconsider();menus.hidden=!R.active||Q('#play').hidden;menus.style.top=innerWidth<900?(innerHeight<500?'35px':Math.max(112,Q('#qbar').getBoundingClientRect().bottom+8)+'px'):'146px';}
 requestAnimationFrame(menuLoop);
 })();

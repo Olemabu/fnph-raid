@@ -70,12 +70,13 @@ function grade(id,ok){
  if(ok){s.right++;s.box=Math.min(5,s.box+1);s.due=Date.now()+SRS_DAYS[s.box]*864e5;}else{s.wrong++;s.box=0;s.due=Date.now()+30*60e3;}
  if(it&&it.type==='q'){
   if(ok){s.mcqRemaining=Math.max(0,(s.mcqRemaining||0)-1);s.mcqDone=s.mcqRemaining===0;if(s.mcqDone)s.box=Math.max(MASTER_AT,s.box);}
-  else{s.mcqRemaining=3;s.mcqDone=false;}
+  else{s.mcqRemaining=2;s.mcqDone=false;}
  }
  store.set('stats',stats);
 }
 // Preserve prior answers: first-time successes retire; missed MCQs retain their outstanding practice.
 for(const it of deck.rooms.flatMap(r=>r.items)){const s=stats[it.id];if(it.type!=='q'||!s||s.mcqDone!==undefined)continue;s.mcqDone=s.box>=MASTER_AT||((s.right||0)>0&&!(s.wrong||0));s.mcqRemaining=s.mcqDone?0:(s.wrong?Math.max(1,3-(s.box||0)):0);}
+for(const s of Object.values(stats))if(!s.mcqDone&&(s.wrong||s.guessed)&&s.mcqRemaining>2)s.mcqRemaining=2;
 store.set('stats',stats);
 function dueItems(max){const now=Date.now();return deck.rooms.flatMap(r=>r.items).filter(it=>{const s=stats[it.id];return !mastered(it)&&s&&s.seen>0&&(s.due||0)<=now;}).sort((a,b)=>(stats[a.id].due||0)-(stats[b.id].due||0)).slice(0,max||1e9);}
 function reviewRoom(){
@@ -615,7 +616,7 @@ R.start=function(rooms,si){
   clearAnswerSplash();
   rooms=rooms.filter(r=>(r.review||r.idx<SLOTS.length)&&r.items.length);
   if(!rooms.length){alertHome('Pick at least one station with questions.');return;}
-  showScreen('play');$.resizecb();$.reset();
+  R.runSerial=(R.runSerial||0)+1;showScreen('play');$.resizecb();$.reset();
   Object.assign(R,{lastAnswer:null,retryResume:null,active:true,concept:null,clock:0,par:0,timeMax:0,paused:false,lastTick:-1,casings:[],rooms,si:Math.max(0,si||0),phase:'travel',queue:[],cur:null,wave:null,cleared:0,total:0,deaths:0,answered:0,correct:0,streak:0,taken:0,misses:new Map(),dying:0,hover:null});
   R.tier=null;applyArsenal(false);
   const s=SP(R.rooms[R.si].idx);
@@ -664,7 +665,7 @@ function openBriefing(){
   card('brief',r.studyPractice?'Study practice · '+r.items.length+' items':r.review?'Daily review · '+r.items.length+' due':'Station '+(r.idx+1)+' of '+SLOTS.length+' · '+esc(r.locus),
     head+
     '<div class="plan"><div><b>'+fresh.length+'</b><span>to learn</span></div><div><b>'+(done.length-review.length)+'</b><span>mastered, skipped</span></div><div><b>'+review.length+'</b><span>review</span></div><div><b>'+(timerOn?fmt(R.par):'off')+'</b><span>par time</span></div></div>'+
-    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+(r.studyMode==='osce'?'Learn each station in order: read the script, practise the next action, say the candidate words and respond to a simulated cue. Missed responses repeat before you advance. Rehearse the full phase order at the end. Teaching cards pause the clock.':m+'% of this station mastered. MCQs appear once; only missed MCQs return three times at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.')+'</p>'+
+    '<div class="mbar"><i style="width:'+m+'%"></i></div><p class="meta">'+arsenalLine()+'</p><p class="meta">'+(r.studyMode==='osce'?'Learn each station in order: read the script, practise the next action, say the candidate words and respond to a simulated cue. Missed responses repeat before you advance. Rehearse the full phase order at the end. Teaching cards pause the clock.':m+'% of this station mastered. MCQs appear once; only missed MCQs return twice at random. Procedures and lists still need 3 correct runs. Mastered items are permanently retired from gameplay, so the station gets shorter and par gets easier to beat. The clock stops whenever a card is open, so reading never costs you time, and you cannot fail on time.')+'</p>'+
     (mode==='race'?'<p class="meta"><b>Ambulance run.</b> Each question is a gantry of answer lanes. Steer into the right lane with ←/→, the left stick, the mouse or keys 1 to 4. Hold ↑ to boost for more points, or ↓ to brake for more reading time.</p>':mode==='fps'?'<p class="meta"><b>Ward round (first person).</b> The answer panels walk towards you. Aim with the mouse (the screen edges turn you) or ←/→ and the sticks. Fire with click, Space, F or the pad trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won\'t pick an answer.</p>':''),
     mode==='race'?'Start the run':mode==='fps'?'Start the ward round':'Begin assault',()=>{R.phase='fight';nextQuestion();},400);
 }
@@ -754,15 +755,15 @@ R.reconsider=function(guessed){
  R.lastAnswer=null;
  if(R.orbAssault)R.orbs.prepareRetry();
  if(last.stats)stats[it.id]={...last.stats};else delete stats[it.id];
- if(guessed){const s=st(it.id);s.mcqDone=false;s.mcqRemaining=3;s.box=0;s.guessed=(s.guessed||0)+1;}
+ if(guessed){const s=st(it.id);s.mcqDone=false;s.mcqRemaining=2;s.box=0;s.guessed=(s.guessed||0)+1;}
  store.set('stats',stats);R.correct=Math.max(0,R.correct-1);R.answered=Math.max(0,R.answered-1);R.cleared=Math.max(0,R.cleared-1);R.streak=last.streak;$.score=Math.max(0,$.score-last.points);
  if(R.campaign&&R.campaign.undoItem)R.campaign.undoItem(it);
  if(!Q('#cardWrap').hidden)closeCard(true);
  clearAnswerSplash();$.mouse.down=0;$.bullets.length=0;$.aimLock=null;applyArsenal(false);
  if(guessed){
-  const before=R.queue.length;R.queue=R.queue.filter(q=>q.id!==it.id);for(let n=0;n<3;n++)insertMcqRepeat(it);R.total+=R.queue.length-before;
+  const before=R.queue.length;R.queue=R.queue.filter(q=>q.id!==it.id);for(let n=0;n<2;n++)insertMcqRepeat(it);R.total+=R.queue.length-before;
   if(wasCurrent||R.phase==='reviewEnd'){R.phase='fight';nextQuestion();}
-  R.toast('Marked as guessed · three random repeats scheduled.',true);
+  R.toast('Marked as guessed · two random repeats scheduled.',true);
  }else{
   if(!wasCurrent&&R.phase==='fight'){R.retryResume={it:current,found:(current.found||[]).slice()};R.queue.unshift(current);}
   R.cur=it;it.found=[];R.phase='fight';setupWave();
@@ -836,21 +837,21 @@ R.deathCard=function(){
     body+='<div class="ans good"><span class="lbl">'+(it.type==='l'?'The full procedure, in order':'The full list')+'</span>'+(it.type==='l'?'<ol>':'<ul>')+it.seq.map(x=>'<li>'+esc(x)+'</li>').join('')+(it.type==='l'?'</ol>':'</ul>')+'</div>';
     if(it.note.length)body+='<div class="note">'+noteHTML(it.note)+'</div>';
   }
-  body+='<p class="meta">'+(it.type==='q'?'This missed question returns three times for practice. In an OSCE session, you repeat it before advancing to the next step.':dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
+  body+='<p class="meta">'+(it.type==='q'?'This missed question returns twice for practice. In an OSCE session, you repeat it before advancing to the next step.':dm==='restart'?'This station restarts from the beginning.':dm==='drill'?'Drill mode: this question comes straight back until you get it right, then once more 2 to 3 questions later.':'This one goes back into the station queue. You will see it again.')+'</p>';
   card('death',picked?(R.modeName()==='race'?'Wrong lane':'Killed'):'Overrun',body,'Respawn',respawn,2500);
 };
 function respawn(){
   const it=R.cur,dm=R.campaignRun?'drill':deathMode;it.found=[];
   if(it.type==='q'){
     const before=R.queue.length;R.queue=R.queue.filter(q=>q.id!==it.id);
-    for(let n=0;n<3;n++)insertMcqRepeat(it);
+    for(let n=0;n<2;n++)insertMcqRepeat(it);
     R.total+=R.queue.length-before;
   }else if(dm==='restart'){R.queue=mixQueue(R.rooms[R.si].items.filter(i=>!mastered(i)));R.total=R.queue.length;R.cleared=0;}
   else if(dm==='drill'){it.drillMiss=true;R.queue.unshift(it);}
   else{const pos=R.queue.length?1+Math.floor(Math.random()*R.queue.length):0;R.queue.splice(pos,0,it);}
   $.hero.life=1;$.enemies.length=0;$.carriers.length=0;$.bullets.length=0;
   R.phase='fight';nextQuestion();
-  if(it.type==='q')setTimeout(()=>R.toast('Three repeats mixed into the remaining questions.',true),400);
+  if(it.type==='q')setTimeout(()=>R.toast('Two repeats mixed into the remaining questions.',true),400);
   else if(dm==='drill')setTimeout(()=>R.toast('Same question again. Get it right to move on.',true),400);
   else if(dm==='shuffle')setTimeout(()=>R.toast('Missed questions come back later. The station falls only when every one is answered correctly.',true),400);
 }
@@ -859,11 +860,11 @@ function swarmDown(){
   R.phase='swarmdead';R.deaths++;R.streak=0;$.rumble.level=25;$.audio.play('death');synth('killed');
   $.carriers.forEach(o=>{if(o.alive)o.explode(0,false);});
   $.explosions.push(new $.Explosion({x:$.hero.x,y:$.hero.y,radius:60,hue:0,saturation:0}));
-  setTimeout(()=>card('death','Overrun by the swarm','<p>Your health ran out. The swarm doesn\'t test knowledge. It just keeps the pressure on, so keep moving and pick up health packs.</p><p class="meta">You respawn at full health. The current question restarts.</p>','Respawn',()=>{
+  const runSerial=R.runSerial;setTimeout(()=>{if(!R.active||runSerial!==R.runSerial)return;card('death','Overrun by the swarm','<p>Your health ran out. The swarm doesn\'t test knowledge. It just keeps the pressure on, so keep moving and pick up health packs.</p><p class="meta">You respawn at full health. The current question restarts.</p>','Respawn',()=>{
     $.hero.life=1;$.enemies.length=0;$.bullets.length=0;
     if(R.cur&&R.cur.type!=='q')R.cur.found=[];
     if(R.cur){R.phase='fight';setupWave();}else{R.phase='travel';objective();}
-  },900),1000);
+  },900);},1000);
 }
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
@@ -905,10 +906,10 @@ R.pause=function(){
   if(R.paused&&Q('#card').classList.contains('pause')){closeCard();return;}
   const previous=Q('#cardWrap').hidden?null:{nodes:[...Q('#cardInner').childNodes],kind:Q('#card').className,button:Q('#cardBtn').textContent,cb:cardCb,remaining:Math.max(0,cardReadyAt-performance.now())};
   const r=R.rooms[R.si];R.paused=true;
-  card('pause','Paused','<p>'+esc(r.topic)+'. Your learning progress is saved.</p><p class="meta">Esc or controller Start resumes. Select confirms the highlighted menu choice.</p><div class="row"><button class="btn ghost" id="cHome">Main menu</button><button class="btn" id="cEnd">End run and see debrief</button></div>','Resume',()=>{
+  card('pause','Paused','<p>'+esc(r.topic)+'. Your learning progress is saved.</p><p class="meta">Esc or controller Start resumes. Select confirms the highlighted menu choice.</p><div class="row"><button class="btn primary" id="cNextSet">Next set</button><button class="btn ghost" id="cHome">Main menu</button><button class="btn" id="cEnd">End run and see debrief</button></div>','Resume',()=>{
     if(previous){Q('#card').className=previous.kind;Q('#cardInner').replaceChildren(...previous.nodes);Q('#cardBtn').textContent=previous.button;cardCb=previous.cb;cardReadyAt=performance.now()+previous.remaining;Q('#cardWrap').hidden=false;$.setState('freeze');const ready=()=>{if(Q('#cardWrap').hidden)return;Q('#cardBtn').disabled=performance.now()<cardReadyAt;if(Q('#cardBtn').disabled)requestAnimationFrame(ready);};ready();}
   },0);
-  Q('#cEnd').onclick=()=>{closeCard(true);debrief();};Q('#cHome').onclick=()=>quitToHome();
+  Q('#cNextSet').onclick=()=>R.nextSet();Q('#cEnd').onclick=()=>{closeCard(true);debrief();};Q('#cHome').onclick=()=>quitToHome();
 };
 function quitToHome(){Q('#cardWrap').hidden=true;cardCb=null;R.paused=false;R.touchFire=R.touchBoost=R.touchBrake=false;clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 

@@ -45,7 +45,7 @@ function timeline(){const out=[];chapters().forEach(ch=>{
  if(ch.index)out.push({id:'transfer::'+ch.room.topic,kind:'transfer',chapter:ch.index,ch,title:'Dispatch to '+ch.room.locus});
  ch.concepts.forEach(c=>out.push({id:'concept::'+ch.room.topic+'::'+c.title,kind:'concept',chapter:ch.index,ch,concept:c,title:c.title.replace(/^OSCE: /,'')}));
  });return out;}
-function next(){let changed=false;for(const m of timeline()){if(complete.has(m.id))continue;const retired=m.kind==='concept'?m.concept.items.every(R.isMastered):weakTransfer(m).length===0;if(retired){complete.add(m.id);changed=true;continue;}if(changed)persist();return m;}if(changed)persist();return null;}
+function next(){let changed=false;const all=timeline(),cursor=all.findIndex(m=>m.id===save.nextMission),ordered=cursor>0?all.slice(cursor).concat(all.slice(0,cursor)):all;for(const m of ordered){if(complete.has(m.id))continue;const retired=m.kind==='concept'?m.concept.items.every(R.isMastered):weakTransfer(m).length===0;if(retired){complete.add(m.id);changed=true;continue;}if(changed)persist();return m;}if(changed)persist();return null;}
 function clearedChapters(){return chapters().filter(ch=>ch.concepts.length&&ch.concepts.every(c=>complete.has('concept::'+ch.room.topic+'::'+c.title))).length;}
 function frameTier(){const n=clearedChapters();let tier=0;R.frames.forEach((f,i)=>{if(n>=f.at||save.visualXP>=FRAME_HITS[i])tier=i;});return tier;}
 function frameLook(){const tier=frameTier(),f={...R.frames[tier]};if(tier===4)f.core=['#ffe392','#72e5ff','#ff9875','#bca2ff','#76ffd0'][Math.floor(Math.max(0,save.visualXP-60)/10)%5];return f;}
@@ -63,6 +63,13 @@ function launchMission(m){
  const room=m.kind==='transfer'?{...m.ch.room,mode:'',review:true,missionConcept:null,concepts:[],items:weakTransfer(m),locus:m.ch.room.locus,topic:'Transfer to '+m.ch.room.topic,note:['Spaceship review: rehearse material from the chapter you just completed.'] }:{...m.ch.room,missionConcept:m.concept};
  R.start([room],0,{campaign:true});R.routeTheme=routeFor(m.chapter);
  const p=SLOTS[room.idx];$.hero.x=p.x*2;$.hero.y=p.y*2;R.beginCombat();updateRibbon();
+}
+function advanceSet(){
+ const all=timeline(),index=all.findIndex(m=>m.id===active?.id);
+ for(let offset=1;offset<=all.length;offset++){const m=all[(Math.max(0,index)+offset)%all.length];if(m.id===active?.id||complete.has(m.id))continue;
+ const pending=m.kind==='concept'?m.concept.items.some(i=>!R.isMastered(i)):weakTransfer(m).length>0;if(!pending)continue;
+ save.nextMission=m.id;persist();if(R.flight)R.flight.completeSet();R.toHome();topicRun=false;launchMission(m);R.toast('Next set · unfinished questions saved for later practice',true);return true;
+ }R.toast('No other unfinished campaign sets available.',true);return false;
 }
 function showBriefing(){if(!active||!R.active)return;const m=active,notes=m.concept?m.concept.note:[];
  const body='<p class="cinemaEyebrow">CHAPTER '+String(m.chapter+1).padStart(2,'0')+'</p><h2 class="cinemaTitle">'+esc(m.title)+'</h2><p class="cinemaStory">'+esc(m.ch.story[1])+'</p><div class="missionDossier">'+notes.map(n=>'<p>'+esc(n)+'</p>').join('')+'</div>';
@@ -121,7 +128,7 @@ function inspectSector(i){selectedSector=i;const r=R.deckRooms()[i],st=topicProg
  Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>{b.classList.toggle('selected',+b.dataset.sector===i);b.setAttribute('aria-pressed',String(+b.dataset.sector===i));});selectMission(sectorMission(i));
 }
 function deploySelected(){if(!selectedMission)return;topicRun=true;launchMission(selectedMission);}
-R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:launch,deploy:launch,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,undoItem,missionItems,timeline,next,clearedChapters,updateRibbon,topicProgress,renderWarMap,inspectSector};
+R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:launch,deploy:launch,advanceSet,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,undoItem,missionItems,timeline,next,clearedChapters,updateRibbon,topicProgress,renderWarMap,inspectSector};
 Q('#campaignLaunch').onclick=launch;Q('#warDeploy').onclick=deploySelected;Q('#warBack').onclick=()=>R.showScreen('home');
 // Animated hangar, drawn at a bounded resolution and paused when it is off screen.
 let last=0;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const canvas=Q('#hangarArt'),c=canvas.getContext('2d');
