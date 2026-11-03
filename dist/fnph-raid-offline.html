@@ -1689,10 +1689,11 @@ $.Hero.prototype.update = function() {
 		/*==============================================================================
 		Fire Weapon
 		==============================================================================*/
+		const fireAllowed = !$.raid?.canFire || $.raid.canFire();
 		if( this.weapon.fireRateTick < this.weapon.fireRate ){
 			this.weapon.fireRateTick += $.dt;
 		} else {
-			if( $.autofire || $.mouse.down || $.pad.fire || ($.touch&&$.touch.fire) || $.keyFire ){
+			if( fireAllowed && ($.autofire || $.mouse.down || $.pad.fire || ($.touch&&$.touch.fire) || $.keyFire) ){
 				$.audio.play( 'shoot' );
 				if( $.powerupTimers[ 2 ] > 0 || $.powerupTimers[ 3 ] > 0 || $.powerupTimers[ 4 ] > 0) {
 					$.audio.play( 'shootAlt' );
@@ -2312,6 +2313,7 @@ $.Bullet = function( opt ) {
 	for( var k in opt ) {
 		this[k] = opt[k];
 	}
+	this.shotEpoch = $.raid && $.raid.shotEpoch;
 	this.enemiesHit = [];
 	this.inView = 0;
 	$.particleEmitters.push( new $.ParticleEmitter( {
@@ -2333,6 +2335,10 @@ $.Bullet = function( opt ) {
 Update
 ==============================================================================*/
 $.Bullet.prototype.update = function( i ) {
+    if ($.raid && this.shotEpoch !== $.raid.shotEpoch) {
+        if ($.bullets[i] === this) $.bullets.splice(i, 1);
+        return;
+    }
 	/*==============================================================================
 	Apply Forces
 	==============================================================================*/
@@ -3714,6 +3720,19 @@ $.Carrier.prototype.explode=function(hue,big){
 
 /* ================= Raid controller ================= */
 const R=$.raid={active:false,phase:'idle'};
+// A confirmation press and shots from a previous wave must never answer a new one.
+R.resetAnswerFire=function(clear=true){
+  R.shotEpoch=(R.shotEpoch||0)+1;
+  R.fireNeedsRelease=true;R.fireNeedsPress=true;
+  if(clear&&$.bullets)$.bullets.length=0;
+};
+R.canFire=function(){
+  const held=!!($.mouse.down||$.pad.rawFire||$.pad.fire||$.touch?.fire||$.keyFire);
+  if(R.fireNeedsRelease){if(!held)R.fireNeedsRelease=false;return false;}
+  if(R.fireNeedsPress){if(!held)return false;R.fireNeedsPress=false;}
+  return !R.active||(!R.paused&&R.phase!=='resolve'&&R.phase!=='dead');
+};
+
 // Layered rifle reports and a continuous environmental bed use the same user audio controls.
 let roomBed=null,roomLive=false;
 R.ensureCombatAudio=function(){const ctx=ac();if(!ctx)return;if(!roomBed){
@@ -3855,6 +3874,7 @@ function nextQuestion(){
 }
 R.optionLabel=text=>R.cur&&R.cur.clues&&R.cur.clues[text]||text;
 function setupWave(){
+  R.resetAnswerFire();
   if(R.orbAssault&&R.orbs){R.orbs.stage(R.cur);return;}
   clearAnswerSplash();
   const it=R.cur;let opts,correct,chip;
@@ -3887,6 +3907,8 @@ function setupWave(){
   synth('wave');hud();
 }
 R.carrierDown=function(c){
+  if(R.phase!=='fight')return;
+  R.resetAnswerFire(false);
   const it=R.cur,ok=R.wave.correct.includes(c.text);R.lastAnswer=ok&&it.type==='q'?{it,stats:stats[it.id]?{...stats[it.id]}:null,streak:R.streak,points:0,si:R.si}:null;R.answered++;R.wasMastered=mastered(it);
   if(ok){
     R.correct++;R.streak++;const mult=Math.min(5,1+Math.floor(R.streak/3)),pts=Math.round((150+250*(1-R.wave.t))*mult);$.score+=pts;if(R.lastAnswer)R.lastAnswer.points=pts;
@@ -4074,6 +4096,7 @@ function quitToHome(){Q('#cardWrap').hidden=true;cardCb=null;R.paused=false;R.to
 /* ---------- cards ---------- */
 let cardCb=null,cardReadyAt=0;
 function card(kind,title,body,btn,cb,delay){
+  R.resetAnswerFire();
   $.setState('freeze');$.mouse.down=0;
   const el=Q('#card');el.className='card '+kind;
   Q('#cardInner').innerHTML='<p class="kicker">'+esc(title)+'</p>'+body;
@@ -4084,6 +4107,7 @@ function card(kind,title,body,btn,cb,delay){
 }
 function closeCard(skipCb){
   if(!skipCb&&performance.now()<cardReadyAt)return;
+  R.resetAnswerFire();
   Q('#cardWrap').hidden=true;const cb=cardCb;cardCb=null;R.paused=false;
   if(R.active&&R.phase!=='won')$.setState('play');
   if(!skipCb&&cb)cb();
@@ -4315,7 +4339,7 @@ function padNav(scr,dir){
 }
 R.pollPad=function(){
   const p=readPad();
-  if(!p){if(padId){padId='';padStatus();}$.pad.mx=$.pad.my=0;$.pad.fire=0;padPrev=[];if(wiz)renderWiz(null);return;}
+  if(!p){if(padId){padId='';padStatus();}$.pad.mx=$.pad.my=0;$.pad.fire=0;$.pad.rawFire=false;padPrev=[];if(wiz)renderWiz(null);return;}
   if(p.id!==padId){padId=p.id;padStatus();}
   // calibrate resting values so worn or odd generic sticks don't drift
   if(!padBase||padBase.id!==p.id){padBase={id:p.id,v:p.axes.map(v=>v||0),n:0};}
@@ -4327,6 +4351,8 @@ R.pollPad=function(){
   const PROFILE=/0810/.test(p.id)&&/0001/.test(p.id)?{id:p.id,drive:{x:0,y:1,sx:1,sy:1},aim:{x:5,y:2,sx:1,sy:1},fire:[0,1,2,3,4,5,6,7],pause:[9],select:[8],hat:9}:null;
   const M=padMap&&padMap.id===p.id?padMap:PROFILE;
   const fireBtns=(M?M.fire:[0,1,2,3,6,7]).filter(i=>i!==8&&i!==9),pauseBtns=[...new Set([9,...(M?M.pause||[]:[])])].filter(i=>i!==8);
+  $.pad.rawFire=fireBtns.some(i=>cur[i])||!!(M&&M.fireAxis!=null&&Math.abs(dev(M.fireAxis))>.5);
+  $.pad.fire=0;
   const anyFireEdge=fireBtns.some(edge)||[0,1,2,3].some(edge),anyPauseEdge=pauseBtns.some(edge),selectEdge=edge(8);
   // overlays and menus: any fire or pause button presses the main button
   if(R.active&&anyPauseEdge){R.pause();padPrev=cur;return;}

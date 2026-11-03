@@ -5,6 +5,7 @@ $.Bullet = function( opt ) {
 	for( var k in opt ) {
 		this[k] = opt[k];
 	}
+	this.shotEpoch = $.raid && $.raid.shotEpoch;
 	this.enemiesHit = [];
 	this.inView = 0;
 	$.particleEmitters.push( new $.ParticleEmitter( {
@@ -26,6 +27,10 @@ $.Bullet = function( opt ) {
 Update
 ==============================================================================*/
 $.Bullet.prototype.update = function( i ) {
+    if ($.raid && this.shotEpoch !== $.raid.shotEpoch) {
+        if ($.bullets[i] === this) $.bullets.splice(i, 1);
+        return;
+    }
 	/*==============================================================================
 	Apply Forces
 	==============================================================================*/

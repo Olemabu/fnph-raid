@@ -143,10 +143,11 @@ $.Hero.prototype.update = function() {
 		/*==============================================================================
 		Fire Weapon
 		==============================================================================*/
+		const fireAllowed = !$.raid?.canFire || $.raid.canFire();
 		if( this.weapon.fireRateTick < this.weapon.fireRate ){
 			this.weapon.fireRateTick += $.dt;
 		} else {
-			if( $.autofire || $.mouse.down || $.pad.fire || ($.touch&&$.touch.fire) || $.keyFire ){
+			if( fireAllowed && ($.autofire || $.mouse.down || $.pad.fire || ($.touch&&$.touch.fire) || $.keyFire) ){
 				$.audio.play( 'shoot' );
 				if( $.powerupTimers[ 2 ] > 0 || $.powerupTimers[ 3 ] > 0 || $.powerupTimers[ 4 ] > 0) {
 					$.audio.play( 'shootAlt' );
