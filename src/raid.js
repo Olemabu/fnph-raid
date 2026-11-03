@@ -268,147 +268,144 @@ $.Carrier.prototype.hit=function(dmg){
   if(!this.warned){this.warned=1;R.toast('Hitting '+this.num+' · '+R.optionLabel(this.text));}
   if(this.life<=0)R.carrierDown(this);
 };
-$.Carrier.prototype.render=function(){
-  if(!this.alive)return;
-  const ctx=$.ctxmg,aim=R.aimTarget()===this,t=this.t,hue=aim?190:322;
-  const hCol=aim?'98,230,255':'255,79,168';
-
-  // 1. Drop shadow on tarmac
-  ctx.save();
-  ctx.translate(this.x+5,this.y+7);
-  ctx.fillStyle='rgba(0,0,0,.5)';
-  ctx.beginPath();ctx.ellipse(0,0,this.radius+6,this.radius*.65,0,0,$.twopi);ctx.fill();
-  ctx.restore();
-
-  if(R.flight&&R.flight.enabled()){R.flight.drawEnemy(ctx,this,aim);}else{
-  // 2. VTOL Hover Thruster Pods (4 corners)
-  const pods=[[-20,-16],[20,-16],[-20,16],[20,16]];
-  for(let k=0;k<pods.length;k++){
-    const px=this.x+pods[k][0],py=this.y+pods[k][1];
-    ctx.fillStyle='#1e2632';ctx.fillRect(px-3.5,py-4,7,8);
-    ctx.strokeStyle='rgba('+hCol+',.6)';ctx.lineWidth=1;
-    ctx.strokeRect(px-3.5,py-4,7,8);
-
-    // Flickering hover exhaust plume
-    const pFlame=6+Math.sin(t*12+k*1.6)*3.5;
-    const pGrad=ctx.createLinearGradient(px,py+4,px,py+4+pFlame);
-    pGrad.addColorStop(0,'#ffffff');
-    pGrad.addColorStop(0.3,'rgba('+hCol+',.8)');
-    pGrad.addColorStop(1,'rgba('+hCol+',0)');
-    ctx.fillStyle=pGrad;
-    ctx.beginPath();
-    ctx.moveTo(px-2.5,py+4);ctx.lineTo(px,py+4+pFlame);ctx.lineTo(px+2.5,py+4);
-    ctx.closePath();ctx.fill();
-  }
-
-  // 3. Heavy Armored Gunship Hull (Octagonal)
-  ctx.save();
-  ctx.translate(this.x,this.y);
-  const r0=this.radius;
-
-  ctx.beginPath();
-  for(let a=0;a<8;a++){
-    const ang=a*$.twopi/8+$.pi/8;
-    const ax=Math.cos(ang)*r0,ay=Math.sin(ang)*(r0*.88);
-    if(a===0)ctx.moveTo(ax,ay);else ctx.lineTo(ax,ay);
-  }
-  ctx.closePath();
-
-  // Dark gunmetal chassis gradient
-  const hullG=ctx.createLinearGradient(-r0,-r0,r0,r0);
-  hullG.addColorStop(0,'#161e28');
-  hullG.addColorStop(0.5,'#232f3e');
-  hullG.addColorStop(1,'#121820');
-  ctx.fillStyle=hullG;ctx.fill();
-
-  // Outer glowing hull stroke
-  ctx.strokeStyle='hsla('+hue+',100%,65%,1)';
-  ctx.lineWidth=aim?2.5:1.5;ctx.stroke();
-
-  // Inner reactor core ring
-  const rotMod=$.enemyOffsetMod/8;
-  ctx.strokeStyle='hsla('+hue+',100%,75%,.85)';
-  ctx.lineWidth=3;
-  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod,rotMod+1.4);ctx.stroke();
-  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod+$.pi,rotMod+$.pi+1.4);ctx.stroke();
-
-  // Target lock brackets when aimed/locked
-  if(aim){
-    ctx.strokeStyle='rgba(98,230,255,.9)';ctx.lineWidth=2;
-    const brR=r0+8,bRot=t*3;
-    for(let b=0;b<4;b++){
-      ctx.save();ctx.rotate(b*$.pi/2+bRot);
-      ctx.beginPath();
-      ctx.moveTo(brR-5,-brR);ctx.lineTo(brR,-brR);ctx.lineTo(brR,-brR+5);
-      ctx.stroke();ctx.restore();
-    }
-  }
-
-  // Segmented Energy Health Pips
-  for(let k=0;k<this.lifeMax;k++){
-    ctx.fillStyle=k<this.life?'hsla('+hue+',100%,70%,1)':'rgba(255,255,255,.15)';
-    ctx.fillRect(-13+k*10,r0+7,8,3);
-    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=0.8;
-    ctx.strokeRect(-13+k*10,r0+7,8,3);
-  }
-
-  // Answer Number Callout
-  ctx.fillStyle='#ffffff';
-  ctx.font='700 20px "Chakra Petch", sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(String(this.num),0,1);
-
-  // Hit damage flash
-  if(this.hitFlag>0){
-    this.hitFlag-=$.dt;
-    ctx.fillStyle='hsla('+hue+',100%,80%,'+this.hitFlag/10+')';
-    ctx.beginPath();ctx.arc(0,0,r0,0,$.twopi);ctx.fill();
-  }
-  ctx.restore();
-
-  }
-  // 4. Holographic Answer Plate (Positioned above gunship)
-  const L=this.label;
-  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')?145:8);
-  let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
-  lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
-  if(R.flight&&R.flight.enabled()&&this.flightAnchor){lx=Math.max(minX,Math.min(maxX,this.flightAnchor.x-L.w/2));ly=Math.max(minY,Math.min(maxY,this.flightAnchor.y-L.h-45));}
-  if(Q('#play').classList.contains('touchPlaying')){
-    const landscape=innerHeight<500,maxH=Math.max(...$.carriers.map(c=>c.label.h)),slot=this.num-1;
-    lx=-$.screen.x+10+(landscape?(slot%2)*(($.cw-180)/2):($.cw-L.w-20)/2);
-    ly=-$.screen.y+R.topSafe()+Math.floor(slot/(landscape?2:1))*(maxH+7);
-  }
-
-
-  this.plate={x:lx,y:ly,w:L.w,h:L.h};
-  // Cyber plate canvas
-  ctx.drawImage(L.canvas,lx,ly,L.w,L.h);
-
-  // Plate border with glowing neon edge
-  ctx.strokeStyle=aim?'hsla(190,100%,65%,1)':'hsla(322,100%,62%,.85)';
-  ctx.lineWidth=aim?2.5:1.5;
-  ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(lx+1,ly+1,L.w-2,L.h-2,8);else ctx.rect(lx+1,ly+1,L.w-2,L.h-2);
-  ctx.stroke();
-
-  // Option Number Badge on Plate
-  ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';
-  ctx.beginPath();ctx.arc(lx+20,ly+L.h/2,13,0,$.twopi);ctx.fill();
-  ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(String(this.num),lx+20,ly+L.h/2+1);
-  ctx.textAlign='left';ctx.textBaseline='alphabetic';
-
-  // Energy Tether connecting plate to gunship
-  ctx.save();
-  ctx.strokeStyle='hsla('+hue+',100%,65%,'+(aim?'.6':'.3')+')';
-  ctx.lineWidth=aim?1.5:1;
-  ctx.setLineDash([4,4]);
-  ctx.beginPath();
-  ctx.moveTo(this.x,this.y-this.radius);
-  ctx.lineTo(Math.max(lx+20,Math.min(lx+L.w-20,this.x)),ly+L.h);
-  ctx.stroke();
-  ctx.restore();
-};
+$.Carrier.prototype.render=function(){
+  if(!this.alive)return;
+  const ctx=$.ctxmg,aim=R.aimTarget()===this,t=this.t,hue=aim?190:322;
+  const hCol=aim?'98,230,255':'255,79,168';
+
+  // 1. Drop shadow on tarmac
+  ctx.save();
+  ctx.translate(this.x+5,this.y+7);
+  ctx.fillStyle='rgba(0,0,0,.5)';
+  ctx.beginPath();ctx.ellipse(0,0,this.radius+6,this.radius*.65,0,0,$.twopi);ctx.fill();
+  ctx.restore();
+
+  // 2. VTOL Hover Thruster Pods (4 corners)
+  const pods=[[-20,-16],[20,-16],[-20,16],[20,16]];
+  for(let k=0;k<pods.length;k++){
+    const px=this.x+pods[k][0],py=this.y+pods[k][1];
+    ctx.fillStyle='#1e2632';ctx.fillRect(px-3.5,py-4,7,8);
+    ctx.strokeStyle='rgba('+hCol+',.6)';ctx.lineWidth=1;
+    ctx.strokeRect(px-3.5,py-4,7,8);
+
+    // Flickering hover exhaust plume
+    const pFlame=6+Math.sin(t*12+k*1.6)*3.5;
+    const pGrad=ctx.createLinearGradient(px,py+4,px,py+4+pFlame);
+    pGrad.addColorStop(0,'#ffffff');
+    pGrad.addColorStop(0.3,'rgba('+hCol+',.8)');
+    pGrad.addColorStop(1,'rgba('+hCol+',0)');
+    ctx.fillStyle=pGrad;
+    ctx.beginPath();
+    ctx.moveTo(px-2.5,py+4);ctx.lineTo(px,py+4+pFlame);ctx.lineTo(px+2.5,py+4);
+    ctx.closePath();ctx.fill();
+  }
+
+  // 3. Heavy Armored Gunship Hull (Octagonal)
+  ctx.save();
+  ctx.translate(this.x,this.y);
+  const r0=this.radius;
+
+  ctx.beginPath();
+  for(let a=0;a<8;a++){
+    const ang=a*$.twopi/8+$.pi/8;
+    const ax=Math.cos(ang)*r0,ay=Math.sin(ang)*(r0*.88);
+    if(a===0)ctx.moveTo(ax,ay);else ctx.lineTo(ax,ay);
+  }
+  ctx.closePath();
+
+  // Dark gunmetal chassis gradient
+  const hullG=ctx.createLinearGradient(-r0,-r0,r0,r0);
+  hullG.addColorStop(0,'#161e28');
+  hullG.addColorStop(0.5,'#232f3e');
+  hullG.addColorStop(1,'#121820');
+  ctx.fillStyle=hullG;ctx.fill();
+
+  // Outer glowing hull stroke
+  ctx.strokeStyle='hsla('+hue+',100%,65%,1)';
+  ctx.lineWidth=aim?2.5:1.5;ctx.stroke();
+
+  // Inner reactor core ring
+  const rotMod=$.enemyOffsetMod/8;
+  ctx.strokeStyle='hsla('+hue+',100%,75%,.85)';
+  ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod,rotMod+1.4);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,r0-8,rotMod+$.pi,rotMod+$.pi+1.4);ctx.stroke();
+
+  // Target lock brackets when aimed/locked
+  if(aim){
+    ctx.strokeStyle='rgba(98,230,255,.9)';ctx.lineWidth=2;
+    const brR=r0+8,bRot=t*3;
+    for(let b=0;b<4;b++){
+      ctx.save();ctx.rotate(b*$.pi/2+bRot);
+      ctx.beginPath();
+      ctx.moveTo(brR-5,-brR);ctx.lineTo(brR,-brR);ctx.lineTo(brR,-brR+5);
+      ctx.stroke();ctx.restore();
+    }
+  }
+
+  // Segmented Energy Health Pips
+  for(let k=0;k<this.lifeMax;k++){
+    ctx.fillStyle=k<this.life?'hsla('+hue+',100%,70%,1)':'rgba(255,255,255,.15)';
+    ctx.fillRect(-13+k*10,r0+7,8,3);
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=0.8;
+    ctx.strokeRect(-13+k*10,r0+7,8,3);
+  }
+
+  // Answer Number Callout
+  ctx.fillStyle='#ffffff';
+  ctx.font='700 20px "Chakra Petch", sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(String(this.num),0,1);
+
+  // Hit damage flash
+  if(this.hitFlag>0){
+    this.hitFlag-=$.dt;
+    ctx.fillStyle='hsla('+hue+',100%,80%,'+this.hitFlag/10+')';
+    ctx.beginPath();ctx.arc(0,0,r0,0,$.twopi);ctx.fill();
+  }
+  ctx.restore();
+
+  // 4. Holographic Answer Plate (Positioned above gunship)
+  const L=this.label;
+  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')?145:8);
+  let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
+  lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
+  if(Q('#play').classList.contains('touchPlaying')){
+    const landscape=innerHeight<500,maxH=Math.max(...$.carriers.map(c=>c.label.h)),slot=this.num-1;
+    lx=-$.screen.x+10+(landscape?(slot%2)*(($.cw-180)/2):($.cw-L.w-20)/2);
+    ly=-$.screen.y+R.topSafe()+Math.floor(slot/(landscape?2:1))*(maxH+7);
+  }
+
+
+  this.plate={x:lx,y:ly,w:L.w,h:L.h};
+  // Cyber plate canvas
+  ctx.drawImage(L.canvas,lx,ly,L.w,L.h);
+
+  // Plate border with glowing neon edge
+  ctx.strokeStyle=aim?'hsla(190,100%,65%,1)':'hsla(322,100%,62%,.85)';
+  ctx.lineWidth=aim?2.5:1.5;
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(lx+1,ly+1,L.w-2,L.h-2,8);else ctx.rect(lx+1,ly+1,L.w-2,L.h-2);
+  ctx.stroke();
+
+  // Option Number Badge on Plate
+  ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';
+  ctx.beginPath();ctx.arc(lx+20,ly+L.h/2,13,0,$.twopi);ctx.fill();
+  ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(String(this.num),lx+20,ly+L.h/2+1);
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+
+  // Energy Tether connecting plate to gunship
+  ctx.save();
+  ctx.strokeStyle='hsla('+hue+',100%,65%,'+(aim?'.6':'.3')+')';
+  ctx.lineWidth=aim?1.5:1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(this.x,this.y-this.radius);
+  ctx.lineTo(Math.max(lx+20,Math.min(lx+L.w-20,this.x)),ly+L.h);
+  ctx.stroke();
+  ctx.restore();
+};
 $.Carrier.prototype.explode=function(hue,big){
   this.alive=false;
   R.addShockwave(this.x,this.y,hue,big?160:95);

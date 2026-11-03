@@ -1,4 +1,4 @@
-const VERSION='e57c5d024e79730b',CACHE='fnphraid-offline-'+VERSION;
+const VERSION='0229ee6975a6a3c2',CACHE='fnphraid-offline-'+VERSION;
 const ROOT=new URL('./',self.location),GAME=new URL('fnph-raid.html',ROOT).href;
 const FILES=['fnph-raid.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{

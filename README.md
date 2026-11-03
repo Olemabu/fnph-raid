@@ -194,3 +194,5 @@ The main campaign now launches with Continue flight, without a hospital map trip
 Each fully completed question set or campaign mission advances one stretch. Three completed sets enter the next landscape: coastline, farmland, city, mountains, then a new circuit. A set means the current mission or selected free-run length, not each repeat. Failed answers and abandoned missions do not advance it. Checkpoints persist under fnphraid.flight.v1 and are included in normal progress backups. Teaching cards freeze flight. Orb Assault remains a separate optional mode.
 
 Run `node --test tests/flight.cjs tests/osce-engine.cjs`, then `python build.py`. Real physical controller and phone feel still benefit from user testing.
+
+The original rendered player ship, enemy artwork and answer gunship/option visuals are restored. Flight scenery and manual handling remain; the flight module does not replace vehicle renderers.

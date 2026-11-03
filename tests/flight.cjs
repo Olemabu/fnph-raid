@@ -3,7 +3,7 @@ function flight(initial){
  const saved={},R={active:true,orbAssault:false,modeName:()=>'',start(){},update(){},beginCombat(){},renderMap(){},renderWorld(){},renderLighting(){},topSafe:()=>180,campaign:{render(){}},toast(){}};
  const $={raid:R,Hero:function(){},Enemy:function(){},spawnEnemy(){return{};},updateScreen(){},renderMinimap(){},mouse:{moved:1},pad:{aim:1},touch:{aim:1},screen:{x:0,y:0},cw:1200,ch:800,dt:1,tick:1,rumble:{},mousescreen(){},carriers:[]};$.Enemy.prototype.update=function(){};$.Enemy.prototype.render=function(){};$.Hero.prototype.update=function(){};$.Hero.prototype.render=function(){};
  const c={$,Math,Number,document:{createElement:()=>({}),querySelector:s=>s==='#campaignStory'?{}:null},localStorage:{getItem:()=>initial?JSON.stringify(initial):null,setItem:(k,v)=>saved[k]=JSON.parse(v)}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/flight.js'),'utf8'),c);return{R,$,saved};
+ const originalHero=$.Hero.prototype.render,originalEnemy=$.Enemy.prototype.render;vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/flight.js'),'utf8'),c);return{R,$,saved,originalHero,originalEnemy};
 }
 test('flight checkpoints advance only once per completed set, change region after three, survive reload',()=>{
  const {R,saved}=flight();for(let i=1;i<=3;i++){R.beginCombat();R.flight.completeSet();R.flight.completeSet();assert.equal(R.flight.progress().sets,i);}
@@ -32,4 +32,8 @@ test('target selection does not rotate the aircraft; manual right-stick heading 
 
 test('a fresh flight clears stale aim commands without applying automatic steering',()=>{
  const {R,$}=flight();$.hero={};R.start();assert.equal($.mouse.moved,0);assert.equal($.pad.aim,null);assert.equal($.touch.aim,null);assert.equal($.hero.direction,-Math.PI/2);
+});
+
+test('flight preserves the original player and enemy artwork renderers',()=>{
+ const {$,originalHero,originalEnemy}=flight();assert.equal($.Hero.prototype.render,originalHero);assert.equal($.Enemy.prototype.render,originalEnemy);
 });

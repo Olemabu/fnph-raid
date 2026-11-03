@@ -63,30 +63,12 @@ F.moveEnemy=function(e){
  const ox=e.x,oy=e.y;e.x=e.flightAnchor.x+Math.sin(e.t)*18;e.y+=(e.flightAnchor.y+Math.sin(e.t*.65+e.num)*10-e.y)*(1-Math.exp(-dt*.025));e.vx=(e.x-ox)/dt;e.vy=(e.y-oy)/dt;
  // Answer aircraft hold readable formations while terrain supplies forward motion.
 };
-function jet(c,x,y,angle,bank,colour,scale,fire){
- c.save();c.translate(x+9,y+15);c.rotate(angle+Math.PI/2);c.fillStyle='#10202b55';c.beginPath();c.ellipse(0,0,28*scale,38*scale,0,0,Math.PI*2);c.fill();c.restore();
- c.save();c.translate(x,y);c.rotate(angle+Math.PI/2+bank);c.scale(scale*(1-Math.abs(bank)*.4),scale);
- c.fillStyle='#91dfff';c.globalAlpha=.75;c.beginPath();c.moveTo(-5,29);c.lineTo(0,48+Math.sin($.tick)*5);c.lineTo(5,29);c.fill();c.globalAlpha=1;
- c.fillStyle=colour;c.strokeStyle='#e3edf1';c.lineWidth=1.3;c.beginPath();c.moveTo(0,-43);c.lineTo(7,-7);c.lineTo(35,15);c.lineTo(35,23);c.lineTo(7,14);c.lineTo(6,29);c.lineTo(17,36);c.lineTo(0,32);c.lineTo(-17,36);c.lineTo(-6,29);c.lineTo(-7,14);c.lineTo(-35,23);c.lineTo(-35,15);c.lineTo(-7,-7);c.closePath();c.fill();c.stroke();
- c.fillStyle='#132e43';c.beginPath();c.ellipse(0,-15,4,12,0,0,Math.PI*2);c.fill();
- if(fire){c.fillStyle='#fff1ac';for(const x of [-13,13])c.fillRect(x-2,-25,4,16);}c.restore();
-}
-F.drawEnemy=function(c,e,aim){jet(c,e.x,e.y,Math.PI/2,Math.sin(e.t)*.12,e.hitFlag>0?'#fff1d6':'#674b50',.65,false);e.hitFlag=Math.max(0,e.hitFlag-$.dt);
- c.fillStyle=aim?'#85f4ff':'#fff';c.font='bold 17px sans-serif';c.textAlign='center';c.fillText(e.num,e.x,e.y+5);c.textAlign='left';
- c.fillStyle='#7be8e0';c.fillRect(e.x-18,e.y+31,36*e.life/e.lifeMax,3);
-};
-
 // Interceptors sweep in from ahead, cross the flight field and peel off below.
-const spawn=$.spawnEnemy,enemyUpdate=$.Enemy.prototype.update,enemyRender=$.Enemy.prototype.render;
+const spawn=$.spawnEnemy,enemyUpdate=$.Enemy.prototype.update;
 $.spawnEnemy=function(){const e=spawn.apply(this,arguments);if(enabled()){e.x=-$.screen.x+40+Math.random()*Math.max(1,$.cw-80);e.y=-$.screen.y-60;e.flightX=e.x;e.flightT=0;}return e;};
 $.Enemy.prototype.update=function(i){if(!enabled())return enemyUpdate.call(this,i);this.flightX??=this.x;this.flightT=(this.flightT||0)+$.dt*.018;const ox=this.x,oy=this.y;
  this.x=this.flightX+Math.sin(this.flightT+this.index)*45;this.y+=Math.max(1.2,Math.min(3,this.speed||1.6))*$.dt;this.vx=(this.x-ox)/($.dt||1);this.vy=(this.y-oy)/($.dt||1);this.inView=this.y+$.screen.y>-40&&this.y+$.screen.y<$.ch+40;
  if(this.y+$.screen.y>$.ch+80)$.enemies.splice(i,1);
-};
-$.Enemy.prototype.render=function(i){if(!enabled())return enemyRender.call(this,i);if(!this.inView)return;jet($.ctxmg,this.x,this.y,Math.atan2(this.vy,this.vx),Math.sin(this.flightT)*.18,this.hitFlag>0?'#fff1c7':'#705958',clamp(this.radius/38,.3,.65),false);this.hitFlag=Math.max(0,this.hitFlag-$.dt);};
-
-const render=$.Hero.prototype.render;$.Hero.prototype.render=function(){if(!enabled())return render.call(this);if(this.life<=0)return;
- jet($.ctxmg,this.x,this.y,this.direction,this.flightBank||0,'#a4b9c6',1,this.weapon.fireFlag>0);this.weapon.fireFlag=Math.max(0,this.weapon.fireFlag-$.dt);
 };
 const help=document.createElement('p');help.className='meta';help.textContent='Manual flight: arrows / WASD or left joystick steer; right joystick controls heading. Hold FIRE / Space to shoot. Target brackets mark the selected enemy; locking does not steer your aircraft. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
 })();
