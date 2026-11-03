@@ -202,7 +202,7 @@ $.Hero.prototype.update = function() {
 		var ei = $.enemies.length;
 		while( ei-- ) {
 			var enemy = $.enemies[ ei ];
-			if( enemy.inView && $.util.distance( this.x, this.y, enemy.x, enemy.y ) <= this.radius + enemy.radius ) {
+			if( !enemy.raidSwarm && enemy.inView && $.util.distance( this.x, this.y, enemy.x, enemy.y ) <= this.radius + enemy.radius ) {
 				$.particleEmitters.push( new $.ParticleEmitter( {
 					x: this.x,
 					y: this.y,

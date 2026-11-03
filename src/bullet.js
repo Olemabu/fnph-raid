@@ -6,6 +6,7 @@ $.Bullet = function( opt ) {
 		this[k] = opt[k];
 	}
 	this.shotEpoch = $.raid && $.raid.shotEpoch;
+    this.answerFire = !$.raid?.flight?.answerFire || $.raid.flight.answerFire();
 	this.enemiesHit = [];
 	this.inView = 0;
 	$.particleEmitters.push( new $.ParticleEmitter( {
@@ -63,10 +64,10 @@ $.Bullet.prototype.update = function( i ) {
 				enemy.receiveDamage( ei, this.damage );
 				if( this.enemiesHit.length > 3 ) { removed = true; }
 			}
-			if( !this.piercing ) { removed = true; }
+			if( enemy.raidSwarm || !this.piercing ) { removed = true; }
 		}
 	}
-	var ci = $.carriers.length;
+	var ci = this.answerFire ? $.carriers.length : 0;
 	while( ci-- && !removed ) {
 		var carrier = $.carriers[ ci ];
 		// a shot fired at a locked answer flies past the other answers, so you never hit a wrong one by accident

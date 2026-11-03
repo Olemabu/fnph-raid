@@ -1748,7 +1748,7 @@ $.Hero.prototype.update = function() {
 		var ei = $.enemies.length;
 		while( ei-- ) {
 			var enemy = $.enemies[ ei ];
-			if( enemy.inView && $.util.distance( this.x, this.y, enemy.x, enemy.y ) <= this.radius + enemy.radius ) {
+			if( !enemy.raidSwarm && enemy.inView && $.util.distance( this.x, this.y, enemy.x, enemy.y ) <= this.radius + enemy.radius ) {
 				$.particleEmitters.push( new $.ParticleEmitter( {
 					x: this.x,
 					y: this.y,
@@ -2314,6 +2314,7 @@ $.Bullet = function( opt ) {
 		this[k] = opt[k];
 	}
 	this.shotEpoch = $.raid && $.raid.shotEpoch;
+    this.answerFire = !$.raid?.flight?.answerFire || $.raid.flight.answerFire();
 	this.enemiesHit = [];
 	this.inView = 0;
 	$.particleEmitters.push( new $.ParticleEmitter( {
@@ -2371,10 +2372,10 @@ $.Bullet.prototype.update = function( i ) {
 				enemy.receiveDamage( ei, this.damage );
 				if( this.enemiesHit.length > 3 ) { removed = true; }
 			}
-			if( !this.piercing ) { removed = true; }
+			if( enemy.raidSwarm || !this.piercing ) { removed = true; }
 		}
 	}
-	var ci = $.carriers.length;
+	var ci = this.answerFire ? $.carriers.length : 0;
 	while( ci-- && !removed ) {
 		var carrier = $.carriers[ ci ];
 		// a shot fired at a locked answer flies past the other answers, so you never hit a wrong one by accident
@@ -5189,6 +5190,46 @@ const regions=[['Coastline','#467d89','#c6b78a'],['Farmland','#71835b','#b4a975'
 const enabled=()=>R.active&&!R.orbAssault&&!R.modeName();
 function completeSet(){if(!enabled()||runDone)return;runDone=true;sets++;try{localStorage.setItem(KEY,JSON.stringify({sets}));}catch(e){}R.toast('Flight checkpoint '+sets+' saved · '+regions[Math.floor(sets/3)%regions.length][0],true);}
 const F=R.flight={enabled,completeSet,progress:()=>({sets,region:Math.floor(sets/3)%regions.length,stretch:sets%3})};
+// Fight through a corridor before deliberately opening fire on an answer.
+F.combat={wave:null,age:0,next:0,stage:'clear',held:false,cooldown:0};
+const resetFire=R.resetAnswerFire;
+if(resetFire)R.resetAnswerFire=function(){const out=resetFire.apply(this,arguments);Object.assign(F.combat,{wave:null,stage:'clear',held:false});return out;};
+const manualFire=()=>!!($.mouse.down||$.pad.rawFire||$.pad.fire||$.touch?.fire||$.keyFire);
+const canFire=R.canFire;
+if(canFire)R.canFire=function(){const allowed=canFire.apply(this,arguments);if(!enabled())return allowed;
+ const b=F.combat,held=manualFire();
+ if(allowed&&b.stage==='clear'&&held)b.held=true;
+ if(b.stage==='clear'&&b.held&&!held)b.stage='ready';
+ else if(allowed&&b.stage==='ready'&&held){b.stage='answer';R.toast('Answer fire armed — clear the path to your chosen option.',true);}
+ return allowed;
+};
+F.answerFire=()=>!enabled()||F.combat.stage==='answer';
+const spawnEnemies=$.spawnEnemies;
+$.spawnEnemies=function(){if(!enabled())return spawnEnemies?.apply(this,arguments);
+ if(R.phase!=='fight'||R.paused||$.hero.life<=0)return;
+ const b=F.combat,dt=$.dt||1;
+ if(b.wave!==R.wave){Object.assign(b,{wave:R.wave,age:0,next:180,cooldown:0});$.enemies.length=0;}
+ b.age+=dt;
+ const chip=document.querySelector('#qChip');
+ if(chip)chip.textContent=b.age<180?'Read the question · swarm approaching':b.stage==='answer'?'ANSWER FIRE · shoot through to your option':b.stage==='ready'?'ANSWER READY · press fire again when ready':'CLEAR THE SWARM · hold fire, then release to ready your answer';
+ if(b.age<180)return;
+ const cap=Math.min($.cw<600?12:20,8+Math.floor((R.cleared||0)/2)*2),gap=Math.max(130,240-(R.cleared||0)*12);
+ if(b.age<b.next)return;b.next=b.age+gap;
+ const count=Math.min(cap-$.enemies.length,3+Math.floor((R.cleared||0)/3));
+ for(let n=0;n<count;n++){
+  const blocker=n===0,e=$.spawnEnemy(blocker?1:0),left=-$.screen.x+30,right=-$.screen.x+$.cw-30;
+  e.raidSwarm=true;e.blocker=blocker;e.life=e.lifeMax=blocker?4:1;e.flightAge=0;e.speed=blocker?1.6:2.4;
+  e.flightX=left+Math.random()*(right-left);e.x=e.flightX;e.y=-$.screen.y-40-n*24;
+  if(n%3===2){e.x=n%2?left-35:right+35;e.y=-$.screen.y+Math.max(R.topSafe()+90,$.ch*.4);e.flightX=left+Math.random()*(right-left);}
+  $.enemies.push(e);
+ }
+};
+F.contact=function(h){const b=F.combat,dt=$.dt||1;b.cooldown=Math.max(0,b.cooldown-dt);if(b.cooldown>0)h.takingDamage=1;
+ if(R.phase!=='fight'||R.paused||b.age<180||h.life<=0||b.cooldown>0)return;
+ if($.enemies.some(e=>e.raidSwarm&&e.inView&&Math.hypot(e.x-h.x,e.y-h.y)<e.radius+h.radius)){
+  h.life=Math.max(0,h.life-.12);h.takingDamage=1;b.cooldown=33;$.rumble.level=6;$.audio.play('takingDamage');
+ }
+};
 const start=R.start;R.start=function(){runDone=false;start.apply(this,arguments);if(enabled()){$.mouse.moved=0;$.pad.aim=null;if($.touch)$.touch.aim=null;$.aimLock=null;$.hero.direction=$.hero.prevDirection=-Math.PI/2;$.hero.flightBank=0;}};
 // Start the teaching encounter directly: no return trip to a hospital map marker.
 const update=R.update;R.update=function(){if(enabled()&&R.phase==='travel'){R.beginCombat();return;}const result=update.apply(this,arguments);if(enabled()){const loc=document.querySelector('#hLoc');if(loc)loc.textContent=regions[Math.floor(sets/3)%regions.length][0]+' · stretch '+(sets%3+1)+'/3';}return result;};
@@ -5196,6 +5237,7 @@ const begin=R.beginCombat;R.beginCombat=function(){runDone=false;return begin.ap
 const heroUpdate=$.Hero.prototype.update;
 $.Hero.prototype.update=function(){
  heroUpdate.call(this);if(!enabled())return;
+ F.contact(this);
  const dt=$.dt||1;
  this.flightBank=(this.flightBank||0)+(clamp(this.vx/8,-1,1)*.28-(this.flightBank||0))*(1-Math.exp(-dt*.14));
  const left=-$.screen.x+44,right=-$.screen.x+$.cw-44,top=-$.screen.y+Math.min($.ch*.46,R.topSafe()+70),bottom=-$.screen.y+$.ch-70;
@@ -5247,11 +5289,24 @@ F.moveEnemy=function(e){
 // Interceptors sweep in from ahead, cross the flight field and peel off below.
 const spawn=$.spawnEnemy,enemyUpdate=$.Enemy.prototype.update;
 $.spawnEnemy=function(){const e=spawn.apply(this,arguments);if(enabled()){e.x=-$.screen.x+40+Math.random()*Math.max(1,$.cw-80);e.y=-$.screen.y-60;e.flightX=e.x;e.flightT=0;}return e;};
-$.Enemy.prototype.update=function(i){if(!enabled())return enemyUpdate.call(this,i);this.flightX??=this.x;this.flightT=(this.flightT||0)+$.dt*.018;const ox=this.x,oy=this.y;
+$.Enemy.prototype.update=function(i){if(!enabled())return enemyUpdate.call(this,i);
+ if(this.raidSwarm){
+  if(R.phase!=='fight'||R.paused){this.inView=false;return;}
+  const dt=$.dt||1;this.flightAge+=dt;const t=this.flightAge/60,left=-$.screen.x+25,right=-$.screen.x+$.cw-25,ox=this.x,oy=this.y;
+  // Weave into the firing corridor, then chase briefly before exiting below.
+  const chase=this.flightAge>150&&this.flightAge<330,target=chase?$.hero.x:this.flightX;
+  const spread=this.blocker?22:65;
+  const want=clamp(target+Math.sin(t*2.3+this.index)*spread,left,right);
+  this.x+=(want-this.x)*(1-Math.exp(-dt*(chase?.035:.025)));
+  this.y+=this.speed*dt;this.vx=(this.x-ox)/dt;this.vy=(this.y-oy)/dt;
+  this.inView=this.y+$.screen.y>-30&&this.y+$.screen.y<$.ch+40;this.hitFlag=Math.max(0,this.hitFlag-dt);
+  if(this.y+$.screen.y>$.ch+70||this.flightAge>660)$.enemies.splice(i,1);return;
+ }
+this.flightX??=this.x;this.flightT=(this.flightT||0)+$.dt*.018;const ox=this.x,oy=this.y;
  this.x=this.flightX+Math.sin(this.flightT+this.index)*45;this.y+=Math.max(1.2,Math.min(3,this.speed||1.6))*$.dt;this.vx=(this.x-ox)/($.dt||1);this.vy=(this.y-oy)/($.dt||1);this.inView=this.y+$.screen.y>-40&&this.y+$.screen.y<$.ch+40;
  if(this.y+$.screen.y>$.ch+80)$.enemies.splice(i,1);
 };
-const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Hold FIRE / Space to shoot. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
+const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Hold FIRE / Space to clear swarms; release and press again to shoot your answer. Contact drains health; collect falling health packs and upgrades. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
 })();
 
 
