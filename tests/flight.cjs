@@ -14,7 +14,7 @@ test('enemy aircraft enter from ahead and settle into separate readable formatio
  const {R,$}=flight();const a={num:1,t:0},b={num:3,t:0};$.carriers=[a,{num:2},b,{num:4}];
  R.flight.moveEnemy(a);R.flight.moveEnemy(b);const first=a.y;
  for(let i=0;i<240;i++){R.flight.moveEnemy(a);R.flight.moveEnemy(b);}
- assert(a.y>first);assert(a.y>200);assert(b.y-a.y>50);assert(Math.abs(a.x-a.flightAnchor.x)<20);assert.equal(R.flight.progress().sets,0);
+ assert(a.y>first);assert(a.y>200);assert.equal(b.flightAnchor.y,a.flightAnchor.y);assert.equal(b.y,a.y);assert(b.x>a.x);assert(Math.abs(a.x-a.flightAnchor.x)<20);assert.equal(R.flight.progress().sets,0);
 });
 test('manual movement banks and settles without awarding a completed set',()=>{
  const {R,$}=flight();$.hero=new $.Hero();Object.assign($.hero,{x:600,y:600,vx:6,vy:0,life:1});$.hero.update();assert($.hero.flightBank>0);const bank=$.hero.flightBank;$.hero.vx=0;for(let i=0;i<30;i++)$.hero.update();assert($.hero.flightBank<bank*.1);
@@ -36,4 +36,11 @@ test('a fresh flight clears stale aim commands without applying automatic steeri
 
 test('flight preserves the original player and enemy artwork renderers',()=>{
  const {$,originalHero,originalEnemy}=flight();assert.equal($.Hero.prototype.render,originalHero);assert.equal($.Enemy.prototype.render,originalEnemy);
+});
+
+test('all four answer ships stay in one horizontal row at desktop and phone widths',()=>{
+ for(const width of [390,844,1920]){const {R,$}=flight();$.cw=width;$.carriers=Array.from({length:4},(_,i)=>({num:i+1,t:i,label:{h:70}}));
+ for(let frame=0;frame<250;frame++)for(const e of $.carriers)R.flight.moveEnemy(e);
+ assert.equal(new Set($.carriers.map(e=>e.y)).size,1);for(let i=1;i<4;i++)assert($.carriers[i].x>$.carriers[i-1].x);
+ }
 });

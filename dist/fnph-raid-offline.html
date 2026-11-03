@@ -3353,7 +3353,7 @@ function wrapText(ctx,text,maxW,maxLines){
   return lines;
 }
 function makeLabel(text,num){
-  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240;
+  const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=R.flight&&R.flight.enabled()?Math.min(240,Math.max(72,Math.floor($.cw/4)-16)):(innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240);
   g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
   const lines=wrapText(g,text,W0-50,innerWidth<900?8:4),H0=20+lines.length*17;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
@@ -3609,7 +3609,8 @@ $.Carrier.prototype.render=function(){
 
   lx=Math.max(minX,Math.min(maxX,lx));ly=Math.max(minY,Math.min(maxY,ly));
 
-  if(Q('#play').classList.contains('touchPlaying')){
+  if(R.flight&&R.flight.enabled()&&this.flightAnchor){lx=Math.max(minX,Math.min(maxX,this.flightAnchor.x-L.w/2));ly=-$.screen.y+R.topSafe();}
+  else if(Q('#play').classList.contains('touchPlaying')){
 
     const landscape=innerHeight<500,maxH=Math.max(...$.carriers.map(c=>c.label.h)),slot=this.num-1;
 
@@ -5162,11 +5163,11 @@ R.renderMap=function(){if(!enabled())return map();
 R.renderWorld=function(){if(!enabled())world();};R.renderLighting=function(){if(!enabled())lighting();};$.renderMinimap=function(){if(!enabled())minimap();};
 F.moveEnemy=function(e){
  const dt=$.dt||1;e.t+=.02*dt;
- if(!e.flightAnchor){const n=$.carriers.length,slot=e.num-1,cols=Math.min(2,n),rows=Math.ceil(n/cols),safe=Math.max(90,Math.min($.ch*.32,R.topSafe()))+Math.min(80,$.ch*.12);
-  e.flightAnchor={x:-$.screen.x+$.cw*((slot%cols+1)/(cols+1)),y:-$.screen.y+safe+Math.floor(slot/cols)*Math.max(50,Math.min(130,($.ch*.55-safe)/Math.max(1,rows-1)))};
+ if(!e.flightAnchor){const n=Math.max(1,$.carriers.length),slot=e.num-1,maxH=Math.max(0,...$.carriers.map(c=>c.label?.h||0)),safe=Math.max(90,R.topSafe())+maxH+55;
+  e.flightAnchor={x:-$.screen.x+$.cw*((slot+.5)/n),y:-$.screen.y+safe};
   e.x=e.flightAnchor.x;e.y=-$.screen.y-50;
  }
- const ox=e.x,oy=e.y;e.x=e.flightAnchor.x+Math.sin(e.t)*18;e.y+=(e.flightAnchor.y+Math.sin(e.t*.65+e.num)*10-e.y)*(1-Math.exp(-dt*.025));e.vx=(e.x-ox)/dt;e.vy=(e.y-oy)/dt;
+ const ox=e.x,oy=e.y;e.x=e.flightAnchor.x+Math.sin(e.t)*18;e.y+=(e.flightAnchor.y+Math.sin($.tick*.013)*10-e.y)*(1-Math.exp(-dt*.025));e.vx=(e.x-ox)/dt;e.vy=(e.y-oy)/dt;
  // Answer aircraft hold readable formations while terrain supplies forward motion.
 };
 // Interceptors sweep in from ahead, cross the flight field and peel off below.

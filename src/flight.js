@@ -56,11 +56,11 @@ R.renderMap=function(){if(!enabled())return map();
 R.renderWorld=function(){if(!enabled())world();};R.renderLighting=function(){if(!enabled())lighting();};$.renderMinimap=function(){if(!enabled())minimap();};
 F.moveEnemy=function(e){
  const dt=$.dt||1;e.t+=.02*dt;
- if(!e.flightAnchor){const n=$.carriers.length,slot=e.num-1,cols=Math.min(2,n),rows=Math.ceil(n/cols),safe=Math.max(90,Math.min($.ch*.32,R.topSafe()))+Math.min(80,$.ch*.12);
-  e.flightAnchor={x:-$.screen.x+$.cw*((slot%cols+1)/(cols+1)),y:-$.screen.y+safe+Math.floor(slot/cols)*Math.max(50,Math.min(130,($.ch*.55-safe)/Math.max(1,rows-1)))};
+ if(!e.flightAnchor){const n=Math.max(1,$.carriers.length),slot=e.num-1,maxH=Math.max(0,...$.carriers.map(c=>c.label?.h||0)),safe=Math.max(90,R.topSafe())+maxH+55;
+  e.flightAnchor={x:-$.screen.x+$.cw*((slot+.5)/n),y:-$.screen.y+safe};
   e.x=e.flightAnchor.x;e.y=-$.screen.y-50;
  }
- const ox=e.x,oy=e.y;e.x=e.flightAnchor.x+Math.sin(e.t)*18;e.y+=(e.flightAnchor.y+Math.sin(e.t*.65+e.num)*10-e.y)*(1-Math.exp(-dt*.025));e.vx=(e.x-ox)/dt;e.vy=(e.y-oy)/dt;
+ const ox=e.x,oy=e.y;e.x=e.flightAnchor.x+Math.sin(e.t)*18;e.y+=(e.flightAnchor.y+Math.sin($.tick*.013)*10-e.y)*(1-Math.exp(-dt*.025));e.vx=(e.x-ox)/dt;e.vy=(e.y-oy)/dt;
  // Answer aircraft hold readable formations while terrain supplies forward motion.
 };
 // Interceptors sweep in from ahead, cross the flight field and peel off below.
