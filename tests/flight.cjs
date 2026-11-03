@@ -44,3 +44,22 @@ test('all four answer ships stay in one horizontal row at desktop and phone widt
  assert.equal(new Set($.carriers.map(e=>e.y)).size,1);for(let i=1;i<4;i++)assert($.carriers[i].x>$.carriers[i-1].x);
  }
 });
+function lateral(){
+ const $={ww:20000,wh:1200,cw:1200,dt:1,keys:{state:{}},pad:{mx:0,my:0,aim:null},touch:{mx:0,my:0,aim:null},mouse:{},raid:{flight:{enabled:()=>true}},enemies:[],powerupTimers:[]};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/hero.js'),'utf8'),{$,Math});return {$,h:new $.Hero()};
+}
+test('lateral controls reach cruising speed quickly, reverse promptly and stop on release',()=>{
+ for(const control of ['keyboard','gamepad','touch']){
+  const {$,h}=lateral(),x=h.x,y=h.y;
+  const input=v=>{if(control==='keyboard'){$.keys.state.right=v>0;$.keys.state.left=v<0;}else $[control==='touch'?'touch':'pad'].mx=v;};
+  input(1);for(let i=0;i<6;i++)h.update();assert(h.vx>11.5);assert(h.x-x>50);
+  input(-1);h.update();h.update();assert(h.vx<-5);
+  input(0);for(let i=0;i<5;i++)h.update();assert(Math.abs(h.vx)<0.1);assert.equal(h.y,y);assert.equal(h.direction,-Math.PI/2);
+ }
+});
+test('lateral travel is frame-rate independent and analogue input retains fine control',()=>{
+ const positions=[];
+ for(const dt of [0.5,1,2]){const {$,h}=lateral();$.dt=dt;$.pad.mx=1;for(let t=0;t<30;t+=dt)h.update();positions.push(h.x);}
+ assert(Math.max(...positions)-Math.min(...positions)<0.001);
+ const {$,h}=lateral();$.pad.mx=0.25;for(let i=0;i<30;i++)h.update();assert(Math.abs(h.vx-3)<0.001);
+});
