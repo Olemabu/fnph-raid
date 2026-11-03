@@ -2487,7 +2487,7 @@ $.Explosion.prototype.render = function( i ) {
 };
 
 ;
-/* vendor/radius-raid/powerup.js */
+/* src/powerup.js */
 /*==============================================================================
 Init
 ==============================================================================*/
@@ -2525,15 +2525,21 @@ $.Powerup.prototype.update = function( i ) {
 	/*==============================================================================
 	Apply Forces
 	==============================================================================*/
-	this.x += Math.cos( this.direction ) * this.speed * $.dt;
-	this.y += Math.sin( this.direction ) * this.speed * $.dt;
-
-	/*==============================================================================
-	Check Bounds
-	==============================================================================*/
-	if( !$.util.rectInRect( this.x, this.y, this.width, this.height, 0, 0, $.ww, $.wh ) ){
-		$.powerups.splice( i, 1 );
-	}
+    const falling = !!($.raid && ($.raid.orbAssault || $.raid.flight?.enabled()));
+    if(falling){
+        // Keep every drop inside the sideways-only ship's reachable flight lane.
+        const left=-$.screen.x+$.hero.radius+30,right=-$.screen.x+$.cw-$.hero.radius-30;
+        const centre=Math.max(left,Math.min(Math.max(left,right),this.x+this.width/2));
+        this.x=centre-this.width/2;
+        if(!this.dropReady){this.y=Math.min(this.y,$.hero.y-this.height-60);this.dropReady=true;}
+        this.direction=Math.PI/2;this.speed=2.4;
+        this.y+=this.speed*$.dt;
+        if(this.y>-$.screen.y+$.ch){$.powerups.splice(i,1);return;}
+    }else{
+        this.x += Math.cos(this.direction)*this.speed*$.dt;
+        this.y += Math.sin(this.direction)*this.speed*$.dt;
+        if(!$.util.rectInRect(this.x,this.y,this.width,this.height,0,0,$.ww,$.wh)){$.powerups.splice(i,1);return;}
+    }
 
 	/*==============================================================================
 	Check Collection Collision

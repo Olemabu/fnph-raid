@@ -205,3 +205,6 @@ The start page is a single viewport with the existing hangar artwork and Continu
 
 
 Current flight controls: ship orientation stays forward, movement is left/right only, and weapons fire straight ahead. Mouse aim and the right stick cannot rotate the ship; the unused touch aim joystick is hidden. The original ship artwork remains unchanged. This replaces the earlier turning-control description above.
+
+
+Flight pickups (health, gifts and weapon powerups) now fall vertically at a steady speed. Drops remain inside the reachable horizontal flight lane and begin above the ship, including drops from enemies that have already passed below it. Collection effects and artwork are unchanged. Pickups disappear after leaving the bottom of the viewport. The adapted implementation is src/powerup.js; the vendor original remains untouched.
