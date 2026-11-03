@@ -23,11 +23,13 @@ test('contact cooldown prevents overlapping enemies from multiplying damage; rep
  for(let i=0;i<32;i++)F.contact($.hero);assert.equal($.hero.life,.88);F.contact($.hero);assert.equal($.hero.life,.76);
  $.hero.x+=100;for(let i=0;i<100;i++)F.contact($.hero);assert.equal($.hero.life,.76);$.hero.x-=100;for(let i=0;i<400;i++)F.contact($.hero);assert.equal($.hero.life,0);
 });
-test('clearing, release-to-ready and fresh answer press remain separate with autofire',()=>{
- const {$,R,F}=game();R.resetAnswerFire();$.autofire=true;assert.equal(R.canFire(),false);$.pad.fire=1;assert(R.canFire());assert.equal(F.answerFire(),false);
- for(let i=0;i<100;i++){R.canFire();assert.equal(F.answerFire(),false);}
- $.pad.fire=0;R.canFire();assert.equal(F.combat.stage,'ready');assert.equal(F.answerFire(),false);
- $.pad.fire=1;R.canFire();assert.equal(F.answerFire(),true);R.resetAnswerFire(false);assert.equal(F.answerFire(),false);
+test('first fresh firing press damages answers without a hidden second-press requirement',()=>{
+ const {$,R,F}=game();$.pad.fire=1;R.resetAnswerFire();$.autofire=true;
+ for(let i=0;i<60;i++){assert.equal(R.canFire(),false);assert.equal(F.answerFire(),false);}
+ $.pad.fire=0;assert.equal(R.canFire(),false);assert.equal(F.answerFire(),false);
+ $.pad.fire=1;assert.equal(R.canFire(),true);assert.equal(F.answerFire(),true);
+ for(let i=0;i<100;i++){assert(R.canFire());assert(F.answerFire());}
+ R.resetAnswerFire(false);assert.equal(F.answerFire(),false);assert.equal(R.canFire(),false);
 });
 test('clearing bullets ignore answer ships, and even piercing answer bullets stop at blockers',()=>{
  const {$,R,F}=game();let hits=0,damage=0;Object.assign($,{particleEmitters:[],ParticleEmitter:function(){},util:{distance:()=>0,rand:()=>1,pointInRect:()=>true},ww:1920,wh:1200,pi:Math.PI});
@@ -37,4 +39,14 @@ test('clearing bullets ignore answer ships, and even piercing answer bullets sto
  $.enemies=[];const openShot=make();$.bullets=[openShot];openShot.update(0);assert.equal(hits,1);
  // A clearing round already in flight stays harmless even after answer fire is armed.
  $.bullets=[clearing];clearing.update(0);assert.equal(hits,1);
+});
+test('one fresh press can destroy a real answer carrier after repeated shots',()=>{
+ const {$,R}=game();Object.assign($,{particleEmitters:[],ParticleEmitter:function(){},util:{distance:()=>0,rand:()=>1,pointInRect:()=>true},ww:1920,wh:1200,pi:Math.PI});
+ let chosen=0;R.optionLabel=t=>t;R.carrierDown=c=>{chosen++;c.alive=false;};
+ vm.runInNewContext(read('bullet.js'),{$,Math});
+ const raid=read('raid.js');$.Carrier=function(){};vm.runInNewContext(raid.slice(raid.indexOf('$.Carrier.prototype.hit='),raid.indexOf('$.Carrier.prototype.render=')),{$,R});
+ const carrier=Object.assign(new $.Carrier(),{alive:true,life:3,x:0,y:0,radius:26,num:1,text:'answer'});$.carriers=[carrier];
+ $.pad.fire=1;R.resetAnswerFire();assert.equal(R.canFire(),false);$.pad.fire=0;R.canFire();$.pad.fire=1;assert(R.canFire());
+ for(let i=0;i<3;i++){const shot=new $.Bullet({x:0,y:0,direction:0,speed:10,size:24,damage:1});$.bullets=[shot];shot.update(0);}
+ assert.equal(carrier.life,0);assert.equal(carrier.alive,false);assert.equal(chosen,1);
 });

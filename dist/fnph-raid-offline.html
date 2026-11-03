@@ -5190,17 +5190,14 @@ const regions=[['Coastline','#467d89','#c6b78a'],['Farmland','#71835b','#b4a975'
 const enabled=()=>R.active&&!R.orbAssault&&!R.modeName();
 function completeSet(){if(!enabled()||runDone)return;runDone=true;sets++;try{localStorage.setItem(KEY,JSON.stringify({sets}));}catch(e){}R.toast('Flight checkpoint '+sets+' saved · '+regions[Math.floor(sets/3)%regions.length][0],true);}
 const F=R.flight={enabled,completeSet,progress:()=>({sets,region:Math.floor(sets/3)%regions.length,stretch:sets%3})};
-// Fight through a corridor before deliberately opening fire on an answer.
-F.combat={wave:null,age:0,next:0,stage:'clear',held:false,cooldown:0};
+// A fresh firing press arms this question; confirmation presses stay consumed.
+F.combat={wave:null,age:0,next:0,stage:'ready',cooldown:0};
 const resetFire=R.resetAnswerFire;
-if(resetFire)R.resetAnswerFire=function(){const out=resetFire.apply(this,arguments);Object.assign(F.combat,{wave:null,stage:'clear',held:false});return out;};
+if(resetFire)R.resetAnswerFire=function(){const out=resetFire.apply(this,arguments);Object.assign(F.combat,{wave:null,stage:'ready'});return out;};
 const manualFire=()=>!!($.mouse.down||$.pad.rawFire||$.pad.fire||$.touch?.fire||$.keyFire);
 const canFire=R.canFire;
 if(canFire)R.canFire=function(){const allowed=canFire.apply(this,arguments);if(!enabled())return allowed;
- const b=F.combat,held=manualFire();
- if(allowed&&b.stage==='clear'&&held)b.held=true;
- if(b.stage==='clear'&&b.held&&!held)b.stage='ready';
- else if(allowed&&b.stage==='ready'&&held){b.stage='answer';R.toast('Answer fire armed — clear the path to your chosen option.',true);}
+ if(allowed&&manualFire())F.combat.stage='answer';
  return allowed;
 };
 F.answerFire=()=>!enabled()||F.combat.stage==='answer';
@@ -5211,7 +5208,7 @@ $.spawnEnemies=function(){if(!enabled())return spawnEnemies?.apply(this,argument
  if(b.wave!==R.wave){Object.assign(b,{wave:R.wave,age:0,next:180,cooldown:0});$.enemies.length=0;}
  b.age+=dt;
  const chip=document.querySelector('#qChip');
- if(chip)chip.textContent=b.age<180?'Read the question · swarm approaching':b.stage==='answer'?'ANSWER FIRE · shoot through to your option':b.stage==='ready'?'ANSWER READY · press fire again when ready':'CLEAR THE SWARM · hold fire, then release to ready your answer';
+ if(chip)chip.textContent=b.age<180?'Read the question · swarm approaching':b.stage==='answer'?'ANSWER FIRE · shoot through to your option':'Release confirm, then hold FIRE to shoot enemies and your answer';
  if(b.age<180)return;
  const cap=Math.min($.cw<600?12:20,8+Math.floor((R.cleared||0)/2)*2),gap=Math.max(130,240-(R.cleared||0)*12);
  if(b.age<b.next)return;b.next=b.age+gap;
@@ -5306,7 +5303,7 @@ this.flightX??=this.x;this.flightT=(this.flightT||0)+$.dt*.018;const ox=this.x,o
  this.x=this.flightX+Math.sin(this.flightT+this.index)*45;this.y+=Math.max(1.2,Math.min(3,this.speed||1.6))*$.dt;this.vx=(this.x-ox)/($.dt||1);this.vy=(this.y-oy)/($.dt||1);this.inView=this.y+$.screen.y>-40&&this.y+$.screen.y<$.ch+40;
  if(this.y+$.screen.y>$.ch+80)$.enemies.splice(i,1);
 };
-const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Hold FIRE / Space to clear swarms; release and press again to shoot your answer. Contact drains health; collect falling health packs and upgrades. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
+const help=document.createElement('p');help.className='meta';help.textContent='Move sideways with Left / Right, A / D or the left joystick. Your ship always faces forward and fires straight ahead. Release the confirmation button, then hold FIRE / Space to shoot through swarms to your answer. Contact drains health; collect falling health packs and upgrades. Target brackets mark the selected enemy. Every completed set changes the route; every three sets changes the landscape.';document.querySelector('#home .operations')?.appendChild(help);
 })();
 
 
