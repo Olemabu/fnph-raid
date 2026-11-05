@@ -219,8 +219,8 @@ function wrapText(ctx,text,maxW,maxLines){
 }
 function makeLabel(text,num){
   const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=R.flight&&R.flight.enabled()?Math.min(240,Math.max(72,Math.floor($.cw/4)-16)):(innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240);
-  const font=R.sideControls?'600 12px "Chakra Petch", "Segoe UI", sans-serif':'600 13.5px "Chakra Petch", "Segoe UI", sans-serif',lineHeight=R.sideControls?15:17;g.font=font;
-  const lines=wrapText(g,text,W0-(R.sideControls?44:50),innerWidth<900?8:4),H0=20+lines.length*lineHeight;
+  const font=R.sideControls?'600 11px "Chakra Petch", "Segoe UI", sans-serif':'600 13.5px "Chakra Petch", "Segoe UI", sans-serif',lineHeight=R.sideControls?14:17;g.font=font;
+  const lines=R.sideControls?[]:wrapText(g,text,W0-50,innerWidth<900?8:4),H0=R.sideControls?Math.max(88,Math.min(108,Math.round($.ch*.27))):20+lines.length*lineHeight;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
 
   // Frosted cyber plate body
@@ -243,7 +243,7 @@ function makeLabel(text,num){
   g.textBaseline='middle';
   lines.forEach((l,i)=>g.fillText(l,R.sideControls?36:42,H0/2-(lines.length-1)*lineHeight/2+i*lineHeight));
 
-  return{canvas:c,w:W0,h:H0};
+  return{canvas:c,w:W0,h:H0,text,scrollable:!!R.sideControls};
 }
 $.Carrier=function(o){
   for(const k in o)this[k]=o[k];
@@ -274,7 +274,7 @@ $.Carrier.prototype.render=function(){
 
   if(!this.alive)return;
 
-  const ctx=$.ctxmg,aim=R.aimTarget()===this,t=this.t,hue=aim?190:322;
+  const ctx=$.ctxmg,aim=R.aimTarget()===this||(R.sideControls&&R.readingOption===this),t=this.t,hue=aim?190:322;
 
   const hCol=aim?'98,230,255':'255,79,168';
 
@@ -515,11 +515,11 @@ $.Carrier.prototype.render=function(){
 
   ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';
 
-  ctx.beginPath();ctx.arc(lx+20,ly+L.h/2,13,0,$.twopi);ctx.fill();
+  const badgeY=R.sideControls?ly+17:ly+L.h/2;ctx.beginPath();ctx.arc(lx+20,badgeY,13,0,$.twopi);ctx.fill();
 
   ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
 
-  ctx.fillText(String(this.num),lx+20,ly+L.h/2+1);
+  ctx.fillText(String(this.num),lx+20,badgeY+1);
 
   ctx.textAlign='left';ctx.textBaseline='alphabetic';
 

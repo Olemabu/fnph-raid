@@ -82,7 +82,7 @@ function listFiles(dir, extension) {
   return files;
 }
 
-function webVersion() { return "5"; }
+function webVersion() { return "6"; }
 
 function prepare() {
   for (const required of [androidJar, tools.aapt2, tools.zipalign]) {
@@ -99,7 +99,7 @@ function prepare() {
   const version = webVersion();
   const manifest = fs.readFileSync(path.join(root, "android", "AndroidManifest.xml"), "utf8")
     .replace(/android:versionCode="\d+"/, `android:versionCode="${version}"`)
-    .replace(/android:versionName="[^"]*"/, `android:versionName="1.2.2"`);
+    .replace(/android:versionName="[^"]*"/, `android:versionName="1.2.3"`);
   fs.writeFileSync(path.join(workDir, "AndroidManifest.xml"), manifest);
   return version;
 }
