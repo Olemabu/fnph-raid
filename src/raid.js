@@ -922,11 +922,13 @@ R.pause=function(){
   if(!R.active)return;
   if(R.paused&&Q('#card').classList.contains('pause')){closeCard();return;}
   const previous=Q('#cardWrap').hidden?null:{nodes:[...Q('#cardInner').childNodes],kind:Q('#card').className,button:Q('#cardBtn').textContent,cb:cardCb,remaining:Math.max(0,cardReadyAt-performance.now())};
+  const canRetry=!previous&&R.canReconsider();
   const r=R.rooms[R.si];R.paused=true;
-  card('pause','Paused','<p>'+esc(r.topic)+'. Your learning progress is saved.</p><p class="meta">Esc or controller Start resumes. Select confirms the highlighted menu choice.</p><div class="row"><button class="btn primary" id="cNextSet">Next set</button><button class="btn ghost" id="cHome">Main menu</button><button class="btn" id="cEnd">End run and see debrief</button></div>','Resume',()=>{
+  card('pause','Paused','<p class="pauseSummary" title="'+esc(r.topic)+'">Progress saved · '+esc(r.topic)+'</p><p class="meta">Tap an action, or Resume. Release Fire before shooting.</p><div class="pauseActions"><button class="btn primary" id="cNextSet">Next set</button>'+(canRetry?'<button class="btn" id="cRetry">Retry last answer</button><button class="btn" id="cGuessed">Last answer was guessed</button>':'')+'<button class="btn ghost" id="cHome">Main menu</button><button class="btn" id="cEnd">End run and see debrief</button></div><p id="cMenuStatus" class="meta" role="status"></p>','Resume',()=>{
     if(previous){Q('#card').className=previous.kind;Q('#cardInner').replaceChildren(...previous.nodes);Q('#cardBtn').textContent=previous.button;cardCb=previous.cb;cardReadyAt=performance.now()+previous.remaining;Q('#cardWrap').hidden=false;$.setState('freeze');const ready=()=>{if(Q('#cardWrap').hidden)return;Q('#cardBtn').disabled=performance.now()<cardReadyAt;if(Q('#cardBtn').disabled)requestAnimationFrame(ready);};ready();}
   },0);
-  Q('#cNextSet').onclick=()=>R.nextSet();Q('#cEnd').onclick=()=>{closeCard(true);debrief();};Q('#cHome').onclick=()=>quitToHome();
+  if(canRetry){Q('#cRetry').onclick=()=>{closeCard(true);R.reconsider(false);};Q('#cGuessed').onclick=()=>{closeCard(true);R.reconsider(true);};}
+  Q('#cNextSet').onclick=()=>{if(!R.nextSet())Q('#cMenuStatus').textContent='No further set in this selection. Resume or choose another topic from Main menu.';};Q('#cEnd').onclick=()=>{closeCard(true);debrief();};Q('#cHome').onclick=()=>quitToHome();
 };
 function quitToHome(){Q('#cardWrap').hidden=true;cardCb=null;R.paused=false;R.touchFire=R.touchBoost=R.touchBrake=false;clearAnswerSplash();R.active=false;R.campaignRun=false;stopMusic();$.setState('idle');renderHome();showScreen('home');}
 

@@ -372,7 +372,9 @@ html[data-theme=light] #homeOptions{background:#fffdf7;color:#203746}
 #play.sideControls .touchStick i{width:36%;height:36%;box-sizing:border-box;border:1px solid #c6dcda;background:linear-gradient(145deg,#9fb8bb,#5d7d88);box-shadow:0 3px 9px #0005,inset 0 1px 1px #ffffff70}
 #play.sideControls #touchFire{width:var(--pad-size);height:var(--pad-size);max-width:none;max-height:none;margin:0;flex-shrink:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #d4bd7e;background:radial-gradient(circle at 35% 25%,#efdfac,#c7a65c);box-shadow:0 8px 18px #020a1230,inset 0 0 0 5px #fff6d329,inset 0 0 0 7px #80642e33;color:#253844;font:700 10px var(--mono);letter-spacing:.12em;transition:box-shadow .1s,background .1s}
 .fireGlyph{display:none}
-#play.sideControls .fireGlyph{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.4}
+#play.sideControls .fireGlyph{display:block;width:30px;height:30px;filter:drop-shadow(0 1px 1px #7b341f33)}
+.fireGlyph .flameOuter{fill:#b53b16;stroke:#762708;stroke-width:1;stroke-linejoin:round}
+.fireGlyph .flameInner{fill:#ffdf73;stroke:none}
 #play.sideControls #touchFire:active{background:#f5e9bc;box-shadow:0 0 20px #debd6255,inset 0 0 0 5px #ffffff50}
 #touchPause{display:none}
 #play.sideControls #touchPause{display:block;position:absolute;top:calc(50% + var(--pad-size)/2 + 18px);pointer-events:auto;touch-action:manipulation;min-height:44px;width:calc(var(--control-rail) - 14px);font:600 8px var(--mono);letter-spacing:.04em;padding:8px 3px;border:1px solid #89a5a855;border-radius:8px;background:#ffffff08;color:var(--rail-ink);box-shadow:inset 0 1px #ffffff12}
@@ -392,6 +394,23 @@ html[data-theme=light] #homeOptions{background:#fffdf7;color:#203746}
 #play.sideControls .gbar{display:none}
 html[data-theme=light] #play.sideControls .touchLeft,html[data-theme=light] #play.sideControls .touchRight{background:linear-gradient(90deg,#e1e7e1,#eef0e8);--rail-ink:#243e49;--rail-muted:#5d7680;box-shadow:inset 0 0 25px #71877e12}
 @media(max-height:340px){#play.sideControls #hTopic{display:none}#play.sideControls .touchRight:before{top:16px}#play.sideControls .hud{padding-top:9px!important}#play.sideControls .stn{gap:2px}}
+
+.card.pause #cardInner{gap:9px;padding:14px 18px 10px}
+.card.pause #cardInner>p{margin:0}
+.pauseSummary{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.pause .meta{font-size:12px}
+.pauseActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.pauseActions .btn{min-height:46px;white-space:normal;touch-action:manipulation;font-size:13px;line-height:1.3}
+#cMenuStatus:empty{display:none}
+@media(orientation:landscape) and (max-height:500px){.pauseActions{grid-template-columns:repeat(3,minmax(0,1fr))}.card.pause .kicker{font-size:25px}}
+@media(pointer:coarse),(max-width:900px){
+ #cardWrap{padding:10px}
+ .card{max-height:calc(100dvh - 20px)}
+ #cardInner{min-height:0;overflow:auto;overscroll-behavior:contain}
+ .cardFoot{flex-shrink:0;padding:10px 18px}
+ #cardBtn,.homeMenuTabs .btn,.homeMenuHeader .btn{min-height:44px}
+ .warNode{touch-action:manipulation}
+}
 </style>
 
 <section id="home" class="page">
@@ -411,7 +430,7 @@ html[data-theme=light] #play.sideControls .touchLeft,html[data-theme=light] #pla
     <div style="display:flex;flex-direction:column;gap:14px">
       <p class="eyebrow">Psychiatry exam raid · FNPH Barnawa</p>
       <h1>FNPH <span>Raid</span></h1>
-      <p class="lede">A fork of the arcade shooter Radius Raid, rebuilt around your exam. Fly in from the Zaire Road gate and take FNPH station by station. At each station, the answers come at you as gunships. Destroy the right one and the rest go down with it. Hit a wrong one and you're killed. Wrong choices show a teaching card. Three consecutive correct answers permanently retire the item from gameplay.</p>
+      <p class="lede">A fork of the arcade shooter Radius Raid, rebuilt around your exam. Fly in from the Zaire Road gate and take FNPH station by station. At each station, the answers come at you as gunships. Destroy the right one and the rest go down with it. Hit a wrong one and you're killed. Wrong choices show a teaching card. First-time correct MCQs retire from gameplay. Missed or guessed MCQs need two correct repeats; procedures and lists need three correct runs.</p>
       <div class="actions"><button id="bStart" class="btn primary">Start the raid</button><button id="bReview" class="btn">Daily review</button><button id="bStudy" class="btn">Study the stations</button><button id="bEdit" class="btn ghost">Edit questions</button></div>
       <div class="actions"><button id="bTeach" class="chipbtn"></button><button id="bMode" class="chipbtn"></button><button id="bOrder" class="chipbtn"></button><button id="bTimer" class="chipbtn"></button><button id="bPad" class="chipbtn">Set up controller</button><button id="bSens" class="chipbtn"></button><button id="bReset" class="chipbtn" hidden>Reset captured stations</button></div>
       <div class="homeG"><div class="segs" id="homeSegs"></div><span id="homeGLabel" class="muted"></span></div>
