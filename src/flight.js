@@ -7,7 +7,7 @@ let sets=Number.isSafeInteger(saved?.sets)&&saved.sets>=0?saved.sets:0,travel=0,
 const regions=[['Coastline','#467d89','#c6b78a'],['Farmland','#71835b','#b4a975'],['City','#687785','#9b9c8e'],['Mountains','#6d7774','#a5a99b']];
 const enabled=()=>R.active&&!R.orbAssault&&!R.modeName();
 function completeSet(){if(!enabled()||runDone)return;runDone=true;sets++;try{localStorage.setItem(KEY,JSON.stringify({sets}));}catch(e){}R.toast('Flight checkpoint '+sets+' saved · '+regions[Math.floor(sets/3)%regions.length][0],true);}
-const F=R.flight={enabled,completeSet,progress:()=>({sets,region:Math.floor(sets/3)%regions.length,stretch:sets%3})};
+const F=R.flight={applyShared:value=>{if(Number.isSafeInteger(value?.sets))sets=Math.max(sets,value.sets);},enabled,completeSet,progress:()=>({sets,region:Math.floor(sets/3)%regions.length,stretch:sets%3})};
 // A fresh firing press arms this question; confirmation presses stay consumed.
 F.combat={wave:null,age:0,next:0,stage:'ready',cooldown:0};
 const resetFire=R.resetAnswerFire;

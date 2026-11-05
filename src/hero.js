@@ -46,12 +46,9 @@ $.Hero.prototype.update = function() {
             const keyboard = Number(!!$.keys.state.right) - Number(!!$.keys.state.left);
             const input = keyboard || Math.max(-1, Math.min(1, stick));
             const speed = Math.max(6, Math.min(12, ($.cw || 1200) / 80));
-            const target = input * speed;
-            const response = input ? 0.65 : 0.95;
-            const decay = Math.exp(-response * $.dt);
-            // Integrate the response so travel stays consistent at different frame rates.
-            this.x += target * $.dt + (this.vx - target) * (1 - decay) / response;
-            this.vx = target + (this.vx - target) * decay;
+            // Direct strafe: no acceleration lag, reverse immediately, no release drift.
+            this.vx = input * speed;
+            this.x += this.vx * $.dt;
             this.vy = 0;
         } else {
 		if( !vertical && $.keys.state.up ) {

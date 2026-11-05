@@ -253,9 +253,23 @@ function answerPlate(carrier){
 function renderMergedAnswer(carrier,ctx,aim,hue){
  ctx.save();
  const p=carrier.plate=answerPlate(carrier),L=carrier.label;
- ctx.drawImage(L.canvas,p.x,p.y,p.w,p.h);
- ctx.strokeStyle=aim?'hsl(190,85%,53%)':'hsla(322,100%,62%,.85)';ctx.lineWidth=carrier.hitFlag>0?3:aim?2.5:1.5;ctx.beginPath();
- if(ctx.roundRect)ctx.roundRect(p.x+1,p.y+1,p.w-2,p.h-2,8);else ctx.rect(p.x+1,p.y+1,p.w-2,p.h-2);ctx.stroke();
+ const edge=aim?'#73eeff':'#d091ed',flash=carrier.hitFlag>0;
+ // Bevelled gunmetal hull with clipped wings; inset screen carries the answer.
+ let metal=ctx.createLinearGradient?.(0,p.y,0,p.y+p.h);
+ if(metal&&metal.addColorStop){metal.addColorStop(0,'#d9e3e7');metal.addColorStop(.12,'#657a87');metal.addColorStop(.45,'#1b2b38');metal.addColorStop(.8,'#526571');metal.addColorStop(1,'#a0b4be');}else metal='#526571';
+ ctx.fillStyle=metal;ctx.beginPath();ctx.moveTo(p.x+12,p.y);ctx.lineTo(p.x+p.w-12,p.y);ctx.lineTo(p.x+p.w,p.y+14);ctx.lineTo(p.x+p.w,p.y+p.h-14);ctx.lineTo(p.x+p.w-12,p.y+p.h);ctx.lineTo(p.x+12,p.y+p.h);ctx.lineTo(p.x,p.y+p.h-14);ctx.lineTo(p.x,p.y+14);ctx.closePath();ctx.fill();
+ ctx.strokeStyle=flash?'#fff2b3':edge;ctx.lineWidth=flash?3:aim?2.5:1.5;ctx.stroke();
+ if(R.sideControls){ctx.fillStyle='#10212c';ctx.fillRect(p.x+7,p.y+32,p.w-14,p.h-43);}else ctx.drawImage(L.canvas,p.x+6,p.y+6,p.w-12,p.h-15);
+ // Recessed viewing screen, hull seams and four steel fasteners.
+ ctx.strokeStyle='rgba(3,12,21,.85)';ctx.lineWidth=2;ctx.strokeRect(p.x+6,p.y+(R.sideControls?31:6),p.w-12,p.h-(R.sideControls?42:15));
+ for(const [x,y] of [[p.x+5,p.y+14],[p.x+p.w-5,p.y+14],[p.x+13,p.y+p.h-5],[p.x+p.w-13,p.y+p.h-5]]){ctx.fillStyle='#d4e3e8';ctx.fillRect(x-1,y-1,2,2);}
+ if(R.sideControls){
+  // Enemy saucer canopy sits in the fixed header, above the scrolling text.
+  const cx=p.x+p.w*.62,cy=p.y+16;
+  ctx.fillStyle='#203a4a';ctx.beginPath();ctx.ellipse(cx,cy+4,Math.min(23,p.w*.18),5,0,0,$.twopi);ctx.fill();
+  ctx.fillStyle=aim?'#72f4ff':'#bfa0f9';ctx.beginPath();ctx.ellipse(cx,cy,Math.min(11,p.w*.09),6,0,Math.PI,0);ctx.fill();
+  ctx.fillStyle=edge;ctx.fillRect(cx-20,cy+4,8,2);ctx.fillRect(cx+12,cy+4,8,2);
+ }
  const badgeY=R.sideControls?p.y+17:p.y+p.h/2;
  ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';ctx.beginPath();ctx.arc(p.x+20,badgeY,13,0,$.twopi);ctx.fill();
  ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(carrier.num),p.x+20,badgeY+1);ctx.textAlign='left';ctx.textBaseline='alphabetic';
@@ -1525,6 +1539,14 @@ function drawTactical(ctx){
 R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
 R.orbOptions=it=>({opts:qOptions(it),correct:[it.answer],chip:'Destroy the correct answer orb',t:0,r0:300});R.advanceQuestion=nextQuestion;R.swarmDeath=swarmDown;
 R.answerPlate=answerPlate;
+R.applySharedSave=function(data){
+ if(data['fnphraid.stats'])stats=data['fnphraid.stats'];
+ if(Array.isArray(data['fnphraid.cdone']))cdone=new Set(data['fnphraid.cdone']);
+ if(Array.isArray(data['fnphraid.captured']))captured=new Set(data['fnphraid.captured']);
+ if(Number.isFinite(data['fnphraid.best']))best=Math.max(best,data['fnphraid.best']);
+ for(const [key,value] of Object.entries(data))localStorage.setItem(key,JSON.stringify(value));
+ R.campaign?.applyShared(data['fnphraid.campaign.v1']);R.flight?.applyShared(data['fnphraid.flight.v1']);
+};
 R.applyProgress=function(states){
  for(const room of deck.rooms)for(const it of room.items){const id=R.progressId?.(it),value=id&&states[id];if(!value)continue;const s=st(it.id);s.mcqDone=value.done;s.mcqRemaining=value.remaining;s.box=value.done?Math.max(MASTER_AT,s.box||0):0;if(value.seen)s.seen=Math.max(1,s.seen||0);else{s.seen=s.right=s.wrong=s.guessed=0;}}
  store.set('stats',stats);

@@ -69,3 +69,13 @@ test('landscape side controls keep horizontal answer enemies safely ahead of the
  for(const e of $.carriers)R.flight.moveEnemy(e);
  const heroY=$.hero.y+$.screen.y;assert(Math.abs(heroY-$.ch*.84)<.001);for(const e of $.carriers)assert(heroY-(e.flightAnchor.y+$.screen.y)>60);assert.equal(new Set($.carriers.map(e=>e.flightAnchor.y)).size,1);
 });
+
+test('direct strafe stops on the release frame and reverses without old-direction travel',()=>{
+ for(const source of ['keys','pad','touch'])for(const dt of [.5,1,2]){
+  const {$,h}=lateral();$.dt=dt;
+  const input=v=>{if(source==='keys'){$.keys.state.left=v<0;$.keys.state.right=v>0;}else $[source].mx=v;};
+  const start=h.x;input(1);h.update();assert.equal(h.x-start,12*dt);assert.equal(h.vx,12);
+  const turn=h.x;input(-1);h.update();assert.equal(h.x-turn,-12*dt);
+  const stop=h.x;input(0);h.update();assert.equal(h.x,stop);assert.equal(h.vx,0);
+ }
+});
