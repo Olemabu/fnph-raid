@@ -220,7 +220,8 @@ function wrapText(ctx,text,maxW,maxLines){
 function makeLabel(text,num){
   const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=R.flight&&R.flight.enabled()?Math.min(240,Math.max(72,Math.floor($.cw/4)-16)):(innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240);
   const font=R.sideControls?'600 11px "Chakra Petch", "Segoe UI", sans-serif':'600 13.5px "Chakra Petch", "Segoe UI", sans-serif',lineHeight=R.sideControls?14:17;g.font=font;
-  const lines=R.sideControls?[]:wrapText(g,text,W0-50,innerWidth<900?8:4),H0=R.sideControls?Math.max(88,Math.min(108,Math.round($.ch*.27))):20+lines.length*lineHeight;
+  const mechaLabel=!!R.flight?.enabled();
+  const lines=mechaLabel?[]:wrapText(g,text,W0-50,innerWidth<900?8:4),H0=mechaLabel?(R.sideControls?Math.max(124,Math.min(142,Math.round($.ch*.34))):Math.max(130,Math.min(156,Math.round($.ch*.22)))):20+lines.length*lineHeight;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
 
   // Frosted cyber plate body
@@ -243,40 +244,34 @@ function makeLabel(text,num){
   g.textBaseline='middle';
   lines.forEach((l,i)=>g.fillText(l,R.sideControls?36:42,H0/2-(lines.length-1)*lineHeight/2+i*lineHeight));
 
-  return{canvas:c,w:W0,h:H0,text,scrollable:!!R.sideControls};
+  return{canvas:c,w:W0,h:H0,text,scrollable:mechaLabel};
 }
 function answerPlate(carrier){
  const L=carrier.label,n=Math.max(1,$.carriers.length),left=-$.screen.x;
  const x=left+$.cw*((carrier.num-.5)/n)-L.w/2;
  return {x:Math.max(left+8,Math.min(left+$.cw-L.w-8,x)),y:-$.screen.y+R.topSafe(),w:L.w,h:L.h};
 }
+// Nine-slice the actual mecha hull so its inset display remains readable in every lane.
+function renderEnemyHull(ctx,img,p){
+ const xs=[0,img.naturalWidth*.23,img.naturalWidth*.77,img.naturalWidth],ys=[0,img.naturalHeight*.28,img.naturalHeight*.65,img.naturalHeight];
+ const dx=[p.x,p.x+p.w*.14,p.x+p.w*.86,p.x+p.w],dy=[p.y,p.y+p.h*.27,p.y+p.h*.80,p.y+p.h];
+ for(let y=0;y<3;y++)for(let x=0;x<3;x++)ctx.drawImage(img,xs[x],ys[y],xs[x+1]-xs[x],ys[y+1]-ys[y],dx[x],dy[y],dx[x+1]-dx[x],dy[y+1]-dy[y]);
+}
 function renderMergedAnswer(carrier,ctx,aim,hue){
- ctx.save();
- const p=carrier.plate=answerPlate(carrier),L=carrier.label;
- const edge=aim?'#73eeff':'#d091ed',flash=carrier.hitFlag>0;
- // Bevelled gunmetal hull with clipped wings; inset screen carries the answer.
- let metal=ctx.createLinearGradient?.(0,p.y,0,p.y+p.h);
- if(metal&&metal.addColorStop){metal.addColorStop(0,'#d9e3e7');metal.addColorStop(.12,'#657a87');metal.addColorStop(.45,'#1b2b38');metal.addColorStop(.8,'#526571');metal.addColorStop(1,'#a0b4be');}else metal='#526571';
- ctx.fillStyle=metal;ctx.beginPath();ctx.moveTo(p.x+12,p.y);ctx.lineTo(p.x+p.w-12,p.y);ctx.lineTo(p.x+p.w,p.y+14);ctx.lineTo(p.x+p.w,p.y+p.h-14);ctx.lineTo(p.x+p.w-12,p.y+p.h);ctx.lineTo(p.x+12,p.y+p.h);ctx.lineTo(p.x,p.y+p.h-14);ctx.lineTo(p.x,p.y+14);ctx.closePath();ctx.fill();
- ctx.strokeStyle=flash?'#fff2b3':edge;ctx.lineWidth=flash?3:aim?2.5:1.5;ctx.stroke();
- if(R.sideControls){ctx.fillStyle='#10212c';ctx.fillRect(p.x+7,p.y+32,p.w-14,p.h-43);}else ctx.drawImage(L.canvas,p.x+6,p.y+6,p.w-12,p.h-15);
- // Recessed viewing screen, hull seams and four steel fasteners.
- ctx.strokeStyle='rgba(3,12,21,.85)';ctx.lineWidth=2;ctx.strokeRect(p.x+6,p.y+(R.sideControls?31:6),p.w-12,p.h-(R.sideControls?42:15));
- for(const [x,y] of [[p.x+5,p.y+14],[p.x+p.w-5,p.y+14],[p.x+13,p.y+p.h-5],[p.x+p.w-13,p.y+p.h-5]]){ctx.fillStyle='#d4e3e8';ctx.fillRect(x-1,y-1,2,2);}
- if(R.sideControls){
-  // Enemy saucer canopy sits in the fixed header, above the scrolling text.
-  const cx=p.x+p.w*.62,cy=p.y+16;
-  ctx.fillStyle='#203a4a';ctx.beginPath();ctx.ellipse(cx,cy+4,Math.min(23,p.w*.18),5,0,0,$.twopi);ctx.fill();
-  ctx.fillStyle=aim?'#72f4ff':'#bfa0f9';ctx.beginPath();ctx.ellipse(cx,cy,Math.min(11,p.w*.09),6,0,Math.PI,0);ctx.fill();
-  ctx.fillStyle=edge;ctx.fillRect(cx-20,cy+4,8,2);ctx.fillRect(cx+12,cy+4,8,2);
+ ctx.save();const p=carrier.plate=answerPlate(carrier),img=document.getElementById('enemyMechaAsset');
+ if(img?.complete&&img.naturalWidth)renderEnemyHull(ctx,img,p);
+ else{ctx.fillStyle='#26353b';ctx.fillRect(p.x+4,p.y+6,p.w-8,p.h-12);ctx.fillStyle='#080e13';ctx.fillRect(p.x+p.w*.14,p.y+p.h*.27,p.w*.72,p.h*.53);}
+ const active=aim||carrier.hitFlag>0;
+ if(active){
+  const x=p.x+p.w*.14,y=p.y+p.h*.27,w=p.w*.72,h=p.h*.53,len=Math.min(9,w*.12);
+  ctx.strokeStyle=carrier.hitFlag>0?'#ffe8ad':'#79ced5';ctx.lineWidth=carrier.hitFlag>0?2:1.5;ctx.beginPath();
+  for(const [cx,cy,sx,sy] of [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]]){ctx.moveTo(cx+sx*len,cy);ctx.lineTo(cx,cy);ctx.lineTo(cx,cy+sy*len);}ctx.stroke();
  }
- const badgeY=R.sideControls?p.y+17:p.y+p.h/2;
- ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';ctx.beginPath();ctx.arc(p.x+20,badgeY,13,0,$.twopi);ctx.fill();
- ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(carrier.num),p.x+20,badgeY+1);ctx.textAlign='left';ctx.textBaseline='alphabetic';
- const gap=3,count=Math.max(1,carrier.lifeMax),width=(p.w-16-(count-1)*gap)/count;
- for(let k=0;k<count;k++){ctx.fillStyle=k<carrier.life?'hsla('+hue+',85%,55%,1)':'rgba(110,135,145,.25)';ctx.fillRect(p.x+8+k*(width+gap),p.y+p.h-5,width,2);}
- if(carrier.hitFlag>0)carrier.hitFlag=Math.max(0,carrier.hitFlag-($.dt||1));
- ctx.restore();
+ // Hull identification, not a floating badge or a second target.
+ ctx.font='700 '+(R.sideControls?11:13)+'px "Chakra Petch",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='#11181d';ctx.strokeText(String(carrier.num),p.x+p.w*.075,p.y+p.h*.48);ctx.fillStyle='#e9e3cf';ctx.fillText(String(carrier.num),p.x+p.w*.075,p.y+p.h*.48);
+ const count=Math.max(1,carrier.lifeMax),gap=3,width=(p.w*.40-(count-1)*gap)/count;
+ for(let k=0;k<count;k++){ctx.fillStyle=k<carrier.life?(aim?'#8ae5ea':'#dcb473'):'#3b3430';ctx.fillRect(p.x+p.w*.30+k*(width+gap),p.y+p.h*.815,width,3);}
+ if(carrier.hitFlag>0)carrier.hitFlag=Math.max(0,carrier.hitFlag-($.dt||1));ctx.restore();
 }
 $.Carrier=function(o){
   for(const k in o)this[k]=o[k];

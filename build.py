@@ -7,8 +7,8 @@ def J(p): return open(os.path.join(HERE,p),encoding='utf-8').read()
 shell=J('src/shell.html')
 css=re.search(r'<style>(.*?)</style>',shell,re.S).group(1)
 shell=re.sub(r'<style>.*?</style>','',shell,count=1,flags=re.S)
-ship_assets={name:'data:image/webp;base64,'+base64.b64encode(open(os.path.join(HERE,'src/assets/'+name+'.webp'),'rb').read()).decode('ascii') for name in ['kestrel-flight','kestrel-hangar']}
-images=''.join('<img hidden alt="" id="'+ident+'" src="'+ship_assets[name]+'">' for name,ident in [('kestrel-flight','shipFlightAsset'),('kestrel-hangar','shipHangarAsset')])
+ship_assets={name:'data:image/webp;base64,'+base64.b64encode(open(os.path.join(HERE,'src/assets/'+name+'.webp'),'rb').read()).decode('ascii') for name in ['kestrel-flight','kestrel-hangar','enemy-mecha-v1']}
+images=''.join('<img hidden alt="" id="'+ident+'" src="'+ship_assets[name]+'">' for name,ident in [('kestrel-flight','shipFlightAsset'),('kestrel-hangar','shipHangarAsset'),('enemy-mecha-v1','enemyMechaAsset')])
 parts=[
  '<script>var $ = {};var gameStyle=document.createElement("style");gameStyle.textContent='+json.dumps(css).replace('</','<\\/')+';document.head.appendChild(gameStyle);</script>',
  '<script>window.FNPH_DECK = '+json.dumps(J('src/deck.txt')).replace('</','<\\/')+';</script>',

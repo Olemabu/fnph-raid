@@ -8,7 +8,7 @@ $cssMatch = [regex]::Match($shell,'<style>(.*?)</style>',[System.Text.RegularExp
 $css = $cssMatch.Groups[1].Value
 $shell = $shell.Remove($cssMatch.Index,$cssMatch.Length)
 $images = ''
-foreach ($pair in @(@('kestrel-flight','shipFlightAsset'),@('kestrel-hangar','shipHangarAsset'))) {
+foreach ($pair in @(@('kestrel-flight','shipFlightAsset'),@('kestrel-hangar','shipHangarAsset'),@('enemy-mecha-v1','enemyMechaAsset'))) {
  $data = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes((Join-Path $here ("src/assets/"+$pair[0]+'.webp'))))
  $images += '<img hidden alt="" id="'+$pair[1]+'" src="data:image/webp;base64,'+$data+'">'
 }

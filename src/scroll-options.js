@@ -30,7 +30,7 @@ function create(carrier){
 }
 function loop(now){
  requestAnimationFrame(loop);const dt=(now-last)/1000;last=now;
- const show=R.sideControls&&R.active&&!R.paused&&R.phase==='fight'&&$.state==='play'&&document.querySelector('#cardWrap').hidden&&!R.answerSplash;
+ const show=(R.sideControls||R.flight?.enabled())&&R.active&&!R.paused&&R.phase==='fight'&&$.state==='play'&&document.querySelector('#cardWrap').hidden&&!R.answerSplash;
  overlay.hidden=!show;if(!show){R.readingOption=null;return;}
  const live=($.carriers||[]).filter(c=>c.alive&&c.label?.scrollable&&c.plate);
  const focused=lane(live,$.hero?.x),changed=focused!==R.readingOption;R.readingOption=focused;
@@ -41,7 +41,7 @@ function loop(now){
   const p=c.plate;Object.assign(n.box.style,{left:Math.round(p.x+$.screen.x-($.rumble.x||0))+'px',top:Math.round(p.y+$.screen.y-($.rumble.y||0))+'px',width:p.w+'px',height:p.h+'px'});
   const max=Math.max(0,n.viewport.scrollHeight-n.viewport.clientHeight);n.box.classList.toggle('overflows',max>1);
   const offset=reduceMotion.matches||!reading?null:advance(n.motion,dt,max);if(offset!==null)n.viewport.scrollTop=offset;
-  const visible=Math.max(1,n.viewport.clientHeight-32),ratio=visible/(visible+max),thumbHeight=Math.max(8,ratio*visible);n.thumb.style.height=thumbHeight+'px';n.thumb.style.transform='translateY('+(max?n.viewport.scrollTop/max*(visible-thumbHeight):0)+'px)';
+  const visible=Math.max(1,n.viewport.clientHeight),ratio=visible/(visible+max),thumbHeight=Math.max(8,ratio*visible);n.thumb.style.height=thumbHeight+'px';n.thumb.style.transform='translateY('+(max?n.viewport.scrollTop/max*(visible-thumbHeight):0)+'px)';
  }
 }
 window.addEventListener('blur',()=>{for(const n of nodes.values()){n.motion.held=false;n.motion.manual=12;}});

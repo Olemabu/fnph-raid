@@ -414,14 +414,15 @@ html[data-theme=light] #play.sideControls .touchLeft,html[data-theme=light] #pla
 
 #optionScrollOverlay{position:absolute;inset:0;z-index:2;pointer-events:none}
 .optionScrollPlate{position:absolute;pointer-events:none;box-sizing:border-box;border-radius:8px}
-.optionScrollPlate.readingOption{outline:2px solid #58c5d3;outline-offset:-1px;box-shadow:0 0 12px #58c5d344}
-html[data-theme=light] .optionScrollPlate.readingOption{outline-color:#087c93;box-shadow:0 0 10px #087c9338}
-.optionScrollText{position:absolute;top:0;bottom:8px;left:0;right:0;-webkit-mask-image:linear-gradient(to bottom,transparent 32px,#000 32px);mask-image:linear-gradient(to bottom,transparent 32px,#000 32px);box-sizing:border-box;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;pointer-events:auto;scrollbar-width:none;font:600 11px/14px "Chakra Petch","Segoe UI",sans-serif;color:#f0f6ff;text-align:left;white-space:normal;overflow-wrap:anywhere;user-select:none;-webkit-user-select:none}
+.optionScrollPlate.readingOption{filter:drop-shadow(0 0 3px #70dce533)}
+
+.optionScrollText{position:absolute;top:27%;bottom:20%;left:14%;right:14%;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;pointer-events:auto;scrollbar-width:none;font:600 11px/14px "Chakra Petch","Segoe UI",sans-serif;color:#f0f6ff;text-align:left;white-space:normal;overflow-wrap:anywhere;user-select:none;-webkit-user-select:none}
+#play:not(.sideControls) .optionScrollText{font-size:13px;line-height:17px}
 .optionScrollText::-webkit-scrollbar{display:none}
 .optionScrollText:focus-visible{outline:2px solid #77c5d0;outline-offset:1px;border-radius:2px}
-.optionScrollContent{padding:34px 8px 2px;min-height:100%;box-sizing:border-box;display:flex;align-items:center}
+.optionScrollContent{padding:3px 4px;min-height:100%;box-sizing:border-box;display:flex;align-items:center}
 .overflows .optionScrollContent{display:block}
-.optionScrollTrack{display:none;position:absolute;top:32px;bottom:8px;right:3px;width:2px;background:#a3b9bc33;border-radius:2px;pointer-events:none}
+.optionScrollTrack{position:absolute;right:15%;top:29%;bottom:22%;width:2px;opacity:.5;pointer-events:none}
 .overflows .optionScrollTrack{display:block}
 .optionScrollTrack i{display:block;width:100%;background:#ab7d46;border-radius:2px}
 html[data-theme=light] .optionScrollText{color:#edf5fa}
