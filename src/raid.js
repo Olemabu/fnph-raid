@@ -219,8 +219,8 @@ function wrapText(ctx,text,maxW,maxLines){
 }
 function makeLabel(text,num){
   const c=document.createElement('canvas'),g=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1),W0=R.flight&&R.flight.enabled()?Math.min(240,Math.max(72,Math.floor($.cw/4)-16)):(innerWidth<900?Math.min(300,innerHeight<500?($.cw-190)/2:$.cw-20):240);
-  g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
-  const lines=wrapText(g,text,W0-50,innerWidth<900?8:4),H0=20+lines.length*17;
+  const font=R.sideControls?'600 12px "Chakra Petch", "Segoe UI", sans-serif':'600 13.5px "Chakra Petch", "Segoe UI", sans-serif',lineHeight=R.sideControls?15:17;g.font=font;
+  const lines=wrapText(g,text,W0-(R.sideControls?44:50),innerWidth<900?8:4),H0=20+lines.length*lineHeight;
   c.width=W0*dpr;c.height=H0*dpr;g.scale(dpr,dpr);
 
   // Frosted cyber plate body
@@ -238,10 +238,10 @@ function makeLabel(text,num){
   g.fillRect(10,1,W0-20,2);
 
   // Text
-  g.font='600 13.5px "Chakra Petch", "Segoe UI", sans-serif';
+  g.font=font;
   g.fillStyle=FNPHTheme.light?'#203746':'#f0f6ff';
   g.textBaseline='middle';
-  lines.forEach((l,i)=>g.fillText(l,42,H0/2-(lines.length-1)*8.5+i*17));
+  lines.forEach((l,i)=>g.fillText(l,R.sideControls?36:42,H0/2-(lines.length-1)*lineHeight/2+i*lineHeight));
 
   return{canvas:c,w:W0,h:H0};
 }
@@ -468,7 +468,7 @@ $.Carrier.prototype.render=function(){
 
   const L=this.label;
 
-  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')?145:8);
+  const minX=-$.screen.x+8,maxX=-$.screen.x+$.cw-L.w-8,minY=-$.screen.y+R.topSafe(),maxY=-$.screen.y+$.ch-L.h-(Q('#play').classList.contains('touchPlaying')&&!Q('#play').classList.contains('sideControls')?145:8);
 
   let lx=this.x-L.w/2,ly=this.y-this.radius-L.h-18;
 

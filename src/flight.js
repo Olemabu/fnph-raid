@@ -55,14 +55,14 @@ $.Hero.prototype.update=function(){
  F.contact(this);
  const dt=$.dt||1;
  this.flightBank=(this.flightBank||0)+(clamp(this.vx/8,-1,1)*.28-(this.flightBank||0))*(1-Math.exp(-dt*.14));
- const left=-$.screen.x+44,right=-$.screen.x+$.cw-44,top=-$.screen.y+Math.min($.ch*.46,R.topSafe()+70),bottom=-$.screen.y+$.ch-70;
+ const left=-$.screen.x+44,right=-$.screen.x+$.cw-44,top=-$.screen.y+Math.min($.ch*.46,R.topSafe()+70),bottom=-$.screen.y+$.ch-(R.sideControls?32:70);
  this.x=clamp(this.x,left,Math.max(left,right));this.y=clamp(this.y,top,Math.max(top,bottom));
  travel+=dt*(2.5+clamp(-this.vy,-1.2,3));
 };
 const camera=$.updateScreen;
 $.updateScreen=function(){if(!enabled())return camera();
  // Stable flight viewport; the world scrolls beneath the manually steered plane.
- if(!Number.isFinite(F.cx)||F.hero!==$.hero||F.width!==$.cw||F.height!==$.ch){F.width=$.cw;F.height=$.ch;for(const e of $.carriers)e.flightAnchor=null;F.hero=$.hero;$.hero.x=$.ww/2;$.hero.y=$.wh/2;F.cx=$.hero.x;F.cy=$.hero.y-$.ch*.18;}
+ if(!Number.isFinite(F.cx)||F.hero!==$.hero||F.width!==$.cw||F.height!==$.ch){F.width=$.cw;F.height=$.ch;for(const e of $.carriers)e.flightAnchor=null;F.hero=$.hero;$.hero.x=$.ww/2;$.hero.y=$.wh/2;F.cx=$.hero.x;F.cy=$.hero.y-$.ch*(R.sideControls?.34:.18);}
  $.screen.x=$.cw/2-F.cx;$.screen.y=$.ch/2-F.cy;$.rumble.x=$.rumble.y=0;$.mousescreen();
 };
 const map=R.renderMap,world=R.renderWorld,lighting=R.renderLighting,minimap=$.renderMinimap;
@@ -94,7 +94,7 @@ R.renderMap=function(){if(!enabled())return map();
 R.renderWorld=function(){if(!enabled())world();};R.renderLighting=function(){if(!enabled())lighting();};$.renderMinimap=function(){if(!enabled())minimap();};
 F.moveEnemy=function(e){
  const dt=$.dt||1;e.t+=.02*dt;
- if(!e.flightAnchor){const n=Math.max(1,$.carriers.length),slot=e.num-1,maxH=Math.max(0,...$.carriers.map(c=>c.label?.h||0)),safe=Math.max(90,R.topSafe())+maxH+55;
+ if(!e.flightAnchor){const n=Math.max(1,$.carriers.length),slot=e.num-1,maxH=Math.max(0,...$.carriers.map(c=>c.label?.h||0)),safe=R.sideControls?Math.min($.ch*.58,Math.max(90,R.topSafe())+maxH+55):Math.max(90,R.topSafe())+maxH+55;
   e.flightAnchor={x:-$.screen.x+$.cw*((slot+.5)/n),y:-$.screen.y+safe};
   e.x=e.flightAnchor.x;e.y=-$.screen.y-50;
  }

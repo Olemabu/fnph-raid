@@ -226,3 +226,7 @@ Start page → **MCQ map** (also under **Progress**) shows MCQ-only completed/re
 ## Android APK
 
 Install the signed APK from the repository Releases page. The game and MCQ map work offline; online AI generation requires internet and your existing study access code. Android uses separate saved progress from Chrome. Android build instructions: `android/README.md`.
+
+## Landscape phone controls
+
+Android v1.2 locks to sensor landscape (either sideways direction). The installed web app also requests landscape. On touch screens in landscape, movement sits in the left rail and Fire/Pause in the right rail, outside the resized central canvas. The question and horizontal answer row use the centre; health and set progress stay left. Pause includes Next set. Input cancellation, focus loss and orientation changes release movement/fire. Desktop layout and saved study progress are retained.

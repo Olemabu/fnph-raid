@@ -63,3 +63,9 @@ test('lateral travel is frame-rate independent and analogue input retains fine c
  assert(Math.max(...positions)-Math.min(...positions)<0.001);
  const {$,h}=lateral();$.pad.mx=0.25;for(let i=0;i<30;i++)h.update();assert(Math.abs(h.vx-3)<0.001);
 });
+
+test('landscape side controls keep horizontal answer enemies safely ahead of the aircraft',()=>{
+ const {R,$}=flight();R.sideControls=true;$.cw=491;$.ch=320;$.ww=1920;$.wh=1200;$.hero={};$.carriers=Array.from({length:4},(_,i)=>({num:i+1,t:0,label:{h:156}}));$.updateScreen();
+ for(const e of $.carriers)R.flight.moveEnemy(e);
+ const heroY=$.hero.y+$.screen.y;assert(Math.abs(heroY-$.ch*.84)<.001);for(const e of $.carriers)assert(heroY-(e.flightAnchor.y+$.screen.y)>60);assert.equal(new Set($.carriers.map(e=>e.flightAnchor.y)).size,1);
+});
