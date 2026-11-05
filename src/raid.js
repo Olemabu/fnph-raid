@@ -73,6 +73,7 @@ function grade(id,ok){
   else{s.mcqRemaining=2;s.mcqDone=false;}
  }
  store.set('stats',stats);
+ if(it&&it.type==='q'&&R.recordProgress)R.recordProgress(it,ok?'right':'wrong');
 }
 // Preserve prior answers: first-time successes retire; missed MCQs retain their outstanding practice.
 for(const it of deck.rooms.flatMap(r=>r.items)){const s=stats[it.id];if(it.type!=='q'||!s||s.mcqDone!==undefined)continue;s.mcqDone=s.box>=MASTER_AT||((s.right||0)>0&&!(s.wrong||0));s.mcqRemaining=s.mcqDone?0:(s.wrong?Math.max(1,3-(s.box||0)):0);}
@@ -772,7 +773,7 @@ R.reconsider=function(guessed){
  if(R.orbAssault)R.orbs.prepareRetry();
  if(last.stats)stats[it.id]={...last.stats};else delete stats[it.id];
  if(guessed){const s=st(it.id);s.mcqDone=false;s.mcqRemaining=2;s.box=0;s.guessed=(s.guessed||0)+1;}
- store.set('stats',stats);R.correct=Math.max(0,R.correct-1);R.answered=Math.max(0,R.answered-1);R.cleared=Math.max(0,R.cleared-1);R.streak=last.streak;$.score=Math.max(0,$.score-last.points);
+ store.set('stats',stats);if(R.recordProgress){const s=stats[it.id]||{};R.recordProgress(it,guessed?'guess':'restore',{done:!!s.mcqDone,remaining:s.mcqRemaining||0,seen:!!s.seen});}R.correct=Math.max(0,R.correct-1);R.answered=Math.max(0,R.answered-1);R.cleared=Math.max(0,R.cleared-1);R.streak=last.streak;$.score=Math.max(0,$.score-last.points);
  if(R.campaign&&R.campaign.undoItem)R.campaign.undoItem(it);
  if(!Q('#cardWrap').hidden)closeCard(true);
  clearAnswerSplash();$.mouse.down=0;$.bullets.length=0;$.aimLock=null;applyArsenal(false);
@@ -1501,6 +1502,11 @@ function drawTactical(ctx){
 }
 R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
 R.orbOptions=it=>({opts:qOptions(it),correct:[it.answer],chip:'Destroy the correct answer orb',t:0,r0:300});R.advanceQuestion=nextQuestion;R.swarmDeath=swarmDown;
+R.applyProgress=function(states){
+ for(const room of deck.rooms)for(const it of room.items){const id=R.progressId?.(it),value=id&&states[id];if(!value)continue;const s=st(it.id);s.mcqDone=value.done;s.mcqRemaining=value.remaining;s.box=value.done?Math.max(MASTER_AT,s.box||0):0;if(value.seen)s.seen=Math.max(1,s.seen||0);else{s.seen=s.right=s.wrong=s.guessed=0;}}
+ store.set('stats',stats);
+ if(!R.active&&R.campaign){R.campaign.render();if(!Q('#warRoom').hidden)R.campaign.renderWarMap();}
+};
 R.beginCombat=()=>{openBriefing();cardReadyAt=0;closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 function boot(){
