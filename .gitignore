@@ -7,3 +7,7 @@ Thumbs.db
 node_modules/
 .commitmsg
 .last-push.txt
+
+*.keystore
+*.jks
+dist/apk/

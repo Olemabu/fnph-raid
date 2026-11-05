@@ -222,3 +222,7 @@ Use https://olemabu.github.io/fnph-raid/dist/play.html as the fresh online entry
 ## MCQ progress map
 
 Start page → **MCQ map** (also under **Progress**) shows MCQ-only completed/remaining totals per topic. Select a topic or concept and **Play remaining MCQs**. Sets contain up to 10 unfinished questions; Next set keeps skipped work unfinished. Existing saved mastery is shared across modes. Unseen and repeat-practice counts are separate; OSCE/list drills do not inflate MCQ totals.
+
+## Android APK
+
+Install the signed APK from the repository Releases page. The game and MCQ map work offline; online AI generation requires internet and your existing study access code. Android uses separate saved progress from Chrome. Android build instructions: `android/README.md`.
