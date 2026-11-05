@@ -246,3 +246,8 @@ Progress → Central saves / Sync with Nebula links this installation to one pri
 
 ## v1.2.6 — detailed mecha answer craft
 The four answer targets now use an original alpha WebP hull with the same worn ivory, graphite and brass detail as the Kestrel aircraft. The central recessed display holds the full answer text, supports manual scrolling and lane-focused auto-scroll, and is large enough for narrow phones. Pink badges and neon card outlines have been removed; identification and armour indicators are integrated into the hull. Python and PowerShell embed the asset in every distribution. Player aircraft, direct strafe, answer safety and central progress storage are unchanged. See ENEMY_DESIGN.md for prompt/provenance and display geometry.
+
+## v1.2.7 — follow Nebula's timetable
+The main launch button plays today's Nebula timetable topic and exact daily MCQ selection. Today/date and day part remain visible; Next set stays inside that selection and completion never silently switches to the campaign. MCQ map and Progress → Continue story campaign are explicit alternatives. Link the same Central saves profile to read personal start dates, swapped topic order and revision selections. Offline uses the last cached timetable; unlinked installations clearly use the bundled default plan. Active flights do not change at midnight.
+
+Regenerate `src/timetable-data.js` with `node tools/build-timetable.cjs` after syllabus/content updates, then build. The generated data uses Nebula's actual syllabus and original MCQ order. Timetable tests compare all 56 calendar days with Nebula's scheduling implementation. Personal timetable ordering preserves repeated day slots; timestamped explicit edits win over stale device snapshots.

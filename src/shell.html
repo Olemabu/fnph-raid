@@ -455,6 +455,9 @@ html[data-theme=light] .optionScrollText{color:#edf5fa}
  #home.compactHome .framePlaque p{font-size:9px;line-height:1.4}
  #home.compactHome .framePlaque small{display:none}
 }
+#qRunTopic{display:block;font:700 10px/1.3 "Chakra Petch",sans-serif;letter-spacing:.025em;margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--gold)}
+#home.compactHome #timetableStatus{font-size:10px;line-height:1.25;max-width:44ch;margin:5px 0 0}
+@media(max-height:400px){#home.compactHome #timetableStatus{font-size:8px;line-height:1.2}}
 </style>
 
 <section id="home" class="page">
@@ -462,7 +465,7 @@ html[data-theme=light] .optionScrollText{color:#edf5fa}
   <section class="campaignPanel" aria-label="Operation Nightingale campaign">
     <div class="campaignMast"><b>FNPH RAID / OPERATION NIGHTINGALE</b><span>Psychiatry residency · 20 chapters</span><span>Command link established</span></div>
     <div class="hangar"><canvas id="hangarArt" aria-label="Rendered Kestrel interceptor in the Nightingale hangar"></canvas>
-      <div class="campaignCopy"><span class="campaignTag" id="campaignChapter"></span><h1>ARM.<br><em>DEPLOY.</em></h1><span class="campaignTag" id="campaignTitle"></span><p id="campaignStory"></p><div class="campaignObjective"><small>NEXT MISSION</small><b id="campaignObjective"></b></div><div class="combatLoadout"><canvas id="loadoutShip" width="360" height="180" aria-label="Your current combat ship"></canvas><div><span>PRIMARY ARMAMENT</span><b id="loadoutWeapon"></b><small id="loadoutSpecs"></small></div><strong>∞<small>ENERGY AMMO</small></strong></div><button id="campaignLaunch" class="btn launchBtn" disabled>Loading game…</button><p class="campaignFootnote">Ship online. MCQs once; missed or guessed answers return twice.</p></div>
+      <div class="campaignCopy"><span class="campaignTag" id="campaignChapter"></span><h1>ARM.<br><em>DEPLOY.</em></h1><span class="campaignTag" id="campaignTitle"></span><p id="campaignStory"></p><div class="campaignObjective"><small id="campaignObjectiveLabel">TODAY’S NEBULA TOPIC</small><b id="campaignObjective"></b></div><div class="combatLoadout"><canvas id="loadoutShip" width="360" height="180" aria-label="Your current combat ship"></canvas><div><span>PRIMARY ARMAMENT</span><b id="loadoutWeapon"></b><small id="loadoutSpecs"></small></div><strong>∞<small>ENERGY AMMO</small></strong></div><button id="campaignLaunch" class="btn launchBtn" disabled>Loading game…</button><p class="campaignFootnote">Ship online. MCQs once; missed or guessed answers return twice.</p></div>
       <div class="framePlaque"><p id="frameCode"></p><h2 id="frameName"></h2><small id="frameNext"></small></div>
     </div>
     <div class="campaignLedger"><div><p id="campaignProgress"></p><div class="campaignMeter"><i id="campaignFill"></i></div></div><div id="frameSteps" class="frameSteps" aria-label="Frame evolution milestones"></div></div>

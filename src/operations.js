@@ -14,6 +14,7 @@ Q('#opsDeploy').onclick=()=>{const items=shuffle(pool()),count=+Q('#opsCount').v
 R.onFreeRunClear=room=>{if(!room.randomFree||!room.endless)return false;const rooms=room.randomScope==='all'?R.deckRooms():[R.deckRooms()[+room.randomScope]],items=shuffle(rooms.flatMap(r=>r.items).filter(i=>!R.isMastered(i)&&(!R.orbAssault||i.type==='q')));if(!items.length)return false;room.items=items.slice(0,20);R.beginCombat();R.toast('Next spaceship round',true);return true;};
 R.nextSet=function(){
  if(!R.active)return false;
+ if(R.timetable?.isCurrentRun())return R.timetable.nextSet();
  if(R.campaignRun&&R.campaign)return R.campaign.advanceSet();
  const current=R.rooms[R.si],scope=current.randomScope;
  if(current.studyMode==='osce'){

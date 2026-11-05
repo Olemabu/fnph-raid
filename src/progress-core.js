@@ -49,6 +49,14 @@ function operation(app,current,base){
 }
 function applyOperation(state,event){
  const out=merge(state,event.data);
+ // A timetable is ordered configuration, not a completion set. Preserve duplicate day slots.
+ if(event.app==='nebula'){
+  const old=state?.['nebula-progress-v1']||{},next=event.data['nebula-progress-v1'];
+  if(next){const size=Number.isInteger(next.orderSize)&&next.orderSize>0&&next.orderSize<=366?next.orderSize:old.orderSize||48;const valid=o=>Array.isArray(o)&&o.length===size;const selected=valid(next.order)&&(!valid(old.order)||(Number(next.orderAt)||0)>(Number(old.orderAt)||0))?next.order:old.order;if(valid(selected))out['nebula-progress-v1'].order=selected.slice();}
+  const prior=state?.['nebula-start'],incoming=event.data['nebula-start'];
+  if(incoming&&prior&&(Number(incoming.changedAt)||0)<=(Number(prior.changedAt)||0))out['nebula-start']={...prior};
+ }
+
  if(event.app==='raid'&&event.data['fnphraid.bestTime'])for(const [id,n] of Object.entries(event.data['fnphraid.bestTime'])){const old=state?.['fnphraid.bestTime']?.[id];if(old>0&&n>0)out['fnphraid.bestTime'][id]=Math.min(old,n);}
  for(const [path,n] of event.add||[]){if(!isCounter(event.app,path)||!path.every(safe)||!Number.isFinite(n)||n<0)continue;let at=out;for(const k of path.slice(0,-1))at=at[k]||(at[k]={});const k=path.at(-1);at[k]=(Number(at[k])||0)+n;}
  return out;

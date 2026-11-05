@@ -915,6 +915,7 @@ function swarmDown(){
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
   if(R.flight)R.flight.completeSet();
+  if(R.onTimetableClear&&R.onTimetableClear(r))return;
   if(R.onFreeRunClear&&R.onFreeRunClear(r))return;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
   const csN=(r.concepts||[]).filter(c=>c.items.length).length,allC=!C||conceptsDone(r)>=csN;
@@ -1533,7 +1534,7 @@ function drawTactical(ctx){
 }
 R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
 R.orbOptions=it=>({opts:qOptions(it),correct:[it.answer],chip:'Destroy the correct answer orb',t:0,r0:300});R.advanceQuestion=nextQuestion;R.swarmDeath=swarmDown;
-R.answerPlate=answerPlate;
+R.answerPlate=answerPlate;R.escape=esc;
 R.applySharedSave=function(data){
  if(data['fnphraid.stats'])stats=data['fnphraid.stats'];
  if(Array.isArray(data['fnphraid.cdone']))cdone=new Set(data['fnphraid.cdone']);
