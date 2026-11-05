@@ -218,3 +218,7 @@ Flight swarms: each question starts with a three-second reading grace. Bursts co
 Online launches now check the network for a complete current game before using the offline cache. Offline and failed/incomplete updates fall back to the last valid copy. Newly staged service workers activate automatically without reloading an active run; progress storage is untouched. Regression coverage: tests/offline-update.cjs.
 
 Use https://olemabu.github.io/fnph-raid/dist/play.html as the fresh online entry. It is built from the identical game HTML and bypasses the legacy worker’s cached filename on the first visit; the current worker provides network-first/offline-fallback behaviour for it too.
+
+## MCQ progress map
+
+Start page → **MCQ map** (also under **Progress**) shows MCQ-only completed/remaining totals per topic. Select a topic or concept and **Play remaining MCQs**. Sets contain up to 10 unfinished questions; Next set keeps skipped work unfinished. Existing saved mastery is shared across modes. Unseen and repeat-practice counts are separate; OSCE/list drills do not inflate MCQ totals.

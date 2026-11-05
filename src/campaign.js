@@ -101,33 +101,37 @@ function render(){
 }
 function updateRibbon(){const el=Q('#missionRibbon');el.hidden=!R.campaignRun||!R.active||!active||!!R.modeName();if(el.hidden){ribbonKey='';return;}const key=active.id+'::'+frameTier();if(key===ribbonKey)return;ribbonKey=key;const f=frameLook();el.innerHTML='<span>CH '+String(active.chapter+1).padStart(2,'0')+' · '+(active.kind==='transfer'?'DISPATCH':'NIGHTINGALE')+'</span><b>'+esc(active.title)+'</b><small>'+esc(f.name)+' · progress saves as you answer</small>';}
 function drawLoadout(){const cv=Q('#loadoutShip'),g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);g.strokeStyle='#66b9c533';g.lineWidth=1;for(let x=0;x<cv.width;x+=20){g.beginPath();g.moveTo(x,0);g.lineTo(x,cv.height);g.stroke();}for(let y=0;y<cv.height;y+=20){g.beginPath();g.moveTo(0,y);g.lineTo(cv.width,y);g.stroke();}R.drawFrame(g,180,90,2,frameTier(),save.visualXP*.1,true,-Math.PI/2,0);}
+function mcqItems(items){return [...new Map(items.filter(it=>it.type==='q').map(it=>[it.id,it])).values()];}
 function topicProgress(r){
- const stats=R.itemStats(),total=r.items.length,retired=r.items.filter(R.isMastered).length;
- const units=r.items.reduce((sum,it)=>sum+(R.isMastered(it)?3:Math.max(0,Math.min(3,(stats[it.id]||{}).box||0))),0);
- const started=r.items.some(it=>{const st=stats[it.id]||{};return(st.seen||st.right||st.wrong||0)>0;});
- const raw=total?units/(total*3):0,percent=retired===total?100:Math.min(99,Math.round(raw*100));
- return {retired,total,percent,started,state:retired===total?'full':!started&&units===0?'empty':percent<34?'started':percent<67?'half':'advanced'};
+ const items=mcqItems(r.items),stats=R.itemStats(),total=items.length,retired=items.filter(R.isMastered).length;
+ const unseen=items.filter(it=>!R.isMastered(it)&&!((stats[it.id]||{}).seen||(stats[it.id]||{}).right||(stats[it.id]||{}).wrong||(stats[it.id]||{}).guessed)).length;
+ const remaining=total-retired,repeats=remaining-unseen,started=retired>0||repeats>0,percent=total?Math.round(retired/total*100):0;
+ return {retired,total,remaining,unseen,repeats,percent,started,state:!total?'none':!remaining?'full':!started?'empty':percent<34?'started':percent<67?'half':'advanced'};
 }
-function sectorMission(i,allowReplay=true){const list=timeline().filter(m=>m.kind==='concept'&&m.chapter===i&&m.concept.items.some(it=>!R.isMastered(it)));return list.find(m=>!complete.has(m.id))||(allowReplay?list[0]:null);}
-function openWarMap(){const m=next();selectedSector=m?m.chapter:0;R.showScreen('warRoom');renderWarMap();}
+function openWarMap(){const rooms=R.deckRooms();selectedSector=Math.max(0,rooms.findIndex(r=>topicProgress(r).remaining));R.showScreen('warRoom');renderWarMap();}
 function renderWarMap(){
- const all=R.deckRooms(),items=all.flatMap(r=>r.items),retired=items.filter(R.isMastered).length;
- Q('#warCount').textContent=all.length+' SECTORS / '+all.reduce((n,r)=>n+r.concepts.length,0)+' CONCEPTS';Q('#warMastery').textContent=retired+' / '+items.length+' ITEMS RETIRED';
+ const all=R.deckRooms(),st=topicProgress({items:all.flatMap(r=>r.items)});
+ Q('#warCount').textContent=all.length+' TOPICS / '+st.total+' MCQs';Q('#warMastery').textContent=st.retired+' completed · '+st.remaining+' left';
  const positions=all.map((r,i)=>{const row=Math.floor(i/4),col=row%2?3-i%4:i%4;return{x:125+250*col,y:64+128*row};});
  Q('#warPaths').innerHTML=positions.slice(1).map((p,i)=>{const a=positions[i];return '<path d="M'+a.x+' '+a.y+' L'+p.x+' '+p.y+'" fill="none" stroke="#416c79" stroke-width="2" stroke-dasharray="5 7"/>';}).join('');
- const labels={empty:'UNTOUCHED',started:'IN PROGRESS',half:'BUILDING MASTERY',advanced:'NEARLY MASTERED',full:'MASTERED'};
- Q('#warNodes').innerHTML=all.map((r,i)=>{const p=positions[i],st=topicProgress(r);return '<button class="warNode progress-'+st.state+'" data-sector="'+i+'" aria-label="'+esc(r.topic)+', '+st.percent+'% progress, '+labels[st.state].toLowerCase()+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%;--sectorFill:'+st.percent+'%"><span>SECTOR '+String(i+1).padStart(2,'0')+' / '+labels[st.state]+'</span><b>'+esc(r.topic)+'</b><small>'+st.percent+'% progress · '+st.retired+'/'+st.total+' mastered</small><i></i></button>';}).join('');
- Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>inspectSector(+b.dataset.sector));inspectSector(selectedSector);
+ const labels={none:'NO MCQs',empty:'UNTOUCHED',started:'IN PROGRESS',half:'BUILDING MASTERY',advanced:'NEARLY COMPLETE',full:'COMPLETED'};
+ Q('#warNodes').innerHTML=all.map((r,i)=>{const p=positions[i],st=topicProgress(r),count=st.total?st.remaining+' left · '+st.retired+'/'+st.total+' completed':'No MCQs';return '<button class="warNode progress-'+st.state+'" data-sector="'+i+'" aria-label="'+esc(r.topic)+', '+count+'" style="--nx:'+p.x/10+'%;--ny:'+p.y/6.4+'%;--sectorFill:'+st.percent+'%"><span>TOPIC '+String(i+1).padStart(2,'0')+' / '+labels[st.state]+'</span><b>'+esc(r.topic)+'</b><small>'+count+'</small><i></i></button>';}).join('');
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>b.onclick=()=>{inspectSector(+b.dataset.sector);if(innerWidth<800)Q('#warTopic').scrollIntoView({block:'start',behavior:'smooth'});});inspectSector(selectedSector);
 }
-function selectMission(m){selectedMission=m;const r=R.deckRooms()[selectedSector];Q('#warNext').textContent=m?r.topic+' · '+m.title:r.topic+' · fully mastered';Q('#warDeploy').disabled=!m;Q('#warDeploy').textContent=m?'Deploy selected mission →':'Topic mastered';Q('#warConcepts').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!!m&&b.dataset.mission===m.id)));}
-function inspectSector(i){selectedSector=i;const r=R.deckRooms()[i],st=topicProgress(r);Q('#warSector').textContent='SECTOR '+String(i+1).padStart(2,'0')+' // '+r.locus;Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=STORY[i]?STORY[i][2]:'';
- Q('#warIntelStats').innerHTML='<b>'+r.concepts.length+'<small>CONCEPTS</small></b><b>'+st.percent+'%<small>PROGRESS</small></b><b>'+st.retired+'/'+st.total+'<small>MASTERED</small></b>';
- const missions=timeline().filter(m=>m.kind==='concept'&&m.chapter===i);
- Q('#warConcepts').innerHTML=missions.map((m,k)=>{const c=m.concept,retired=c.items.filter(R.isMastered).length;return '<li class="'+(retired===c.items.length?'retired':'')+'"><button data-mission="'+esc(m.id)+'" data-concept="'+k+'"'+(retired===c.items.length?' disabled':'')+'>'+esc(c.title)+'<small>'+retired+'/'+c.items.length+' mastered'+(retired===c.items.length?' · complete':' · select mission')+'</small></button></li>';}).join('');
+function selectMission(m){selectedMission=m;const r=R.deckRooms()[selectedSector],st=topicProgress(r);Q('#warNext').textContent=m?r.topic+' · '+m.title:r.topic+(st.total?' · all MCQs completed':' · no MCQs');Q('#warDeploy').disabled=!m;Q('#warDeploy').textContent=m?'Play remaining MCQs →':st.total?'All MCQs completed':'No MCQs';Q('#warConcepts').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!!m&&b.dataset.mission===m.id)));}
+function inspectSector(i){selectedSector=i;const r=R.deckRooms()[i],st=topicProgress(r);Q('#warSector').textContent='TOPIC '+String(i+1).padStart(2,'0');Q('#warTopic').textContent=r.topic;Q('#warIntelText').textContent=st.unseen+' unseen · '+st.repeats+' need repeat practice. A missed or guessed question stays unfinished until its required correct repeats are complete.';
+ Q('#warIntelStats').innerHTML='<b>'+st.total+'<small>TOTAL MCQs</small></b><b>'+st.retired+'<small>COMPLETED</small></b><b>'+st.remaining+'<small>LEFT</small></b>';
+ const missions=[{id:'topic',title:'All unfinished MCQs',items:r.items},...(r.concepts||[]).map((c,k)=>({id:'concept-'+k,title:c.title,items:c.items}))].filter(m=>mcqItems(m.items).length);
+ Q('#warConcepts').innerHTML=missions.map((m,k)=>{const st=topicProgress(m);return '<li class="'+(!st.remaining?'retired':'')+'"><button data-mission="'+m.id+'" data-concept="'+k+'"'+(!st.remaining?' disabled':'')+'>'+esc(m.title)+'<small>'+st.remaining+' left · '+st.retired+'/'+st.total+' completed</small></button></li>';}).join('');
  Q('#warConcepts').querySelectorAll('button').forEach(b=>b.onclick=()=>selectMission(missions[+b.dataset.concept]));
- Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>{b.classList.toggle('selected',+b.dataset.sector===i);b.setAttribute('aria-pressed',String(+b.dataset.sector===i));});selectMission(sectorMission(i));
+ Q('#warNodes').querySelectorAll('[data-sector]').forEach(b=>{b.classList.toggle('selected',+b.dataset.sector===i);b.setAttribute('aria-pressed',String(+b.dataset.sector===i));});selectMission(missions.find(m=>topicProgress(m).remaining)||null);
 }
-function deploySelected(){if(!selectedMission)return;topicRun=true;launchMission(selectedMission);}
+function deploySelected(){
+ if(!selectedMission)return;const base=R.deckRooms()[selectedSector],items=mcqItems(selectedMission.items).filter(it=>!R.isMastered(it));
+ if(!items.length){inspectSector(selectedSector);return;}
+ const room={...base,locus:'MCQ map practice',topic:base.topic+' · '+selectedMission.title,mode:'',review:true,studyPractice:true,randomFree:false,missionConcept:null,concepts:[],nextSetPool:items,items:items.slice(0,10),note:['Unfinished MCQs only. Progress saves across game modes. Use Next set to move to another group without marking skipped questions complete.']};
+ R.start([room],0);R.beginCombat();
+}
 R.campaign={hudLabel:()=>active?'Chapter '+String(active.chapter+1).padStart(2,'0')+' / 20 · '+(active.kind==='transfer'?'Dispatch':'Mission'):'',launch:launch,deploy:launch,advanceSet,openWarMap,render,frameTier,frameLook,onCorrect,showBriefing,routeFor,recordItem,undoItem,missionItems,timeline,next,clearedChapters,updateRibbon,topicProgress,renderWarMap,inspectSector};
 Q('#campaignLaunch').onclick=launch;Q('#warDeploy').onclick=deploySelected;Q('#warBack').onclick=()=>R.showScreen('home');
 // Animated hangar, drawn at a bounded resolution and paused when it is off screen.

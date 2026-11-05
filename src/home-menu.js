@@ -17,6 +17,8 @@ function add(key,label,nodes){
 const study=Q('#studyQuery')?.closest('.appTools'),install=Q('#offlineStatus')?.closest('.appTools'),theme=Q('#home .themeSettings'),more=Q('#home .freeFlight');
 if(more)more.open=true;
 add('study','Study session',[study]);add('practice','Free flight',[Q('#home .operations')]);add('options','Options',[theme,more]);add('progress','Progress',[Q('#home .campaignLedger'),Q('#chapterRail')]);add('install','Install & saves',[install]);
+function mapButton(root){const b=document.createElement('button');b.className='btn';b.textContent='MCQ map';b.onclick=()=>{close();R.campaign.openWarMap();};root.prepend(b);}
+mapButton(nav);mapButton(entries.get('progress').pane);
 function open(key,button){
  const entry=entries.get(key);if(!entry)return;
  if(!dialog.open)opener=button;
