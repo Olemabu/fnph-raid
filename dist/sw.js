@@ -1,4 +1,4 @@
-const VERSION='ae8fc283238c1837',CACHE='fnphraid-offline-'+VERSION;
+const VERSION='b3969b8612ae8d92',CACHE='fnphraid-offline-'+VERSION;
 const ROOT=new URL('./',self.location),GAME=new URL('fnph-raid.html',ROOT).href;
 const FILES=['fnph-raid.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{
@@ -30,6 +30,6 @@ self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);
  if(event.request.method!=='GET'||url.origin!==ROOT.origin||!url.pathname.startsWith(ROOT.pathname))return;
  const name=url.pathname.slice(ROOT.pathname.length);
- if(name==='fnph-raid.html'||(event.request.mode==='navigate'&&name===''))event.respondWith(latestGame(event.request));
+ if(name==='play.html'||name==='fnph-raid.html'||(event.request.mode==='navigate'&&name===''))event.respondWith(latestGame(event.request));
  else if(FILES.includes(name))event.respondWith((async()=>await(await caches.open(CACHE)).match(new URL(name,ROOT).href)||fetch(event.request))());
 });

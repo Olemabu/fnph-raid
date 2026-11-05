@@ -33,6 +33,7 @@ html=wrap(bundle)
 offline=wrap(images+'<script>window.FNPHBoot.stage("Starting the offline game…","All artwork, questions and sound are inside this file.",70);</script><script>'+runtime+'</script>',True)
 os.makedirs(os.path.join(HERE,'dist'),exist_ok=True)
 open(os.path.join(HERE,'dist','fnph-raid.html'),'w',encoding='utf-8').write(html)
+open(os.path.join(HERE,'dist','play.html'),'w',encoding='utf-8').write(html)
 open(os.path.join(HERE,'dist','fnph-raid-offline.html'),'w',encoding='utf-8').write(offline)
 readme=J('src/package-readme.txt')
 with zipfile.ZipFile(os.path.join(HERE,'dist','FNPH-Raid-Offline.zip'),'w',zipfile.ZIP_DEFLATED,compresslevel=9) as package:

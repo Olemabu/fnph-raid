@@ -36,6 +36,7 @@ $direct=$images+'<script>window.FNPHBoot.stage("Starting the offline game...","A
 $offline='<!doctype html><html lang="en"><head>'+$head+'</head><body><script>window.FNPH_OFFLINE_EDITION=true;</script>'+$early+$shell.Replace('/*__SCRIPTS__*/',$direct)+'</body></html>'
 $dist=Join-Path $here 'dist';[System.IO.Directory]::CreateDirectory($dist) | Out-Null
 [System.IO.File]::WriteAllText((Join-Path $dist 'fnph-raid.html'),$html,$utf8)
+[System.IO.File]::WriteAllText((Join-Path $dist 'play.html'),$html,$utf8)
 [System.IO.File]::WriteAllText((Join-Path $dist 'fnph-raid-offline.html'),$offline,$utf8)
 Add-Type -AssemblyName System.IO.Compression
 $zipStream=[System.IO.File]::Create((Join-Path $dist 'FNPH-Raid-Offline.zip'))

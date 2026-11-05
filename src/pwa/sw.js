@@ -30,6 +30,6 @@ self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);
  if(event.request.method!=='GET'||url.origin!==ROOT.origin||!url.pathname.startsWith(ROOT.pathname))return;
  const name=url.pathname.slice(ROOT.pathname.length);
- if(name==='fnph-raid.html'||(event.request.mode==='navigate'&&name===''))event.respondWith(latestGame(event.request));
+ if(name==='play.html'||name==='fnph-raid.html'||(event.request.mode==='navigate'&&name===''))event.respondWith(latestGame(event.request));
  else if(FILES.includes(name))event.respondWith((async()=>await(await caches.open(CACHE)).match(new URL(name,ROOT).href)||fetch(event.request))());
 });
