@@ -48,7 +48,7 @@ R.onTimetableClear=function(room){if(!room.timetableRun)return false;const day=r
 const meta=document.createElement('p');meta.id='timetableStatus';meta.className='campaignFootnote';meta.setAttribute('role','status');Q('#campaignLaunch').after(meta);
 Q('#campaignLaunch').onclick=launch;const campaignButton=document.createElement('button');campaignButton.className='btn';campaignButton.textContent='Continue story campaign';campaignButton.onclick=()=>{R.homeMenu.close();R.campaign.launch();};Q('#homePane-progress').prepend(campaignButton);
 const label=document.createElement('span');label.id='qRunTopic';Q('#qbar').prepend(label);
-function hud(){requestAnimationFrame(hud);const room=R.active&&R.rooms?.[R.si],text=room?(room.timetableRun?'NEBULA TODAY · ':'MANUAL TOPIC · ')+(room.timetableRun?room.timetableDay.title+' · '+partLabel(room.timetableDay):room.topic):'';if(label.textContent!==text)label.textContent=text;label.hidden=!room;}
+function hud(){requestAnimationFrame(hud);const room=R.active&&R.rooms?.[R.si],text=room?(room.nebulaOsceId?'NEBULA OSCE · ':room.timetableRun?'NEBULA TODAY · ':'MANUAL TOPIC · ')+(room.timetableRun?room.timetableDay.title+' · '+partLabel(room.timetableDay):room.topic):'';if(label.textContent!==text)label.textContent=text;label.hidden=!room;}
 R.timetable={renderHome,refresh,launch,nextSet,isCurrentRun,plan,itemsFor};
 window.addEventListener('focus',()=>{if(!R.active)refresh();});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!R.active)refresh();});setInterval(()=>{if(!document.hidden&&!R.active){renderHome();refresh();}},60000);
 renderHome();refresh();requestAnimationFrame(hud);

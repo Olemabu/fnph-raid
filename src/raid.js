@@ -693,6 +693,7 @@ function openBriefing(){
   const r=R.rooms[R.si];
   const C=R.concept=r.missionConcept||pickConcept(r),basePool=C?C.items:r.items,
     pool=R.campaignRun&&R.campaign?R.campaign.missionItems(basePool):basePool;
+  if(R.osceSync&&!R.osceSync.ensure(r,pool.find(i=>!mastered(i))||pool[0],C,openBriefing))return;
   const fresh=pool.filter(i=>!mastered(i)),done=pool.filter(mastered);
   const review=[];
   R.phase='briefing';R.queue=mixQueue(fresh);
@@ -730,11 +731,13 @@ function insertMcqRepeat(it){
  const pos=positions.length?pickOne(positions):R.queue.length;R.queue.splice(pos,0,it);
 }
 function nextQuestion(){
+  if(R.osceSync&&!R.osceSync.ensure(R.rooms[R.si],R.queue.find(it=>!mastered(it)),R.concept,nextQuestion))return;
   const eligible=R.queue.filter(it=>!mastered(it));R.total=Math.max(R.cleared,R.total-(R.queue.length-eligible.length));R.queue=eligible;
   if(!R.queue.length){if(R.lastAnswer){R.phase='reviewEnd';card('learn','Questions complete','<p>You can retry the last MCQ or mark it as guessed before finishing.</p>','Finish question set',()=>{R.lastAnswer=null;stationCleared();},0);}else stationCleared();return;}
   R.cur=R.queue.shift();R.cur.found=R.retryResume&&R.retryResume.it===R.cur?R.retryResume.found:[];if(R.retryResume&&R.retryResume.it===R.cur)R.retryResume=null;
   const lesson=R.cur.osceLesson;
   if(lesson&&R.osceLessonKey!==lesson.key){R.osceLessonKey=lesson.key;R.phase='briefing';card('brief','OSCE · Station '+lesson.stationNumber+' · Step '+lesson.step+' of '+lesson.total,
+    lesson.nebulaScript?'<h2>'+esc(lesson.station)+' — '+esc(lesson.title)+'</h2><p><b>Say / demonstrate:</b></p><p>'+esc(lesson.say)+'</p><p><b>Examiner checks:</b> '+esc(lesson.reason)+'</p>':
     '<h2>'+esc(lesson.station)+' — '+esc(lesson.title)+'</h2><p><b>Do:</b> '+esc(lesson.action)+'</p><p><b>Say aloud:</b> “'+esc(lesson.say)+'”</p><p><b>They may say:</b> “'+esc(lesson.expect)+'”</p><p><b>Your reply:</b> “'+esc(lesson.reply)+'”</p><p><b>Why:</b> '+esc(lesson.reason)+'</p>'+(lesson.critical?'<p class="ans bad">Critical safety step — do not omit this.</p>':''), 'Practise this step',()=>{R.phase='fight';setupWave();},300);return;}
   setupWave();
 }
@@ -915,6 +918,7 @@ function swarmDown(){
 function stationCleared(){
   const r=R.rooms[R.si],s=SP(r.idx),C=R.concept;
   if(R.flight)R.flight.completeSet();
+  if(R.onNebulaOsceClear&&R.onNebulaOsceClear(r))return;
   if(R.onTimetableClear&&R.onTimetableClear(r))return;
   if(R.onFreeRunClear&&R.onFreeRunClear(r))return;
   if(C){cdone.add(ckey(r,C));store.set('cdone',[...cdone]);}
@@ -1548,7 +1552,7 @@ R.applyProgress=function(states){
  store.set('stats',stats);
  if(!R.active&&R.campaign){R.campaign.render();if(!Q('#warRoom').hidden)R.campaign.renderWarMap();}
 };
-R.beginCombat=()=>{openBriefing();cardReadyAt=0;closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
+R.dismissCard=()=>closeCard(true);R.beginCombat=()=>{openBriefing();cardReadyAt=0;if(!R.osceSync?.waiting)closeCard();};R.isMastered=mastered;R.loadout=()=>ARSENAL[arsenalTier()];R.showScreen=showScreen;R.deckRooms=()=>deck.rooms;R.itemStats=()=>stats;R.showCard=card;R.openBriefing=openBriefing;R.toHome=quitToHome;
 /* ================= Boot ================= */
 function boot(){
   $.init();buildMap();renderHome();if(!R.active)showScreen('home');

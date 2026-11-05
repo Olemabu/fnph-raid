@@ -45,8 +45,9 @@ async function readTimetable(){
  if(!cfg.token)return null;
  const token=cfg.token,data=await requestData('/state',token,{app:'nebula',operation:null});if(cfg.token!==token)return null;
  const p=data.state?.['nebula-progress-v1']||{},start=data.state?.['nebula-start'];
- return {plan:p.plan,start:start?.plan===p.plan?start.start:null,startAt:start?.changedAt||0,order:p.order,orderAt:p.orderAt||0,wrongIds:Object.keys(p.mcq||{}).filter(id=>p.mcq[id]==='wrong'),phaseDays:p.phaseDay||{},fetchedAt:Date.now()};
+ return {plan:p.plan,start:start?.plan===p.plan?start.start:null,startAt:start?.changedAt||0,order:p.order,orderAt:p.orderAt||0,wrongIds:Object.keys(p.mcq||{}).filter(id=>p.mcq[id]==='wrong'),phaseDays:p.phaseDay||{},osce:p.ol||{},osceDays:p.osceDays||{},fetchedAt:Date.now()};
 }
+async function reserveOsce(day,index,seed=[],station=null,complete=false){if(!cfg.token)throw Error("Link the same Central saves profile in both apps first.");const token=cfg.token,result=await requestData("/osce",token,{day,index,seed:seed.slice(0,2),station,complete});if(cfg.token!==token)throw Error("Central saves profile changed. Try again.");return result;}
 function sync(){if(busy)return busy;if(!cfg.token||!adapter)return Promise.resolve();busy=window.navigator?.locks?window.navigator.locks.request("nebula-raid-save",runSync):runSync();return busy;}
 async function runSync(){
  const token=cfg.token;let sharedError='';status='Syncing…';update();
@@ -57,8 +58,8 @@ async function runSync(){
 async function link(token,create){
  if(!/^NR1-[a-f0-9]{64}$/.test(token))throw Error('Enter the complete personal sync code starting NR1-. This is not your AI study access code.');
  await request(create?'/create':'/sync',token);
- localStorage.removeItem('fnphraid.nebula-timetable-v1');
- cfg={token,remote:{},lastAt:0};persist();
+ localStorage.removeItem('fnphraid.nebula-timetable-v1');localStorage.removeItem('fnphraid.osce-claims-v1');
+ cfg={token,remote:{},lastAt:0,linkedAt:Date.now()};persist();
  for(const [q,s] of Object.entries(adapter.seed()))if(s.seen||s.done||s.remaining)put(q,'seed',s,true);
  await sync();
 }
@@ -69,7 +70,7 @@ function open(){
  d.innerHTML='<h2>Central saves and MCQ sync</h2><p>Use the same private sync code in each browser and phone app. MCQ answer results sync automatically. Nebula credits each correct answer immediately; only Raid requires two correct repeats after a miss. One central profile combines Raid campaign, upgrades and question history with Nebula study completion and study time. New work adds to the shared save; an older device cannot replace it. Separate recovery backups are also kept. Saved drafts, chats and access codes are excluded. Internet is required; local saves continue offline.</p><p id="progressSyncStatus" role="status"></p><p id="centralBackupStatus" role="status"></p><div id="progressSyncActions"></div><p>Keep this code private: it gives access to your MCQ progress. It is separate from your AI study access code.</p><button id="progressSyncClose">Close</button>';
  const actions=d.querySelector('#progressSyncActions');
  function button(label,fn){const b=document.createElement('button');b.textContent=label;Object.assign(b.style,{padding:'12px',margin:'4px',border:'1px solid #8b6b30',borderRadius:'6px',background:'#eee6d3',color:'#203746'});b.onclick=fn;actions.append(b);return b;}
- if(cfg.token){button('Sync now',sync);button('Check saved devices',async()=>{try{const result=await requestData('/backups',cfg.token,{});let list=d.querySelector('#centralDevices');if(!list){list=document.createElement('p');list.id='centralDevices';actions.append(list);}list.textContent=result.backups.length?result.backups.map(b=>b.app+' · device '+b.device.slice(0,8)+' · '+new Date(b.saved).toLocaleString()+(b.previous_at?' · previous save also kept':'')).join(' | '):'No device backups saved yet. Press Sync now.';}catch(e){backupStatus=e.message;update();}});button('Show my sync code',()=>{if(actions.querySelector('input'))return;const field=document.createElement('input');field.value=cfg.token;field.readOnly=true;field.setAttribute('aria-label','Your private sync code');field.style.cssText='width:100%;box-sizing:border-box;padding:12px;margin:12px 0;font-size:16px';actions.append(field);field.select();});button('Disconnect this device',()=>{localStorage.removeItem('fnphraid.nebula-timetable-v1');cfg={token:'',remote:{},lastAt:0};persist();status='Disconnected. Local learning progress is kept.';backupStatus='Central backup: not linked';lastBackup='';open();});}
+ if(cfg.token){button('Sync now',sync);button('Check saved devices',async()=>{try{const result=await requestData('/backups',cfg.token,{});let list=d.querySelector('#centralDevices');if(!list){list=document.createElement('p');list.id='centralDevices';actions.append(list);}list.textContent=result.backups.length?result.backups.map(b=>b.app+' · device '+b.device.slice(0,8)+' · '+new Date(b.saved).toLocaleString()+(b.previous_at?' · previous save also kept':'')).join(' | '):'No device backups saved yet. Press Sync now.';}catch(e){backupStatus=e.message;update();}});button('Show my sync code',()=>{if(actions.querySelector('input'))return;const field=document.createElement('input');field.value=cfg.token;field.readOnly=true;field.setAttribute('aria-label','Your private sync code');field.style.cssText='width:100%;box-sizing:border-box;padding:12px;margin:12px 0;font-size:16px';actions.append(field);field.select();});button('Disconnect this device',()=>{localStorage.removeItem('fnphraid.nebula-timetable-v1');localStorage.removeItem('fnphraid.osce-claims-v1');cfg={token:'',remote:{},lastAt:0};persist();status='Disconnected. Local learning progress is kept.';backupStatus='Central backup: not linked';lastBackup='';open();});}
  else{
   button('Create my sync profile',async()=>{try{status='Creating your profile…';update();const token='NR1-'+Array.from(crypto.getRandomValues(new Uint8Array(32)),x=>x.toString(16).padStart(2,'0')).join('');await link(token,true);open();}catch(e){status=e.message;update();}});
   const label=document.createElement('label');label.textContent='Already created a profile? Paste its sync code:';const field=document.createElement('input');field.type='password';field.autocomplete='off';field.spellcheck=false;field.setAttribute('aria-label','Personal sync code');field.style.cssText='width:100%;box-sizing:border-box;padding:12px;margin:8px 0;font-size:16px';label.append(field);actions.append(label);
@@ -78,5 +79,5 @@ function open(){
  document.body.append(d);d.querySelector('#progressSyncClose').onclick=()=>d.close();d.addEventListener('close',()=>d.remove());d.showModal();update();
 }
 window.addEventListener('online',sync);window.addEventListener('storage',e=>{if(e.key===KEY){cfg=read(KEY,cfg);update();}if(e.key?.startsWith(PREFIX))update();});document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync();});setInterval(()=>{if(!document.hidden)sync();},15000);
-window.McqProgressSync={readTimetable,configure,record,sync,open,isLinked:()=>!!cfg.token};
+window.McqProgressSync={reserveOsce,readTimetable,profileStamp:()=>cfg.linkedAt||0,configure,record,sync,open,isLinked:()=>!!cfg.token};
 })();
