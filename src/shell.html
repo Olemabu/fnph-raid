@@ -359,17 +359,27 @@ html[data-theme=light] #homeOptions{background:#fffdf7;color:#203746}
 
 
 /* Landscape handheld layout: controls occupy rails outside the canvas. */
-#play.sideControls{--control-rail:clamp(88px,13vw,140px);--rail-left:calc(var(--control-rail) + env(safe-area-inset-left,0px));--rail-right:calc(var(--control-rail) + env(safe-area-inset-right,0px))}
+#play.sideControls{--control-rail:clamp(88px,13vw,140px);--pad-size:clamp(66px,10.2vw,96px);--rail-ink:#d5e2dd;--rail-muted:#89a5a8;--rail-left:calc(var(--control-rail) + env(safe-area-inset-left,0px));--rail-right:calc(var(--control-rail) + env(safe-area-inset-right,0px))}
 #play.sideControls #stage{left:var(--rail-left);right:var(--rail-right);top:0;bottom:0;border-inline:1px solid #6f9ea3}
 #play.sideControls #touchFlight{inset:0;display:block}
 #play.sideControls #touchFlight[hidden]{display:none}
-#play.sideControls .touchLeft,#play.sideControls .touchRight{position:absolute;top:0;bottom:0;box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;gap:12px;background:#102431f5;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))}
+#play.sideControls .touchLeft,#play.sideControls .touchRight{position:absolute;top:0;bottom:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;background:linear-gradient(90deg,#0b1b25,#152d37);color:var(--rail-ink);box-shadow:inset 0 0 30px #020b1233;user-select:none}
 #play.sideControls .touchLeft{left:0;width:var(--rail-left);padding-left:env(safe-area-inset-left,0px)}
 #play.sideControls .touchRight{right:0;width:var(--rail-right);padding-right:env(safe-area-inset-right,0px);justify-content:center}
-#play.sideControls .touchStick{width:calc(var(--control-rail) - 18px);height:calc(var(--control-rail) - 18px);max-width:110px;max-height:110px;box-sizing:border-box}
-#play.sideControls #touchFire{width:calc(var(--control-rail) - 22px);height:calc(var(--control-rail) - 22px);max-width:94px;max-height:94px;margin:0;flex-shrink:0}
+#play.sideControls .touchStick{width:var(--pad-size);height:var(--pad-size);max-width:none;max-height:none;box-sizing:border-box;border:1px solid #88a6ad;border-radius:50%;background:radial-gradient(circle,#304e5a 0 28%,#142d38 29% 53%,#6c909922 54% 55%,#132b35 56%);box-shadow:0 8px 18px #020a1230,inset 0 0 0 5px #97bdc411;flex-shrink:0}
+#play.sideControls .touchStick:before{content:'↔';position:absolute;color:#91b6bc;font-size:19px;letter-spacing:30px;text-indent:30px;opacity:.7;pointer-events:none}
+#play.sideControls .touchStick span{top:auto;bottom:-24px;left:0;width:100%;text-align:center;font:600 8px var(--mono);letter-spacing:.1em;color:var(--rail-muted);white-space:nowrap}
+#play.sideControls .touchStick i{width:36%;height:36%;box-sizing:border-box;border:1px solid #c6dcda;background:linear-gradient(145deg,#9fb8bb,#5d7d88);box-shadow:0 3px 9px #0005,inset 0 1px 1px #ffffff70}
+#play.sideControls #touchFire{width:var(--pad-size);height:var(--pad-size);max-width:none;max-height:none;margin:0;flex-shrink:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #d4bd7e;background:radial-gradient(circle at 35% 25%,#efdfac,#c7a65c);box-shadow:0 8px 18px #020a1230,inset 0 0 0 5px #fff6d329,inset 0 0 0 7px #80642e33;color:#253844;font:700 10px var(--mono);letter-spacing:.12em;transition:box-shadow .1s,background .1s}
+.fireGlyph{display:none}
+#play.sideControls .fireGlyph{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.4}
+#play.sideControls #touchFire:active{background:#f5e9bc;box-shadow:0 0 20px #debd6255,inset 0 0 0 5px #ffffff50}
 #touchPause{display:none}
-#play.sideControls #touchPause{display:block;pointer-events:auto;touch-action:manipulation;min-height:44px;width:calc(var(--control-rail) - 12px);font-size:10px;padding:7px 3px;border:1px solid #96b3b8;border-radius:6px;background:#e7dfc9;color:#203746}
+#play.sideControls #touchPause{display:block;position:absolute;top:calc(50% + var(--pad-size)/2 + 18px);pointer-events:auto;touch-action:manipulation;min-height:44px;width:calc(var(--control-rail) - 14px);font:600 8px var(--mono);letter-spacing:.04em;padding:8px 3px;border:1px solid #89a5a855;border-radius:8px;background:#ffffff08;color:var(--rail-ink);box-shadow:inset 0 1px #ffffff12}
+#play.sideControls .touchRight:before{content:'WEAPONS';position:absolute;top:22px;font:600 9px var(--mono);letter-spacing:.14em;color:var(--rail-muted)}
+#play.sideControls .touchLeft:after,#play.sideControls .touchRight:after{position:absolute;bottom:max(15px,env(safe-area-inset-bottom,0px));font:500 7px var(--mono);letter-spacing:.08em;color:var(--rail-muted);text-align:center}
+#play.sideControls .touchLeft:after{content:'DRAG TO STRAFE'}
+#play.sideControls .touchRight:after{content:'HOLD TO FIRE'}
 #play.sideControls .hud{left:0;right:auto;width:var(--rail-left);box-sizing:border-box;padding:14px 8px 0 calc(8px + env(safe-area-inset-left,0px))!important;background:none;z-index:8}
 #play.sideControls .stn{display:flex;flex-direction:column;gap:4px;min-width:0;width:100%;max-width:none}
 #play.sideControls .stn b{font-size:12px}
@@ -380,8 +390,8 @@ html[data-theme=light] #homeOptions{background:#fffdf7;color:#203746}
 #play.sideControls #qText{font-size:clamp(12px,2.4vh,17px);line-height:1.25}
 #play.sideControls #qChip{font-size:8px}
 #play.sideControls .gbar{display:none}
-html[data-theme=light] #play.sideControls .touchLeft,html[data-theme=light] #play.sideControls .touchRight{background:#e6eae3}
-@media(max-height:340px){#play.sideControls .touchLeft{padding-bottom:8px}#play.sideControls .touchStick{max-width:76px;max-height:76px}#play.sideControls #hTopic{display:none}}
+html[data-theme=light] #play.sideControls .touchLeft,html[data-theme=light] #play.sideControls .touchRight{background:linear-gradient(90deg,#e1e7e1,#eef0e8);--rail-ink:#243e49;--rail-muted:#5d7680;box-shadow:inset 0 0 25px #71877e12}
+@media(max-height:340px){#play.sideControls #hTopic{display:none}#play.sideControls .touchRight:before{top:16px}#play.sideControls .hud{padding-top:9px!important}#play.sideControls .stn{gap:2px}}
 </style>
 
 <section id="home" class="page">

@@ -230,3 +230,5 @@ Install the signed APK from the repository Releases page. The game and MCQ map w
 ## Landscape phone controls
 
 Android v1.2 locks to sensor landscape (either sideways direction). The installed web app also requests landscape. On touch screens in landscape, movement sits in the left rail and Fire/Pause in the right rail, outside the resized central canvas. The question and horizontal answer row use the centre; health and set progress stay left. Pause includes Next set. Input cancellation, focus loss and orientation changes release movement/fire. Desktop layout and saved study progress are retained.
+
+Android v1.2.1 fixes cold landscape startup: mobile layout reserves the rails before boot but waits for engine initialization before resizing canvas objects. A regression test invokes the actual resize function with uninitialized canvases. Both thumb controls share the same centre line and diameter, with Pause/Menu below Fire. Cold offline startup and aligned, non-overlapping controls were checked at 844×390 and 667×320.
