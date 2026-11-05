@@ -245,6 +245,25 @@ function makeLabel(text,num){
 
   return{canvas:c,w:W0,h:H0,text,scrollable:!!R.sideControls};
 }
+function answerPlate(carrier){
+ const L=carrier.label,n=Math.max(1,$.carriers.length),left=-$.screen.x;
+ const x=left+$.cw*((carrier.num-.5)/n)-L.w/2;
+ return {x:Math.max(left+8,Math.min(left+$.cw-L.w-8,x)),y:-$.screen.y+R.topSafe(),w:L.w,h:L.h};
+}
+function renderMergedAnswer(carrier,ctx,aim,hue){
+ ctx.save();
+ const p=carrier.plate=answerPlate(carrier),L=carrier.label;
+ ctx.drawImage(L.canvas,p.x,p.y,p.w,p.h);
+ ctx.strokeStyle=aim?'hsl(190,85%,53%)':'hsla(322,100%,62%,.85)';ctx.lineWidth=carrier.hitFlag>0?3:aim?2.5:1.5;ctx.beginPath();
+ if(ctx.roundRect)ctx.roundRect(p.x+1,p.y+1,p.w-2,p.h-2,8);else ctx.rect(p.x+1,p.y+1,p.w-2,p.h-2);ctx.stroke();
+ const badgeY=R.sideControls?p.y+17:p.y+p.h/2;
+ ctx.fillStyle=aim?'hsl(190,100%,60%)':'hsl(322,100%,62%)';ctx.beginPath();ctx.arc(p.x+20,badgeY,13,0,$.twopi);ctx.fill();
+ ctx.fillStyle='#060a10';ctx.font='700 15px "Chakra Petch",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(carrier.num),p.x+20,badgeY+1);ctx.textAlign='left';ctx.textBaseline='alphabetic';
+ const gap=3,count=Math.max(1,carrier.lifeMax),width=(p.w-16-(count-1)*gap)/count;
+ for(let k=0;k<count;k++){ctx.fillStyle=k<carrier.life?'hsla('+hue+',85%,55%,1)':'rgba(110,135,145,.25)';ctx.fillRect(p.x+8+k*(width+gap),p.y+p.h-5,width,2);}
+ if(carrier.hitFlag>0)carrier.hitFlag=Math.max(0,carrier.hitFlag-($.dt||1));
+ ctx.restore();
+}
 $.Carrier=function(o){
   for(const k in o)this[k]=o[k];
   this.radius=26;this.life=this.lifeMax=3+(($.arsenal&&$.arsenal.armour)||0);this.hitFlag=0;this.t=Math.random()*6;this.label=makeLabel(R.optionLabel(this.text),this.num);this.vx=0;this.vy=0;this.alive=true;
@@ -276,6 +295,7 @@ $.Carrier.prototype.render=function(){
 
   const ctx=$.ctxmg,aim=R.aimTarget()===this||(R.sideControls&&R.readingOption===this),t=this.t,hue=aim?190:322;
 
+  if(R.flight&&R.flight.enabled()&&this.mergedAnswer){renderMergedAnswer(this,ctx,aim,hue);return;}
   const hCol=aim?'98,230,255':'255,79,168';
 
 
@@ -1504,6 +1524,7 @@ function drawTactical(ctx){
 }
 R.refreshTheme=()=>{if(!$.initialized)return;buildMap();renderHome();for(const c of $.carriers||[])c.label=makeLabel(R.optionLabel(c.text),c.num);};
 R.orbOptions=it=>({opts:qOptions(it),correct:[it.answer],chip:'Destroy the correct answer orb',t:0,r0:300});R.advanceQuestion=nextQuestion;R.swarmDeath=swarmDown;
+R.answerPlate=answerPlate;
 R.applyProgress=function(states){
  for(const room of deck.rooms)for(const it of room.items){const id=R.progressId?.(it),value=id&&states[id];if(!value)continue;const s=st(it.id);s.mcqDone=value.done;s.mcqRemaining=value.remaining;s.box=value.done?Math.max(MASTER_AT,s.box||0):0;if(value.seen)s.seen=Math.max(1,s.seen||0);else{s.seen=s.right=s.wrong=s.guessed=0;}}
  store.set('stats',stats);

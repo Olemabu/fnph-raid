@@ -94,6 +94,7 @@ R.renderMap=function(){if(!enabled())return map();
 R.renderWorld=function(){if(!enabled())world();};R.renderLighting=function(){if(!enabled())lighting();};$.renderMinimap=function(){if(!enabled())minimap();};
 F.moveEnemy=function(e){
  const dt=$.dt||1;e.t+=.02*dt;
+ if(R.answerPlate){const p=R.answerPlate(e);e.mergedAnswer=true;e.plate=p;e.x=p.x+p.w/2;e.y=p.y+p.h/2;e.flightAnchor={x:e.x,y:e.y};e.vx=e.vy=0;return;}
  if(!e.flightAnchor){const n=Math.max(1,$.carriers.length),slot=e.num-1,maxH=Math.max(0,...$.carriers.map(c=>c.label?.h||0)),safe=R.sideControls?Math.min($.ch*.58,Math.max(90,R.topSafe())+maxH+55):Math.max(90,R.topSafe())+maxH+55;
   e.flightAnchor={x:-$.screen.x+$.cw*((slot+.5)/n),y:-$.screen.y+safe};
   e.x=e.flightAnchor.x;e.y=-$.screen.y-50;

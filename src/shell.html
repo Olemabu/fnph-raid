@@ -425,6 +425,35 @@ html[data-theme=light] .optionScrollPlate.readingOption{outline-color:#087c93;bo
 .overflows .optionScrollTrack{display:block}
 .optionScrollTrack i{display:block;width:100%;background:#ab7d46;border-radius:2px}
 html[data-theme=light] .optionScrollText{color:#203746}
+
+/* Keep the hangar's content inside a centred, padded frame. */
+#home.compactHome{--home-inset:clamp(12px,2vw,28px);max-width:1600px;margin-inline:auto;padding:calc(var(--home-inset) + env(safe-area-inset-top,0px)) calc(var(--home-inset) + env(safe-area-inset-right,0px)) calc(var(--home-inset) + env(safe-area-inset-bottom,0px)) calc(var(--home-inset) + env(safe-area-inset-left,0px));gap:12px}
+#home.compactHome .campaignPanel{border-radius:10px;overflow:hidden}
+#home.compactHome .campaignMast{padding:10px 16px;gap:12px;box-sizing:border-box}
+#home.compactHome .campaignMast>*{font-size:clamp(8px,.8vw,11px);line-height:1.4;overflow-wrap:anywhere}
+#home.compactHome .campaignCopy{padding:22px clamp(18px,2vw,32px)}
+#home.compactHome .framePlaque{right:18px;bottom:16px;top:auto;max-width:min(250px,42%);box-sizing:border-box}
+@media(orientation:landscape) and (max-height:560px){
+ #home.compactHome{gap:10px}
+ #home.compactHome .campaignMast{padding:8px 14px}
+ #home.compactHome .campaignMast>span:last-child{display:none}
+ #home.compactHome .campaignCopy{width:48%;padding:14px 18px}
+ #home.compactHome .campaignCopy .campaignTag{font-size:10px}
+ #home.compactHome .campaignObjective{margin:9px 0}
+ #home.compactHome .campaignObjective b{font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+ #home.compactHome .framePlaque{right:16px;bottom:12px;padding:6px 10px}
+ #home.compactHome .framePlaque p{font-size:8px;line-height:1.3;margin:0 0 3px;letter-spacing:.03em}
+ #home.compactHome .framePlaque h2{font-size:17px;margin:0;line-height:1.2}
+ #home.compactHome .framePlaque small{display:none}
+ #home.compactHome .homeDock{gap:6px}
+ #home.compactHome .homeDock .btn{min-width:0;min-height:40px;font-size:11px;padding:6px}
+}
+
+@media(max-width:800px) and (orientation:portrait){
+ #home.compactHome .framePlaque{top:16px;bottom:auto;right:16px;max-width:48%;padding:7px 10px}
+ #home.compactHome .framePlaque p{font-size:9px;line-height:1.4}
+ #home.compactHome .framePlaque small{display:none}
+}
 </style>
 
 <section id="home" class="page">
@@ -464,7 +493,7 @@ html[data-theme=light] .optionScrollText{color:#203746}
       <h2 style="font-size:18px">How it plays</h2>
       <div class="how">
         <div><b>Briefing</b><p>Each station opens with a briefing card: the framework for that topic, before you're tested on it.</p></div>
-        <div><b>Answers attack</b><p>Four gunships carry the options and close in on you. Each needs 3 hits. Swarms keep the pressure on.</p></div>
+        <div><b>Answer targets</b><p>Four rectangles carry the options. Shoot the rectangle you choose; its bottom armour bar shows the remaining hits. Swarms can block your shots.</p></div>
         <div><b>Close calls</b><p>The wrong options are near-misses: a different number, the wrong cluster, the DSM rule instead of ICD-11, the neighbouring step. Read carefully before you fire. Choose the description that matches each acronym letter.</p></div>
         <div><b>Beat par</b><p>Each station has a par time. The clock stops while you read, and you can't fail on time. MCQs appear once; missed MCQs return twice randomly. Procedures and lists need 3 correct runs. Completed items are mastered: it is permanently retired from gameplay, so the station gets shorter and par easier to beat.</p></div>
         <div><b>Procedures</b><p>For steps in order, destroy step 1, then step 2, and so on. Shooting a step out of order kills you and shows the full sequence.</p></div>

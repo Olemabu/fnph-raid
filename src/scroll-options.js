@@ -9,7 +9,7 @@ function advance(s,dt,max){
  if(s.phase==='restart'){s.offset=0;s.wait=3;s.phase='down';return 0;}
  s.offset=Math.min(max,s.offset+dt*10);if(s.offset>=max){s.wait=4;s.phase='restart';}return s.offset;
 }
-function lane(carriers,x){if(!Number.isFinite(x))return null;let best=null,distance=Infinity;for(const c of carriers){if(!c.alive||!c.plate)continue;const d=Math.abs(x-(c.plate.x+c.plate.w/2));if(d<distance){best=c;distance=d;}}return best;}
+function lane(carriers,x){if(!Number.isFinite(x))return null;return carriers.find(c=>c.alive&&c.plate&&x>=c.plate.x&&x<=c.plate.x+c.plate.w)||null;}
 root.OptionScrollMotion={state,advance,lane};
 if(typeof document==='undefined')return;
 const R=$.raid,stage=document.querySelector('#stage'),overlay=document.createElement('div');overlay.id='optionScrollOverlay';overlay.hidden=true;stage.appendChild(overlay);

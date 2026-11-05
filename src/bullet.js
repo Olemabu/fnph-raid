@@ -1,3 +1,17 @@
+$.bulletHitsCircle=function(b,c,startX,startY,radius){
+ const dx=b.x-startX,dy=b.y-startY,den=dx*dx+dy*dy,t=den?Math.max(0,Math.min(1,((c.x-startX)*dx+(c.y-startY)*dy)/den)):0;
+ return Math.hypot(startX+dx*t-c.x,startY+dy*t-c.y)<=radius;
+};
+// A merged answer is hit only at its visible rectangle, including fast shots crossing it.
+$.bulletHitsCarrier=function(b,c,startX,startY){
+ if(!c.mergedAnswer||!c.plate)return $.bulletHitsCircle(b,c,startX,startY,c.radius+2);
+ const p=c.plate,dx=b.x-startX,dy=b.y-startY;let lo=0,hi=1;
+ for(const [start,delta,min,max] of [[startX,dx,p.x,p.x+p.w],[startY,dy,p.y,p.y+p.h]]){
+  if(Math.abs(delta)<1e-9){if(start<min||start>max)return false;continue;}
+  let a=(min-start)/delta,z=(max-start)/delta;if(a>z)[a,z]=[z,a];lo=Math.max(lo,a);hi=Math.min(hi,z);if(lo>hi)return false;
+ }
+ return true;
+};
 /*==============================================================================
 Init
 ==============================================================================*/
@@ -35,6 +49,7 @@ $.Bullet.prototype.update = function( i ) {
 	/*==============================================================================
 	Apply Forces
 	==============================================================================*/
+	var shotStartX=this.x,shotStartY=this.y;
 	// Mk V seeker rounds curve towards the locked answer
 	if( this.homing && this.target && this.target.alive ) {
 		var want = Math.atan2( this.target.y - this.y, this.target.x - this.x ), dd = want - this.direction;
@@ -54,7 +69,7 @@ $.Bullet.prototype.update = function( i ) {
 	var ei = $.enemies.length;
 	while( ei-- && !removed ) {
 		var enemy = $.enemies[ ei ];
-		if( $.util.distance( this.x, this.y, enemy.x, enemy.y ) <= enemy.radius ) {
+		if( $.bulletHitsCircle(this,enemy,shotStartX,shotStartY,enemy.radius) ) {
 			if( this.enemiesHit.indexOf( enemy.index ) == -1 ){
 				$.particleEmitters.push( new $.ParticleEmitter( {
 					x: this.x, y: this.y, count: Math.floor( $.util.rand( 1, 4 ) ), spawnRange: 0, friction: 0.85, minSpeed: 5, maxSpeed: 12,
@@ -72,7 +87,7 @@ $.Bullet.prototype.update = function( i ) {
 		var carrier = $.carriers[ ci ];
 		// a shot fired at a locked answer flies past the other answers, so you never hit a wrong one by accident
 		if( this.target && this.target.alive && carrier !== this.target ) { continue; }
-		if( carrier.alive && $.util.distance( this.x, this.y, carrier.x, carrier.y ) <= carrier.radius + 2 ) {
+		if( carrier.alive && $.bulletHitsCarrier(this,carrier,shotStartX,shotStartY) ) {
 			if( this.enemiesHit.indexOf( 'c' + carrier.num ) == -1 ) {
 				this.enemiesHit.push( 'c' + carrier.num );
 				$.particleEmitters.push( new $.ParticleEmitter( {
