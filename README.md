@@ -30,6 +30,7 @@ Load order matters, so it is fixed in `build.py`. The global `$` is the engine n
 `src/deck.txt` is generated from **nebula-study** (`C:\Users\USER\Documents\nebula-study\data`, GitHub `Olemabu/nebula-study`) by `tools/nebula2deck.js`:
 - **20 map stations = the 20 NPMCN Part I topics** in `data/syllabus.js`. Each station keeps its FNPH locus. The 5 new loci (Admin Block, OPD Clinic, Pharmacy, Library, Records Office) are placeholders: rename them to real FNPH places for your memory palace.
 - **Concepts:** each high-yield point in `data/topics/<topic>.js` becomes a `### concept`. Its summary is the briefing, and all of its MCQs follow (all 1,783, with 4 wrong options sampled 3 at a time).
+- **Past questions:** the current deck adds 144 answer-keyed WACP July 2023 MCQs as the first concepts in relevant stations. Near-identical repeats are collapsed. Newer recall-only questions without a verified key stay out of the shootable pool; each imported question carries its PQ/year/college label.
 - **OSCE:** all 59 scripts in `data/osce/stations.js` are embedded as `### OSCE:` concepts inside their related topic. Each one tests phase order, which phase a line comes from, what the examiner checks, the critical fail and viva answers. They play as the first-person ward round, or as the ambulance run in Emergency.
 - **Bonus drills:** the earlier hand-written stations are kept as `### Bonus drill:` concepts.
 - **One run = one concept.** A station is taken when all its concepts are secured. After that, runs revisit the weakest concept.
@@ -117,7 +118,7 @@ Deploy starts combat directly. The in-game Briefing button opens the story and c
 Mastery requires **three consecutive correct answers** per item. On mastery, the item is permanently retired from every gameplay queue, daily practice and transfer; existing streaks of 3 or more also qualify. Study remains available. Wrong answers before mastery reset the streak.
 
 ## War map and combat loadout (1 Nov 2026)
-The command deck shows the actual combat-ship silhouette, current mastery-based weapon, projectiles per burst and unlimited energy ammunition. Its deployment button opens the 20-sector syllabus war map first. The map shows all 339 concepts and 2,740 learning items, per-topic retirement progress, inspectable concept lists and the next linear objective. Any topic and any unmastered concept can be selected and deployed directly.
+The command deck shows the actual combat-ship silhouette, current mastery-based weapon, projectiles per burst and unlimited energy ammunition. Its deployment button opens the 20-sector syllabus war map first. The map shows all 357 concepts and 2,884 learning items, per-topic retirement progress, inspectable concept lists and the next linear objective. Any topic and any unmastered concept can be selected and deployed directly.
 
 Live cosmetic refits happen at 5, 15, 30 and 60 correct hits, without leaving combat or blocking input. Existing correct-answer totals seed the career-hit credit. At the highest frame, reactor livery keeps changing every 10 further correct hits. These visual rewards are separate from learning mastery and the existing weapon arsenal.
 

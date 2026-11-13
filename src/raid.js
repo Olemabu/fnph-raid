@@ -19,7 +19,7 @@ function parseDeck(text){
   const rooms=[],errors=[];let cur=null,target=null,curC=null;
   text.split(/\r?\n/).forEach((raw,i)=>{
     const line=raw.trim();if(!line)return;
-    if(line.startsWith('>')){const t=line.slice(1).trim();if(target){if(t.startsWith('Process cues: ')&&target.type==='l'){target.cues=t.slice(14).split('|').map(x=>x.trim());if(target.cues.length!==target.seq.length)errors.push('Line '+(i+1)+': process cues must match the number of steps');}else (target.note=target.note||[]).push(t);}return;}
+    if(line.startsWith('>')){const t=line.slice(1).trim();if(target){if(target.type==='q'&&/^Source:\s*PQ\d{4}\s*·\s*/.test(t)){target.sourceLabel=t.slice(8).trim();}else if(t.startsWith('Process cues: ')&&target.type==='l'){target.cues=t.slice(14).split('|').map(x=>x.trim());if(target.cues.length!==target.seq.length)errors.push('Line '+(i+1)+': process cues must match the number of steps');}else (target.note=target.note||[]).push(t);}return;}
     if(line.startsWith('###')){const p=line.slice(3).split('|').map(s=>s.trim());if(!cur){cur={locus:'Station 1',topic:'General',mode:'',items:[],note:[],concepts:[]};rooms.push(cur);}curC={title:p[0]||'Concept',mode:(p[1]||'').toLowerCase(),note:[],items:[]};cur.concepts.push(curC);target=curC;return;}
     if(line.startsWith('##')){curC=null;const p=line.slice(2).split('|').map(s=>s.trim());cur={concepts:[],locus:p[0]||('Station '+(rooms.length+1)),topic:p[1]||p[0]||'Untitled',mode:(p[2]||'').toLowerCase(),items:[],note:[]};rooms.push(cur);target=cur;return;}
     if(line.startsWith('#'))return;
@@ -768,7 +768,7 @@ function setupWave(){
   if(R.modeName()==='race'&&R.raceStart){$.carriers.length=0;R.raceStart(R.wave);}
   if(R.modeName()==='stealth'&&R.stealthStart){$.carriers.length=0;R.stealthStart(R.wave);}
   if(R.modeName()==='fps'&&R.fpsStart){$.carriers.length=0;R.fpsStart(R.wave);}
-  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';Q('#qText').textContent=it.cues?it.prompt.replace(': the phases of the station, in order','')+' · '+it.cues[it.found.length]+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose the action':it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
+  Q('#qbar').hidden=false;Q('#qChip').textContent=chip;Q('#qChip').className='chip';const source=Q('#qSource');if(source){source.textContent=it.sourceLabel||'';source.hidden=!it.sourceLabel;}Q('#qText').textContent=it.cues?it.prompt.replace(': the phases of the station, in order','')+' · '+it.cues[it.found.length]+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose the action':it.prompt+(it.type==='l'&&Object.keys(it.clues||{}).length?' · '+it.seq[it.found.length][0].toUpperCase()+' ('+(it.found.length+1)+'/'+it.seq.length+'): choose its meaning':'');
   Q('#qChain').innerHTML=it.type!=='q'&&it.found.length?it.found.map(x=>'<span>'+esc(x)+'</span>').join(''):'';
   R.phase='fight';
   if(R.modeName()==='stealth'){R.wave.chip='Infiltrate and hack the correct terminal';if(R.phase==='fight')Q('#qChip').textContent=R.wave.chip;}

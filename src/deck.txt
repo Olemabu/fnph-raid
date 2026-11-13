@@ -3,9 +3,33 @@
 # ">" lines under a station or concept are its briefing (the high-yield summary); under an item they are its teaching note.
 # Q: question = right answer | wrong | wrong (:: why) ... · L: procedure in order = step | step ~~ decoy · S: list in any order = item | item ~~ decoy
 # Modes: race (ambulance run), fps (first-person ward round). Rebuild after edits: build.bat or python build.py.
+# Past MCQ refresh: 144 keyed WACP July 2023 questions from Nebula; newer imported recall prompts without keys are not shootable.
 
 ## Main Gate | Phenomenology & psychopathology
 > Phenomenology & psychopathology. Source: NPMCN - Phenomenology & Psychopathology 2026.pdf. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Phenomenology & psychopathology
+Q: Which test is used to assess short-term memory? = Digit Span | Stroop Test | Clock Drawing | Wisconsin Card Sorting
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is most likely to induce retrospective falsification of memory? = What is being told aligns with previously held belief | Warning given before misleading information | Person being middle-aged | Exposure to conflicting information
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What type of memory issue is characterised by incorrect recall? = Cryptomnesia | Primacy effect | Falsification | Proactive falsification
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A man sees faces as frightening and misshapen. What is this visual distortion called? = Metamorphopsia | Paraprosdokian | Chromatopsia | Palinopsia
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A woman sees a cat and then sees her in different daily situations. What is this phenomenon called? = Palinopsia | Illusion | Hallucination | Delusion
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What type of memory issue is characterised by new information affecting old memories, potentially leading to distortions or inaccuracies? = Retroactive falsification | Proactive falsification | Ganser syndrome | Paramnesia
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A woman says she sees colours when she hears her husband's voice or laughter; this is: = Synesthesia | Hallucination | Delusion | Illusion
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Phenomenology and psychopathology
 > - Descriptive phenomenology: the precise description and classification of the patient's subjective experience, as they experience it, without theorising about cause.
@@ -599,6 +623,46 @@ L: Erikson's psychosocial stages = Trust vs mistrust | Autonomy vs shame and dou
 
 ## Car Park | Psychiatric interview
 > Psychiatric interview. Source: NPMCN - PSYCHIATRIC INTERVIEWING - A CLERKSHIP FORMAT.pdf. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Child psychiatry
+Q: A child appears shocked and does not come close when offered help. What is the likely diagnosis? = Reactive Attachment Disorder | Autism Spectrum Disorder | Avoidant Attachment | Anxious Resistant Attachment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What feature is seen in Reactive Attachment Disorder? = Fearfulness | Cognitive deficit | Language deficit | Hyperactivity
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A child goes to daycare for the first time, showing no reaction when their parents leave or return. What is the likely diagnosis? = Avoidant Attachment | Reactive Attachment Disorder | Autism Spectrum Disorder | Anxious Resistant Attachment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In autism, hypoplasia of which structure is commonly observed? = Cerebellar vermis | Hippocampus | Prefrontal cortex | Amygdala
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Is increased maternal sensitivity during attachment behaviour associated with increased functional connectivity between which brain regions? = Hippocampus and amygdala | Hippocampus and putamen | Hippocampus and limbic system | Hippocampus and prefrontal cortex
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: According to Piaget's theory, what is the most crucial feature of the sensorimotor stage of development? = Object permanence | Egocentrism | Conservation | Theory of mind
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the advantage of using the sectional method in a study with children? = Reduced attrition | Easily accessible data | Detailed individual interviews | More ethical considerations
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: If a child follows the rules but has poor self-esteem, what type of parenting style might be involved? = Authoritarian | Authoritative | Permissive | Neglectful
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What differentiates oppositional defiant disorder (ODD) from intermittent explosive disorder (IED)? = Outbursts out of proportion to the stimulus | Physical aggression | Verbal aggression | Impulsivity
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Parenting with rules but no rigidity and responsiveness present is often classified as which parenting style: = Authoritative | Authoritarian | Permissive | Neglectful
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
+### Past questions · Psychiatric interview
+Q: What is true about the categorical classification of mental disorders? = It is based on observable behaviours | It provides an accessible collection of epidemiological data | It allows for accommodation of different levels of severity | It is highly personalised to individual experiences
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which interview-rated scale is commonly used in psychiatric assessments? = HAMD (Hamilton Depression Rating Scale) | HADS (Hospital Anxiety and Depression Scale) | PHQ (Patient Health Questionnaire) | PANSS (Positive and Negative Syndrome Scale)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Principles of the psychiatric interview
 > - Setting: private, safe (you nearest the door, alarm), uninterrupted; introduce yourself, explain purpose and confidentiality and its limits.
@@ -1780,6 +1844,44 @@ S: Examiner checklist = Involve adolescent; discuss privacy and consent | Clarif
 ## Main Block | Mood disorders
 > Mood disorders. Source: FEB 2026 MOOD DISORDERS FROM OWOEYE.ppt. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Mood disorders
+Q: How many episodes of depression are needed for a diagnosis of recurrent depressive disorder? = Two | One | Three | Four
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What differentiates Avoidant Restrictive Food Intake Disorder from Anorexia? = Binge eating episodes | Intentional weight loss | Significant functional impairment | Fear of food
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the difference between Hoarding Disorder and OCD? = Absence of obsessional thoughts | Objects have intrinsic value | Fear of contamination | Fear of harm to others
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: How long after the loss event can prolonged grief disorder be diagnosed? = 6 months | 1 month | 1 year | 2 years
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In ICD-11, what are the qualifiers for depressive episodes? = All of the above | Biological symptoms | Pseudodementia | Melancholic features
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: How is Complex PTSD differentiated from PTSD? = Poor interpersonal relationships | Greater exposure to trauma | The presence of flashbacks | The severity of avoidance behaviour
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What differentiates hypomania from mania in bipolar disorder? = Psychotic symptoms | Decreased sleep need | Flight of ideas | Increased energy levels
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the correct sequence of the three stages in the concept of separation anxiety, as defined by Bowlby? = Protest, detachment, despair | Protest, despair, detachment | Detachment, protest, despair | Despair, protest, detachment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: According to the superstition theory of OCD, compulsions are formed due to: = A chance pairing of behaviour and stimulus | Immediate relief from anxiety | Mental processes by which threatening thoughts are removed | Ritualistic behaviors
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which inflammatory marker is commonly associated with depression? = IL-6 | IL-4 | IL-11 | IL-13
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the difference between hypomania and mania: = All of the above | Decreased sleep need | Flight of ideas | Psychotic symptoms
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the correct sequence of the three stages of separation anxiety: = Protest, detachment, despair | Protest, despair, detachment | Detachment, protest, despair | Despair, protest, detachment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Mood vs affect — define both precisely
 > - Mood: a pervasive, sustained feeling tone experienced internally, which colours behaviour and perception of self and the world ("climate").
 > - Affect: the external, observed expression of emotion, moment to moment ("weather").
@@ -2406,6 +2508,26 @@ L: Starting an antidepressant (NICE outline) = Assess severity and suicide risk 
 ## NE Wing | Personality disorders
 > Personality disorders. Source: PERSONALITY DISORDER 2026 AMOSU_081016.ppt. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Personality disorders
+Q: What is a nomothetic personality theory concerned with in terms of personality dimensions? = Reliability over time | Reliability among cultures | Universalizability in assessment | Individual variability
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is a common critique of nomothetic personality theories? = Lack of attention to individual variability | Lack of reliability over time | Lack of reliability among cultures | Lack of universalizability in assessment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Reciprocal inhibition is a technique employed in which behavioural therapy? = Systematic desensitisation | Operant conditioning | Aversion therapy | Rational emotive behavior therapy
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In Freud's theory, if a stage is not resolved, it can result in: = Fixations | Regression | Oedipal conflict | Sublimation
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In Freud’s theory, not resolving a stage results in: = Fixations | Regression | Oedipal conflict | Sublimation
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Mild personality disorder in ICD-11 is equivalent to what in DSM-V: = No impairment | Some impairment | Severe impairment | Moderate impairment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Personality and personality disorder
 > - Personality: the enduring pattern of perceiving, relating to and thinking about oneself and the environment; develops in childhood/adolescence, relatively stable, but adaptable.
 > - Personality disorder (general criteria, all systems): an enduring, pervasive, inflexible pattern of inner experience and behaviour that deviates markedly from cultural expectations, begins in adolescence or early adulthood, is stable over time, and causes distress or impairment.
@@ -2753,6 +2875,26 @@ Q: Personality disorder traits: the other patterns: what is the critical fail in
 
 ## Pink Quad | Schizophrenia
 > Schizophrenia. Source: Schizophrenia NPMCN feb 2026.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Schizophrenia
+Q: What aspect of memory is relatively preserved in schizophrenia? = Short-term memory | Long-term memory | Procedural memory | Semantic memory
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which neurotransmitter is most implicated in improving cognitive symptoms in schizophrenia? = Acetylcholine (ACh) | Dopamine (DA) | Norepinephrine (NE) | Serotonin (5-HT)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which antipsychotic reaches peak plasma concentration earliest? = Sulpiride | Quetiapine | Olanzapine | Aripiprazole
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which genetic basis is considered most biologically plausible in schizophrenia? = NRG1 | DISC1 | COMT | DRD2
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The ion channel most implicated in schizophrenia is which of the options? = Sodium | Calcium | Potassium | Chloride
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the first-rank symptom of schizophrenia, as described by Schneider? = Man sees a clock strike 12 and believes he is the Messiah | Voices commanding him to do things | Believing his neighbours are poisoning him | Visual hallucinations
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Who named what — examiners love this
 > - Kraepelin (1893/1899): "dementia praecox" — early onset, chronic deteriorating course, poor outcome. He separated it from manic-depressive insanity (the Kraepelinian dichotomy).
@@ -3118,6 +3260,98 @@ Q: Which antipsychotic is uniquely proven to reduce suicide in schizophrenia? = 
 
 ## Clozapine Clinic | Biological treatments
 > Biological treatments. Source: BIOLOGICAL TREATMENT IN PSYCHIATRY.pptx (Dr Akinola). Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Biological treatments
+Q: What is the mechanism of action of Lurasidone? = D2, 5HT2a, 5HT7 antagonist | D2 antagonist, 5HT2a, 5HT7 agonist | D2 antagonist | 5HT2a, 5HT7 antagonist
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which medication is associated with the least sexual side effects? = Vortioxetine | Lurasidone | Clozapine | Lithium
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the prominent side effect of Topiramate? = Weight loss | Increased appetite | Cognitive impairment | Insomnia
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the prominent side effect of Lithium? = Tremors | Worsening psoriasis | Weight gain | Hypertension
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which receptor does Clozapine have the most affinity for? = 5HT2A | D2 | 5HT7 | NMDA
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the mechanism of action of Lamotrigine? = Sodium channel blocker | Dopamine agonist | GABA enhancer | NMDA antagonist
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which receptor has the most affinity to NMDA? = NMDA receptor | GABA-A receptor | 5HT2A receptor | Dopamine receptor
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the molecular mechanism of the NMDA receptor? = Calcium channel | Sodium channel | Potassium channel | Glutamate receptor
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the molecular mechanism of the SERT transporter? = Serotonin reuptake | Dopamine reuptake | GABA inhibition | NMDA activation
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which disease is prazosin best indicated for? = Hypertension | ADHD | Anxiety | Autism
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which disorder is Pindolol best indicated? = Depression | ADHD | Anxiety | Autism
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which disorder is guanfacine best indicated? = ADHD | Autism | Anxiety | Bipolar Disorder
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which disorder is Propranolol best indicated? = Anxiety | ADHD | Autism | Bipolar Disorder
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which medication is often abused by exam-taking students? = Methylphenidate | Atomoxetine | Guanfacine | Modafinil
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the mechanism of action of Atomoxetine? = Noradrenaline reuptake inhibition | Dopamine agonism | Serotonin reuptake inhibition | GABA receptor activation
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: How often does a G protein-coupled receptor pass through the cell membrane? = Nine times | Three times | Five times | Seven times
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the molecular mechanism of glutamate receptors? = Calcium channel | Sodium channel | Potassium channel | Glutamate receptor
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What does the area under the curve (AUC) denote in pharmacokinetics? = Bioavailability | Exposure to the drug over time | Peak drug concentration | Clearance rate
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In first-order kinetics, what does the log of plasma concentration plotted against time show? = Linear elimination | Non-linear elimination | Zero-order elimination | First-order elimination
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Is the absorption constant independent of which factor? = Extravascular route of administration | Elimination constant | Form of the drug | Composition of the drug
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which medication is associated with an increased risk of Ebstein anomaly? = Lithium | Valproate | Topiramate | Clozapine
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which medication has the narrowest therapeutic index among the listed options? = Lithium | Doxepin | Clomethizol | Olanzapine
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Extrapyramidal symptoms (EPS) are produced at what percentage of D2 receptor occupancy? = 0.6% | 0.8% | 0.2% | 1.0%
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Metabotropic receptors are primarily which type of receptors? = G protein-coupled receptors | Ligand-gated ion channels | Receptor tyrosine kinases | Intracellular receptors
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In treating Clozapine-induced constipation, which medication is considered a first-line option? = Lactulose | Methylcellulose | Senna | Docusate
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which neurotransmitter does GABAergic projection target in the striatum? = Medium spiny neurons | Pyramidal neurons | Cholinergic interneurons | Glutamatergic neurons
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which of the listed medications works by acetylcholinesterase inhibition? = Galantamine | Memantine | Donepezil | Rivastigmine
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the mechanism of action of Memantine, an NMDA receptor antagonist? = Uncompetitive NMDA antagonism | Active NMDA antagonism | Glutamate release inhibition | Dopamine reuptake inhibition
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: GABA is projected onto which cell type in the striatum, a part of the basal ganglia? = Medium spiny neurons | Pyramidal neurons | Cholinergic interneurons | Dopaminergic neurons
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which type of receptors directly reverse the effects of caffeine? = Adenosine receptors | Sigma receptors | Dopamine receptors | Norepinephrine receptors
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Choosing an antidepressant (Dr Akinola)
 > - All antidepressants work about equally well: first trial — ~30% remit, ~50% respond. Pick by side-effect profile and comorbidity.
@@ -3802,6 +4036,22 @@ Q: Best way to check understanding in an explanation station = Ask the patient t
 ## Emergency Resus | Emergency psychiatry | race
 > Emergency psychiatry. Source: EMERGENCY PSYCHIATRY LECTURE REVISION COURSE PART I 19TH FEBRUAY 2026.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Emergency psychiatry
+Q: Which of the following is NOT typically seen in serotonin syndrome? = Diplopia | Nausea | Headache | Tremors
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Many bystanders witnessing an emergency, but no one is likely to help, is a phenomenon known as: = Bystander effect | Diffusion of responsibility | Social loafing | Social facilitation
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
+### Past questions · Consultation-liaison psychiatry
+Q: A woman's daughter is undergoing chemotherapy for three months. She is reminded of her mother's death from cancer. What is her diagnosis? = Adjustment Disorder | Acute Stress Disorder | Complex PTSD | PTSD
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A man admitted for a foot amputation expresses a strong desire to die. What is his diagnosis? = Adjustment Disorder | Acute Stress Reaction | Depression | Bipolar Disorder
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### What a psychiatric emergency is
 > - Emergency psychiatry ＝ the clinical application of psychiatry in emergency settings (AAEP).
 > - A psychiatric emergency ＝ a situation needing immediate, rapid assessment and intervention to prevent harm — acute disturbance of thought, mood, behaviour or relationships, as defined by the patient, family or social unit (Wheat et al., 2016).
@@ -4298,6 +4548,26 @@ Q: Commonest cognitive side effect of ECT = Short-term memory impairment around 
 ## U-Block | Substance use disorders
 > Substance use disorders. Source: PPT Part 1 Revision course.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Substance use disorders
+Q: Methamphetamine has the most affinity to which vesicles? = Dopamine vesicles | Serotonin vesicles | NMDA vesicles | GABA vesicles
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: MDMA has the most affinity to which vesicles? = Serotonin vesicles | Dopamine vesicles | NMDA vesicles | GABA vesicles
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is true about alcohol dependence in young people? = Early onset of drinking is a predictor of later dependence | Incidence of binge drinking is lower in 18–20-year-olds | Girls are more affected than boys | It is uncommon in young people
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the rate-limiting step in alcohol metabolism? = Alcohol dehydrogenase | Aldehyde dehydrogenase | CYP2E1 (Cytochrome P450 2E1) | Acetaldehyde dehydrogenase
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A commonly used medication for opioid overdose, naloxone, is often mixed with which medication to reduce the chances of misuse by deterring patients from injecting it? = Buprenorphine | Methadone | Fentanyl | Naltrexone
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What medication is commonly mixed with buprenorphine to reduce the risk of misuse in opioid addiction treatment? = Naloxone | Methadone | Fentanyl | Naltrexone
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Epidemiology terms
 > - Incidence ＝ new cases ÷ population at risk over a period — reflects risk.
 > - Prevalence ＝ all existing cases at a point (point prevalence) or over a period ÷ total population — reflects burden; depends on incidence × duration (P ≈ I × D). Falls with recovery or death.
@@ -4763,6 +5033,20 @@ L: Opioid overdose management = Support airway and breathing | Give naloxone | R
 ## Sports Field | Genetics
 > Genetics. Source: Feb 2026 NPMCN - Genetics in Child and Psychiatry.pdf. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Genetics
+Q: Which gene codes for P-glycoprotein? = ABCB1 | DRD2 | COMT | MAOA
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which gene codes for alpha-synuclein? = SNCA | APO E | GBA | SLC6A3
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In which condition is the LRRK2 mutation commonly found? = Parkinson's Disease | Huntington's Disease | Alzheimer's Disease | Amyotrophic Lateral Sclerosis (ALS)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Lyonisation is associated with which chromosomal condition? = Turner syndrome | Down syndrome | Klinefelter syndrome | Cri-du-chat syndrome
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Genes and variation
 > - 23 pairs of chromosomes; DNA wound on histones; nucleosides A, G, C, T; exons expressed, introns not.
 > - Central dogma: DNA → (transcription) RNA → (translation) protein.
@@ -4932,6 +5216,11 @@ Q: The lecture's view of pharmacogenomic antidepressant selection is that it is:
 
 ## West Courtyard | Perinatal psychiatry
 > Perinatal psychiatry. Source: Oxford Handbook of Psychiatry (no lecture). Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Perinatal psychiatry
+Q: What is represented by an increased glomerular filtration rate (GFR) in pregnancy? = Increased renal blood flow | Increased excretion of waste products | Decreased ability to metabolise drugs | Decreased blood pressure
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Classification
 > - Perinatal ＝ pregnancy + first postnatal year.
@@ -5172,6 +5461,11 @@ Q: Explaining postpartum (puerperal) psychosis: what is the critical fail in thi
 
 ## Long Red Ward | Old age psychiatry
 > Old age psychiatry. Source: National-Old Age Psychiatry-02-2026.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Old age psychiatry
+Q: What is the most common inclusion in Frontotemporal Dementia (FTD)? = Tau positive, amyloid negative | Tau-positive, amyloid positive | Amyloid positive, tau positive ubiquitin negative | Tau-positive, ubiquitin-positive
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Amnestic syndrome
 > - Specific impairment of episodic memory with functional impairment; medial temporal lobe ± thalamus/diencephalon damage.
@@ -5761,6 +6055,115 @@ Q: Mini-Mental State Examination: what is the critical fail in this station? = S
 
 ## South Ward | Neurology I
 > Neurology I. Source: 2026 Psychiatry Update Course _ Neurology 1 _ Rufus Akinyemi.pdf. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Neurology I
+Q: Which antibodies/antigens are implicated in autoimmune encephalitis with limbic hyperactivity, hyponatremia, and psychiatric symptoms? = NMDA | AQP4 | GABA-A | GABA-B
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which autoimmune encephalitis is associated with a second flu-like prodrome and seizures? = AQP4 | NMDA | GABA-A | GABA-B
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which autoimmune encephalitis is characterised by optic nerve and spine inflammation? = AQP4 | NMDA | GABA-A | GABA-B
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which molecule is a blood-brain barrier (BBB) component? = Tight junction proteins | Glucose | Albumin | Aquaporin-4
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What does a brain organoid represent in terms of the age of the human brain? = 6 days | 10 years | 20 years | 2nd trimester
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which brain region influences empathy? = Insula | Dorsolateral Prefrontal Cortex (DLPFC) | Amygdala | Hippocampus
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A non-dominant side lesion most likely results in what type of apraxia? = Constructional apraxia (Detail) | Constructional apraxia (Gestalt) | Ideomotor apraxia | Dressing apraxia
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which brain regions does the default mode network involve? = Prefrontal cortex | Parietal lobe | Temporal lobe | Occipital lobe
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Deep brain stimulation (DBS) in obsessive-compulsive disorder (OCD) commonly targets which brain structure? = Anterior cingulate cortex | Amygdala | Prefrontal cortex | Striatum
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The dentate gyrus is a part of the brain Structure? = Hippocampus | Thalamus | Basal ganglia | Amygdala
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which cells in the nervous system are phagocytic and responsible for immune responses in the brain? = Microglia | Astrocytes | Macrophages | Oligodendrocytes
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The last part of the brain to be myelinated is often considered to be the: = Prefrontal cortex | Anterior frontal pole | Caudate | Amygdala
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
+### Past questions · Neuroscience
+Q: Which test assesses abstraction, cognitive estimates, and proverb testing? = Wisconsin Card Sorting | Stroop Test | Digit Span | Clock Drawing
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is a test for abstraction? = Wisconsin Card Sorting | Digit Span | Stroop Test | Clock Drawing
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What phenomenon is related to selective auditory attention? = Cocktail Party Phenomenon | Involuntary Attention | Proactive Falsification | Retroactive Falsification
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which test assesses selective attention? = Stroop Test | Digit Span | Clock Drawing | Wisconsin Card Sorting
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the pathophysiologic mechanism of Korsakoff's syndrome? = Mamillary body alpha-ketoglutarate dysfunction | Hippocampal GABA receptor dysfunction | Prefrontal cortex acetylcholine imbalance | Thalamic NMDA receptor dysfunction
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the pathophysiologic mechanism of Multisystem Atrophy? = Alpha-synuclein accumulation | Tau protein hyperphosphorylation | Dopaminergic neuron loss | Glutamate excitotoxicity
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: During which stage of sleep is the consolidation of emotional memories thought to occur? = REM (Rapid Eye Movement) sleep | Stage 1 NREM (Non-Rapid Eye Movement) sleep | Stage 2 NREM sleep | Stage 3 NREM sleep
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What medication is commonly used for REM sleep behaviour disorder? = Prazosin | Trazodone | Melatonin | Clonazepam
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which sleep disorder is associated with the loss of orexin-producing neurons? = Narcolepsy | Insomnia | Sleep Apnea | Restless Leg Syndrome
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is true about purines? = Are uncommon nitrogen-containing compounds | Found only in eukaryotes | Include cytosine and thymine | Can only be obtained from the diet
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which neurotransmitter is most involved in the hallucinogenic effects of psychedelics? = 5HT2 | 5HT1 | 5HT3 | Dopamine (DA)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which test is used to assess motor speed? = Finger Tapping Test | Trail Making Test | Clock Drawing Test | Stroop Test
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the most biologically important metabolite among the options? = Ethanol | Diazepam | Oxazepam | Lorazepam
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What test is used to assess premorbid intelligence? = NART (National Adult Reading Test) | WAIS (Wechsler Adult Intelligence Scale) | MMSE (Mini-Mental State Examination) | WISC (Wechsler Intelligence Scale for Children)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which technique is often used in the in vivo measurement of neurotransmitters? = PET (Positron Emission Tomography) | fMRI (Functional Magnetic Resonance Imaging) | MRE (Magnetic Resonance Elastography) | MRS (Magnetic Resonance Spectroscopy)
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What does FDG (Fluorodeoxyglucose) commonly represent in medical imaging? = Glucose metabolism | Blood flow | Oxygen consumption | Cerebral blood volume
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which test is commonly used to assess executive function? = Wisconsin Card Sorting Test | Clock Drawing Test | Digit Span Test | Stroop Test
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What test is typically used to assess set-shifting and cognitive flexibility? = Wisconsin Card Sorting Test | Stroop Test | Clock Drawing Test | Trail Making Test
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is true about stupor? = Consciousness is decreased | The patient appears awake and alert | Stupor exists on a spectrum of wakefulness to coma | The patient displays heightened emotional reactivity
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which neurotransmitter pathway is Locus coeruleus primarily involved? = Noradrenergic | Serotonergic | Acetylcholine (ACh) | Dopaminergic
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: If a person experiences synesthesia, what does this mean? = They perceive sensory experiences in an unusual way | They can hear colours | They see colours when they hear sounds | They have a heightened sense of taste
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In the context of myelination, which cells are responsible for myelination in the central nervous system (CNS)? = Oligodendrocytes | Schwann cells | Astrocytes | Microglia
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Locus coeruleus is involved in which pathways: = Noradrenergic | Serotonergic | Acetylcholine (ACh) | All of the above
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Brain health and burden
 > - WHO 2022: capacitance to function across cognitive, sensory, socio-emotional, behavioural and motor domains, to actualise full potential over the life course, irrespective of disorder.
@@ -7219,6 +7622,11 @@ Q: The four abilities in a capacity assessment = Understand, retain, use or weig
 ## Admin Block | Forensic II — Assessment & services
 > Forensic II — Assessment & services. Source: Forensic Psychiatry 2 Assessment and Services 2026.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Forensic II — Assessment & services
+Q: Recombination fraction values that mean two genes will be independently assorted are typical: = 0.5 | 0.2 | 0.1 | 1.0
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### The field
 > - Interface of law and psychiatry — civil, criminal, administrative law.
 > - Treated in low, medium or high secure settings by risk.
@@ -7761,6 +8169,14 @@ Q: Fitness to plead: what is the critical fail in this station? = Assessing guil
 ## OPD Clinic | Community & social psychiatry
 > Community & social psychiatry. Source: Community Psychiatry lecture- 2026.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Community & social psychiatry
+Q: To diagnose intellectual disability, an individual's IQ must typically be how many standard deviations below the mean? = 4 | 2 | 3 | 5
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Intellectual disability diagnosis requires IQ to be how many standard deviations away from the mean: = 4 | 2 | 3 | 5
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Community psychiatry: definition and principles
 > - Farooq and Minhas (2001): development and provision of a coordinated and comprehensive programme of mental health care for residents of specified catchment areas.
 > - Simply: services beyond hospital settings, integrated into primary care and community structures.
@@ -8153,6 +8569,47 @@ Q: A brooding period followed by a sudden violent outburst, described in Malaysi
 ## Library | History of psychiatry
 > History of psychiatry. Source: No lecture — Shorter Oxford / Kaplan. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
 
+### Past questions · Psychology
+Q: What does the term "meaning of words" refer to in linguistics? = Lexical Semantics | Phonology | Orthography | Syntax
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: In Bayesian theory, what is an already-held belief called? = Prior | Evidence data | Posterior | Likelihood
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Which type of power influences patient adherence to treatment? = Referent power | Legitimate power | Information power | Expert power
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is true about the Kaiser CDC ACE study? = Parental divorce was included as an ACE | There is a linear relationship between the number of abuse categories and depression | Psychological abuse was not included in the original study | The study focused only on childhood experiences
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: When a person wants to fit in socially and be perceived as a 'nice person,' they are exhibiting which level of morality according to Kohlberg's theory? = Conventional morality | Social order morality | Self-interest morality | Preconvention morality
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The concept that people's interactions are influenced by each other, which in turn are influenced by others, is known as: = Circular causality | Triangulation | Detouring | Enmeshment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: When family members gang up on other family members, it is often referred to as: = Triangulation | Circular causality | Detouring | Enmeshment
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The phenomenon where healthcare workers are observed to wash their hands more frequently, resulting in better hygiene practices, is known as: = Hawthorne effect | Observer bias | Selection bias | Confirmation bias
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The internal structure of knowledge that humans have to understand a concept is known as: = Schema | Archetype | Model | Paradigm
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: A policeman comes to a crime scene, sees a well-dressed man, and decides he cannot be the culprit. This is an example of the: = Halo effect | Barnum effect | Pygmalion effect | Confirmation bias
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Sherif's experiments involving the "autokinetic effect" were primarily designed to investigate: = Conformity | Group dynamics | Social identity | Cognitive dissonance
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: The healthcare workers' tendency to wash their hands more frequently when being observed, which results in better hygiene practices, is referred to as: = The Hawthorne effect | Observer bias | Selection bias | Confirmation bias
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: What is the term for the process of adding new information to existing knowledge and expanding it: = Accommodation | Adaptation | Assimilation | Schema development
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+
 ### Ancient to Renaissance
 > - Hippocrates: natural causes; brain; epilepsy not sacred; black bile → melancholia; mania, phrenitis, hysteria.
 > - Aretaeus: mania and melancholia in the same patient. Galen — humours for 1,500 years.
@@ -8382,6 +8839,20 @@ Q: The Yaba lunatic asylum in Lagos opened in: = 1907 | 1847 | 1954 | 1979 | 191
 
 ## Records Office | Basic statistics
 > Basic statistics. Source: Basic statistics 1 & 2_NPMCNFac Psych_Revision Course 2026_OGUNWALE.pptx. Each run plays one concept: read its summary in the briefing, then answer all of its questions.
+
+### Past questions · Basic statistics
+Q: In the CATIE trial, what percentage of patients have metabolic syndrome? = 11-20% | 41-50% | 31-40% | 21-30%
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Research has replicated findings about altruism, showing that empathy increases altruism for which group? = Ingroup members | Ethnic outgroups | Strangers | Family members
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Given a speech sample, what type of thought disorder is characterised by loosening associations and a lack of coherence in speech? = Loosening of associations | Flight of ideas | Tangentiality | Neologism
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
+Q: Given a speech sample: "This is a hospital where doctors are trained. Doctors are? Apple keeps the doctors away, Newton sees an Apple, and Newton discovers gravity." What is this: = Neologism | Loosening of associations | Flight of ideas | Tangentiality
+> Source: PQ2023 · WACP · July
+> WACP recall answer key supplied; this import did not include a separate rationale.
 
 ### Basics
 > - Ghaemi: "medicine without statistics is quackery; statistics without medicine is numerology".
