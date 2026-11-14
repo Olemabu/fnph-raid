@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 function flight(initial){
  const saved={},R={active:true,orbAssault:false,modeName:()=>'',start(){},update(){},beginCombat(){},renderMap(){},renderWorld(){},renderLighting(){},topSafe:()=>180,campaign:{render(){}},toast(){}};
- const $={raid:R,Hero:function(){},Enemy:function(){},spawnEnemy(){return{};},updateScreen(){},renderMinimap(){},mouse:{moved:1},pad:{aim:1},touch:{aim:1},screen:{x:0,y:0},cw:1200,ch:800,dt:1,tick:1,rumble:{},mousescreen(){},carriers:[]};$.Enemy.prototype.update=function(){};$.Enemy.prototype.render=function(){};$.Hero.prototype.update=function(){};$.Hero.prototype.render=function(){};
+ const $={raid:R,Hero:function(){},Enemy:function(){},spawnEnemy(){return{};},updateScreen(){},renderMinimap(){},mouse:{moved:1},pad:{aim:1},touch:{aim:1},screen:{x:0,y:0},cw:1200,ch:800,dt:1,tick:1,rumble:{},mousescreen(){},carriers:[],enemies:[]};$.Enemy.prototype.update=function(){};$.Enemy.prototype.render=function(){this.stockRendered=true;};$.Hero.prototype.update=function(){};$.Hero.prototype.render=function(){};
  const c={$,Math,Number,document:{createElement:()=>({}),querySelector:s=>s==='#campaignStory'?{}:null},localStorage:{getItem:()=>initial?JSON.stringify(initial):null,setItem:(k,v)=>saved[k]=JSON.parse(v)}};
  const originalHero=$.Hero.prototype.render,originalEnemy=$.Enemy.prototype.render;vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/flight.js'),'utf8'),c);return{R,$,saved,originalHero,originalEnemy};
 }
@@ -34,8 +34,9 @@ test('a fresh flight clears stale aim commands without applying automatic steeri
  const {R,$}=flight();$.hero={};R.start();assert.equal($.mouse.moved,0);assert.equal($.pad.aim,null);assert.equal($.touch.aim,null);assert.equal($.hero.direction,-Math.PI/2);
 });
 
-test('flight preserves the original player and enemy artwork renderers',()=>{
- const {$,originalHero,originalEnemy}=flight();assert.equal($.Hero.prototype.render,originalHero);assert.equal($.Enemy.prototype.render,originalEnemy);
+test('mecha interceptors get a dedicated renderer while player and ordinary enemy renderers remain intact',()=>{
+ const {$,originalHero,originalEnemy}=flight();assert.equal($.Hero.prototype.render,originalHero);assert.notEqual($.Enemy.prototype.render,originalEnemy);
+ const ordinary={raidSwarm:false};$.Enemy.prototype.render.call(ordinary,0);assert.equal(ordinary.stockRendered,true);
 });
 
 test('all four answer ships stay in one horizontal row at desktop and phone widths',()=>{
