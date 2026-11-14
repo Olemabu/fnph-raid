@@ -14,9 +14,6 @@ function operations(room,deck){const c={R:{active:true,campaignRun:false,rooms:[
 test('Next set in free flight chooses fresh questions and preserves unfinished work',()=>{
  const all=Array.from({length:12},(_,i)=>({id:String(i),type:'q'})),room={randomFree:true,randomScope:'all',items:all.slice(0,4)},R=operations(room,[{items:all}]);assert.equal(R.nextSet(),true);assert.deepEqual(Array.from(R.rooms[0].items,i=>i.id),['4','5','6','7']);assert(all.every(i=>!i.done));
 });
-test('Next set moves to the next OSCE station while retaining full station order and the original pack',()=>{
- const all=[1,2,3].flatMap(n=>[{id:n+'a',osceLesson:{stationNumber:n}},{id:n+'b',type:'l'}]),R=operations({studyMode:'osce',items:all},[]);R.cur=all[0];assert(R.nextSet());assert.deepEqual(Array.from(R.rooms[0].items,i=>i.id),['2a','2b']);assert.equal(R.rooms[0].nextSetPool,all);assert(R.nextSet());assert.deepEqual(Array.from(R.rooms[0].items,i=>i.id),['3a','3b']);assert(all.every(i=>!i.done));
-});
 test('campaign Next set saves a cursor without falsely completing the skipped mission',()=>{
  const all=[1,2,3].map(n=>({id:String(n),kind:'concept',concept:{items:[{}]}})),c={active:all[0],timeline:()=>all,save:{},complete:new Set(),persist(){},weakTransfer:()=>[],topicRun:true,R:{isMastered:()=>false,toast(){},toHome(){c.active=null;}},launchMission:m=>c.active=m};vm.createContext(c);const src=read('campaign.js');vm.runInContext(src.slice(src.indexOf('function advanceSet('),src.indexOf('function showBriefing(')),c);
  assert(c.advanceSet());assert.equal(c.active.id,'2');assert.equal(c.save.nextMission,'2');assert.equal(c.complete.size,0);

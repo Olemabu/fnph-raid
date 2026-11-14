@@ -2,6 +2,8 @@
 
 An arcade shooter (a fork of **Radius Raid** by Jack Rugile, MIT licence) rebuilt as a revision game for psychiatry exams, set on a map of FNPH Barnawa.
 
+> **Current build:** OSCE station drills and Nebula daily OSCE integration have been removed from FNPH Raid. Historical release notes below describe older builds. MCQ, essay, procedure/list and general question practice remain. Existing saved progress data is preserved.
+
 ## Quick start
 
 1. Install Python 3 if you don't have it.
@@ -31,7 +33,6 @@ Load order matters, so it is fixed in `build.py`. The global `$` is the engine n
 - **20 map stations = the 20 NPMCN Part I topics** in `data/syllabus.js`. Each station keeps its FNPH locus. The 5 new loci (Admin Block, OPD Clinic, Pharmacy, Library, Records Office) are placeholders: rename them to real FNPH places for your memory palace.
 - **Concepts:** each high-yield point in `data/topics/<topic>.js` becomes a `### concept`. Its summary is the briefing, and all of its MCQs follow (all 1,783, with 4 wrong options sampled 3 at a time).
 - **Past questions:** the current deck adds 144 answer-keyed WACP July 2023 MCQs as the first concepts in relevant stations. Near-identical repeats are collapsed. Newer recall-only questions without a verified key stay out of the shootable pool; each imported question carries its PQ/year/college label.
-- **OSCE:** all 59 scripts in `data/osce/stations.js` are embedded as `### OSCE:` concepts inside their related topic. Each one tests phase order, which phase a line comes from, what the examiner checks, the critical fail and viva answers. They play as the first-person ward round, or as the ambulance run in Emergency.
 - **Bonus drills:** the earlier hand-written stations are kept as `### Bonus drill:` concepts.
 - **One run = one concept.** A station is taken when all its concepts are secured. After that, runs revisit the weakest concept.
 - **To regenerate** after nebula changes: see the header of `tools/nebula2deck.js`, then rebuild.
@@ -59,14 +60,6 @@ Rules: exactly 4 options per `Q:` (the first is correct). Every wrong option and
 - Daily review plays due questions with the same direct gameplay. Correct answers are scheduled in 1, 3, 7, 16, then 35 days; misses are due within 30 minutes.
 - Full raid order supports map order, study plan, weakest station first or most reviews due first.
 
-## OSCE process memory routes
-
-All 59 imported OSCE stations have short action-word cues for their 352 existing phases. Long routes are chunked into runs of up to four cues in the briefing. These are new learning aids, not official or validated scoring mnemonics; the original order, checklists and critical-fail notes remain authoritative.
-
-The ordered process drill shows a cue, offers action descriptions from that station, then splashes the original phase name after a correct choice. Completed phases stay in the strip. No recall rating is required. For example, the suicide-risk route is **Trigger → Plan → Act → After / Mind → Risks and supports → Safe plan**. Read each cue's full mapping in Study the stations.
-
-Deck syntax: place `> Process cues: cue 1 | cue 2 | cue 3` immediately after an `L:` item whose phases use `Phase => action description`. There must be one cue per phase. `tools/nebula2deck.js` preserves these additions from its previous-deck input when upstream phase names and order still match; changed sequences are regenerated for review.
-
 ## Controller
 
 **Menus with only a gamepad:** use the d-pad or left stick to move the highlight, **button 1** to press, **button 2** to go back, and **Start** to start the raid. On cards, any button continues.
@@ -85,10 +78,10 @@ There is a built-in profile for the user's USB Gamepad (vendor 0810, product 000
 
 ## Stage modes
 
-A station can be played as a different mini-game. Add a third field to its deck header: `## Emergency Resus | Clozapine emergencies | race`. If there is no third field, any topic containing "emergency" plays as a race, and any topic containing "OSCE" plays as a first-person ward round.
+A station can be played as a different mini-game. Add a third field to its deck header: `## Emergency Resus | Clozapine emergencies | race`. If there is no third field, any topic containing "emergency" plays as a race.
 
 - **race: Ambulance run** (`src/mode-race.js`). This is a pseudo-3D road. Each question is a gantry of colour-coded answer lanes, and the answer text is on cards along the bottom. To pick, steer with ←/→, the left stick, the mouse, keys 1 to 4, or by tapping a card. Hold ↑ to boost (more points) or ↓ to brake (more reading time). The lane you are in when you reach the gantry is your answer. It goes through `R.carrierDown()`, so grading, drill mode and teaching cards work unchanged.
-- **fps: Ward round** (`src/mode-fps.js`). This is a raycast first-person ward. The answer panels walk towards you. Aim with the mouse (the screen edges turn you), ←/→ or the sticks. Fire with click, Space, F or the trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won't pick an answer. If the panels reach you, you are overrun. It is used for OSCE stations (`| fps`, or any topic that mentions OSCE).
+- **fps: Ward round** (`src/mode-fps.js`). This is a raycast first-person ward. The answer panels walk towards you. Aim with the mouse (the screen edges turn you), ←/→ or the sticks. Fire with click, Space, F or the trigger. Keys 1 to 4, or tapping a card, lock on. Each panel takes 3 hits, so a stray shot won't pick an answer. If the panels reach you, you are overrun. This mode is no longer included in the current build.
 - **stealth: Blacksite** (`src/mode-stealth.js`). Evade patrol sight cones and use cover. Move with WASD/stick or click the floor. Keys 1–4 route to an answer terminal; Shift crouches; hold E, Space or the trigger nearby to hack. Touch controls are provided.
 
 ## Saved progress
@@ -105,10 +98,10 @@ Progress is saved in the browser's localStorage under keys starting `fnphraid.` 
 
 ## Operation Nightingale campaign
 
-Deploy starts combat directly. The in-game Briefing button opens the story and concept notes on demand. The home hangar opens a saved, linear campaign with 20 chapters, all 339 existing concepts, and 19 inter-chapter ambulance transfers (358 missions). The story is fictional; clinical questions, OSCE checklists, source order and question IDs are retained in `src/deck.txt`.
+Deploy starts combat directly. The in-game Briefing button opens the story and concept notes on demand. The home hangar opens a saved, linear campaign with 20 chapters, all 339 existing concepts, and 19 inter-chapter ambulance transfers (358 missions). The story is fictional; clinical questions, source order and question IDs are retained in `src/deck.txt`.
 
 - **Continue mission** resumes the first incomplete mission. Successful whole questions/processes save immediately to `fnphraid.campaign.v1`, so reloading resumes that mission without replaying already secured items. An unfinished process restarts its sequence. Existing mastery and free-flight progress are separate and preserved.
-- All questions in the current concept that are not yet mastered are played; mastered items are never reviewed or replayed. OSCE process drills go first. Correct choices keep the campaign moving; wrong choices open the existing teaching card and repeat until right, then reinforce later in the run.
+- All questions in the current concept that are not yet mastered are played; mastered items are never reviewed or replayed. Correct choices keep the campaign moving; wrong choices open the existing teaching card and repeat until right, then reinforce later in the run.
 - Each transfer selects up to eight unmastered questions from earlier chapters, prioritising misses, overdue items and low mastery. If all earlier items are retired, it uses unmastered questions from the destination chapter; an empty transfer is skipped. Four original road environments rotate: hospital perimeter at dusk, wet neon city, underpass and blue-hour transfer. Roadside vehicles are scenery and do not interfere with answer grading.
 - Five original vector mecha frames unlock at 0, 5, 15, 30 and 60 correct combat hits (previous chapter-based unlocks are preserved): Kestrel, Sentinel, Seraph, Archon and Nightingale. Silhouettes, wings, armour, reactor colours, hangar portraits, battlefield frames and ward-round weapon accents change. These frame rewards are cosmetic; the separate mastery-based weapon arsenal still determines combat upgrades.
 - Returning to the hangar, pausing or closing the tab keeps earned progress. The original station selection, daily review, question editor, settings and credits are under **Free flight**.
@@ -128,7 +121,7 @@ Startup is fully self-contained. External Google Fonts stylesheets have been rem
 `src/mecha3d.js` renders original bevelled armour meshes, articulated joint housings, cylinders, weapon barrels, wing hardware and emissive elements with WebGL depth testing and lighting. The same renderer supplies the hangar portrait, loadout preview and combat mecha. Pointer movement over the hangar adjusts the viewing angle. The existing frame unlocks and livery remain in effect. If WebGL is unavailable or lost, the original Canvas renderer keeps the game playable. The user requested the previous ship shape, so both build paths now exclude this prototype and use the original vector renderer. This is a lightweight real-3D model renderer inside the existing 2D battlefield, not a HALO-equivalent 3D game engine or AAA asset pipeline.
 
 ## Special operations
-Scroll below the command deck to the three operation cards. Select Night Dispatch, Ward Breach or Blacksite, choose a syllabus sector and concept, then Deploy operation. The original question IDs and permanent mastery retirement apply across all modes. The race environment can be selected independently. OSCE concepts are listed first for Ward Breach; other concepts are also available.
+Scroll below the command deck to the three operation cards. Select Night Dispatch, Ward Breach or Blacksite, choose a syllabus sector and concept, then Deploy operation. The original question IDs and permanent mastery retirement apply across all modes. The race environment can be selected independently.
 The optional WebGL renderer in `src/stage3d.js` supplies original lit 3D geometry, depth testing, fog, emissive surfaces, material detail and soft contact shadows. The fallback is the existing Canvas race/ward scene and a tactical overhead stealth view. No assets or scripts are fetched at runtime. `src/operations.js` supplies the menu, live scene thumbnails and touch controls. The original interceptor ship remains unchanged.
 
 ## Topic selection and random free runs
@@ -148,7 +141,7 @@ Esc pauses and opens the menu; Esc again resumes. Controller Start (button 9) to
 Weapon reports and a ward ambience loop use the Sound/Music controls and browser audio context. Use Enable audio if the browser suspended audio or sound was disabled; no microphone is used. Audio respects saved mute settings.
 
 ## Current game scope: spaceship only
-Racing, 007 infiltration and the first-person ward shooter have been removed. All topics, OSCEs and campaign reviews use the original interceptor combat. The home screen offers spaceship random practice by topic or across the syllabus; the map supports direct concept selection. Saved mastery and earned ship upgrades are preserved. Earlier references to driving and first-person panels describe removed features.
+Racing, 007 infiltration and the first-person ward shooter have been removed. All topics and campaign reviews use the original interceptor combat. The home screen offers spaceship random practice by topic or across the syllabus; the map supports direct concept selection. Saved mastery and earned ship upgrades are preserved. Earlier references to driving and first-person panels describe removed features.
 
 ## MCQ repetition rule
 An MCQ appears once and retires if answered correctly. A failed MCQ is inserted three times at random points among the remaining questions. Each correct repeat reduces its saved outstanding count; another miss resets the count to three without adding duplicate batches. Unfinished repeats survive reload. Procedures and list drills retain their previous mastery rule.
@@ -185,7 +178,7 @@ In the home screen's **Turn a question into a game** panel, paste your question,
 
 Teaching cards and repeated questions cover the answer and examiner checklist. Session progress is separate from syllabus progress. Clear each item through repeated practice, or choose **Practise this session again** after completion. See [DIRECT_QUESTION_FLOW.md](DIRECT_QUESTION_FLOW.md) for deployment and test details.
 
-Select **OSCE** to learn station phases, candidate wording and patient/relative responses in order, or **Essay** to learn an answer outline and key points. See [OSCE_MODE.md](OSCE_MODE.md). Existing general sessions need to be rebuilt with the selected format to gain this structure.
+Paste an exam question or topic to generate an essay or general learning session with a sourced answer, key points and playable practice questions. OSCE station format is not available in Raid.
 
 
 ## Aircraft flight (November 2026)
@@ -194,12 +187,12 @@ The main campaign now launches with Continue flight, without a hospital map trip
 
 Each fully completed question set or campaign mission advances one stretch. Three completed sets enter the next landscape: coastline, farmland, city, mountains, then a new circuit. A set means the current mission or selected free-run length, not each repeat. Failed answers and abandoned missions do not advance it. Checkpoints persist under fnphraid.flight.v1 and are included in normal progress backups. Teaching cards freeze flight. Orb Assault remains a separate optional mode.
 
-Run `node --test tests/flight.cjs tests/osce-engine.cjs`, then `python build.py`. Real physical controller and phone feel still benefit from user testing.
+Run `node --test tests/flight.cjs tests/timetable.cjs`, then `python build.py`. Real physical controller and phone feel still benefit from user testing.
 
 The original rendered player ship, enemy artwork and answer gunship/option visuals are restored. Flight scenery and manual handling remain; the flight module does not replace vehicle renderers.
 
 
-Wrong or guessed MCQs now need two correct repeats, including outstanding saved misses. Next set is available in the flight controls and pause menu. It advances campaign selection without marking skipped work complete, saves that selection for the next launch, and leaves unfinished mastery records intact. Free flight selects a fresh batch within the chosen topic; multi-station study sessions advance to the next OSCE station. Single-station sessions report when no other station is available. Advancing manually also advances the scenery checkpoint.
+Wrong or guessed MCQs now need two correct repeats, including outstanding saved misses. Next set is available in the flight controls and pause menu. It advances campaign selection without marking skipped work complete, saves that selection for the next launch, and leaves unfinished mastery records intact. Free flight selects a fresh batch within the chosen topic; study sessions advance to the next set. If no fresh set is available, the game reports that clearly. Advancing manually also advances the scenery checkpoint.
 
 
 The start page is a single viewport with the existing hangar artwork and Continue flight. Study session, Free flight, Options, Progress, and Install & saves open modal menus; only their contents scroll. Controls retain their original handlers, menus close before starting play, and controller navigation targets the open menu. Verified at desktop, phone portrait and phone landscape dimensions.
@@ -210,7 +203,7 @@ Current flight controls: ship orientation stays forward, movement is left/right 
 
 Flight pickups (health, gifts and weapon powerups) now fall vertically at a steady speed. Drops remain inside the reachable horizontal flight lane and begin above the ship, including drops from enemies that have already passed below it. Collection effects and artwork are unchanged. Pickups disappear after leaving the bottom of the viewport. The adapted implementation is src/powerup.js; the vendor original remains untouched.
 
-Lateral flight controls now share responsive acceleration and braking across keyboard, gamepad and touch. Cruise speed scales with viewport width (6 to 12 pixels per 60 Hz frame); analogue input retains fine control. Movement integration is frame-rate independent. Verified by the 22-test flight, pickup, next-set and OSCE suite.
+Lateral flight controls now share responsive acceleration and braking across keyboard, gamepad and touch. Cruise speed scales with viewport width (6 to 12 pixels per 60 Hz frame); analogue input retains fine control. Movement integration is frame-rate independent. Verified by the flight, pickup and next-set regression suite.
 
 Answer safety: dismissing teaching cards consumes the confirmation press. Every new question or procedure step requires release and a fresh manual fire press, including when autofire is enabled. Controller button and trigger state is tracked while menus are open. Resolving an answer invalidates all existing bullets immediately; staging the next wave clears them. Regression coverage: tests/answer-safety.cjs.
 
@@ -222,7 +215,7 @@ Use https://olemabu.github.io/fnph-raid/dist/play.html as the fresh online entry
 
 ## MCQ progress map
 
-Start page → **MCQ map** (also under **Progress**) shows MCQ-only completed/remaining totals per topic. Select a topic or concept and **Play remaining MCQs**. Sets contain up to 10 unfinished questions; Next set keeps skipped work unfinished. Existing saved mastery is shared across modes. Unseen and repeat-practice counts are separate; OSCE/list drills do not inflate MCQ totals.
+Start page → **MCQ map** (also under **Progress**) shows MCQ-only completed/remaining totals per topic. Select a topic or concept and **Play remaining MCQs**. Sets contain up to 10 unfinished questions; Next set keeps skipped work unfinished. Existing saved mastery is shared across modes. Unseen and repeat-practice counts are separate; List drills do not inflate MCQ totals.
 
 ## Android APK
 
@@ -253,5 +246,5 @@ The main launch button plays today's Nebula timetable topic and exact daily MCQ 
 
 Regenerate `src/timetable-data.js` with `node tools/build-timetable.cjs` after syllabus/content updates, then build. The generated data uses Nebula's actual syllabus and original MCQ order. Timetable tests compare all 56 calendar days with Nebula's scheduling implementation. Personal timetable ordering preserves repeated day slots; timestamped explicit edits win over stale device snapshots.
 
-## v1.2.8 — shared daily OSCEs
-Study session → Today's Nebula OSCEs follows Nebula's exact daily station selector and the same central two-station allowance. Completing a canonical teaching raid records guided practice and the seen day in Nebula; spoken full-run passes remain separate. Update both apps and use the same Central saves profile. New linked station admission requires internet; admitted gameplay can continue offline and completion credit retries. See OSCE_SYNC.md.
+## Archived v1.2.8 note — daily station integration (removed from current build)
+This earlier daily station integration was removed from the current Raid build on 14 Nov 2026. Historical progress records were left intact.

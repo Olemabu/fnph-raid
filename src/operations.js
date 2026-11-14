@@ -17,13 +17,6 @@ R.nextSet=function(){
  if(R.timetable?.isCurrentRun())return R.timetable.nextSet();
  if(R.campaignRun&&R.campaign)return R.campaign.advanceSet();
  const current=R.rooms[R.si],scope=current.randomScope;
- if(current.studyMode==='osce'){
-  const all=current.nextSetPool||current.items,groups=[];let group=null;for(const it of all){if(it.osceLesson&&it.osceLesson.stationNumber!==group?.number){group={number:it.osceLesson.stationNumber,items:[]};groups.push(group);}if(group)group.items.push(it);}
-  const number=R.cur?.osceLesson?.stationNumber||current.items.find(i=>i.osceLesson)?.osceLesson.stationNumber,index=groups.findIndex(g=>g.number===number);
-  const next=groups.slice(index+1).concat(groups.slice(0,index)).find(g=>g.items.some(i=>!R.isMastered(i)));
-  if(!next){R.toast('No other OSCE stations in this session. Import or build another session.',true);return false;}
-  const room={...current,nextSetPool:all,items:next.items,concepts:[]};if(R.flight)R.flight.completeSet();R.toHome();R.start([room],0);R.beginCombat();return true;
- }
  const source=current.randomFree?(scope==='all'?R.deckRooms():[R.deckRooms()[+scope]]).flatMap(r=>r.items):(current.nextSetPool||current.items);
  const excluded=new Set(current.items.map(i=>i.id));let fresh=source.filter(i=>!R.isMastered(i)&&!excluded.has(i.id)&&(!R.orbAssault||i.type==='q'));
  if(!fresh.length&&!current.randomFree&&R.si+1<R.rooms.length){const rooms=R.rooms.slice(),index=R.si+1;if(R.flight)R.flight.completeSet();R.toHome();R.start(rooms,index);R.beginCombat();return true;}

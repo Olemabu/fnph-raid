@@ -1,6 +1,10 @@
 # HANDOFF: where FNPH Raid is and what to do next
 
-Read this first if you are an AI picking up this project (Antigravity, Codex, Claude, Copilot, Cursor). Then read `README.md` (architecture, deck format) and `AGENTS.md` (rules). Last updated 31 Oct 2026.
+Read this first if you are an AI picking up this project (Antigravity, Codex, Claude, Copilot, Cursor). Then read `README.md` (architecture, deck format) and `AGENTS.md` (rules). Last updated 14 Nov 2026.
+
+## Current state (14 Nov 2026)
+
+FNPH Raid no longer contains OSCE station content, OSCE-specific gameplay, or the Nebula daily OSCE sync path. The single question-to-game tool accepts essay/general study packs only. Existing OSCE progress records in local/central saves were left untouched, but Raid does not load or expose them. Ordinary syllabus questions, the 144 keyed WACP past MCQs, and other non-OSCE content remain. Older notes below are historical; do not restore those removed features.
 
 ## 0. Ground rules
 

@@ -43,7 +43,7 @@ const ROUTES=R.routes=[
 function chapters(){return R.deckRooms().map((r,i)=>({room:r,index:i,story:STORY[i]||STORY[0],concepts:r.concepts.filter(c=>c.items.length)}));}
 function timeline(){const out=[];chapters().forEach(ch=>{
  if(ch.index)out.push({id:'transfer::'+ch.room.topic,kind:'transfer',chapter:ch.index,ch,title:'Dispatch to '+ch.room.locus});
- ch.concepts.forEach(c=>out.push({id:'concept::'+ch.room.topic+'::'+c.title,kind:'concept',chapter:ch.index,ch,concept:c,title:c.title.replace(/^OSCE: /,'')}));
+ ch.concepts.forEach(c=>out.push({id:'concept::'+ch.room.topic+'::'+c.title,kind:'concept',chapter:ch.index,ch,concept:c,title:c.title}));
  });return out;}
 function next(){let changed=false;const all=timeline(),cursor=all.findIndex(m=>m.id===save.nextMission),ordered=cursor>0?all.slice(cursor).concat(all.slice(0,cursor)):all;for(const m of ordered){if(complete.has(m.id))continue;const retired=m.kind==='concept'?m.concept.items.every(R.isMastered):weakTransfer(m).length===0;if(retired){complete.add(m.id);changed=true;continue;}if(changed)persist();return m;}if(changed)persist();return null;}
 function clearedChapters(){return chapters().filter(ch=>ch.concepts.length&&ch.concepts.every(c=>complete.has('concept::'+ch.room.topic+'::'+c.title))).length;}
