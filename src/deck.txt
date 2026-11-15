@@ -2957,7 +2957,7 @@ Q: Chromosomal DNA is supercoiled on itself and fixed on: = Histone proteins | R
 > '...supercoiled on itself and fixed histone proteins.'
 Q: How genetically similar are humans to one another? = 99.9% | 50% | 75% | 90% | 100%
 > 'Humans are 99.9% genetically similar to one another.'
-Q: Which disorder is given as an example of 'Mendelian-type' inheritance? = Phenylketonuria | Schizophrenia | Depression | ADHD | Anxiety
+Q: Which disorder is given as an example of 'Mendelian-type' inheritance? = Phenylketonuria | Schizophrenia :: Schizophrenia is usually described as polygenic: many genetic variants contribute to risk, rather than one classic Mendelian inheritance pattern. | Depression :: Major depressive disorder generally has a complex, polygenic architecture; it is not the lecture’s classic single-gene example. | ADHD :: ADHD susceptibility is complex and polygenic, not a classic single-gene Mendelian pattern. | Anxiety :: Anxiety disorders usually reflect complex, multifactorial risk rather than a classic single-gene Mendelian pattern.
 > 'Relatively rarer disorders (e.g., phenylketonuria — 1:23,930 live births) follow a Mendelian type inheritance.'
 Q: Schizophrenia is described in the lecture as: = Polygenic — many common variants each of small effect | Mendelian | Mitochondrial | Caused by one CNV | Not heritable
 > '...more common traits (e.g., schizophrenia — 1:100) are polygenic i.e., influenced by multiple and common genetic variants each of small effect.'

@@ -47,7 +47,7 @@ for(const [locus,tid,olds,mode] of SLOTS){
   out.push('> '+clean(t.title)+'. Source: '+clean(t.lecture)+'. Each run plays one concept: read its summary in the briefing, then answer all of its questions.');
   const byPoint={};T.mcqs.forEach(m=>{(byPoint[m.point]=byPoint[m.point]||[]).push(m);});
   const emit=m=>{const ans=m.options[m.answer];const wr=m.options.filter((o,i)=>i!==m.answer);
-    out.push('Q: '+clean(m.q)+' = '+[ans].concat(wr).map(o=>cut(clean(o),220)).join(' | '));
+    out.push('Q: '+clean(m.q)+' = '+[ans].concat(wr).map(o=>{const reason=m.why&&m.why[o];return cut(clean(o),220)+(reason?' :: '+cut(clean(reason),350):'');}).join(' | '));
     noteLines(m.explain).forEach(l=>out.push(l));stats.q++;};
   T.points.forEach(p=>{
     const lines=String(p.text).split(/\r?\n/);let title=clean(lines[0]).replace(/[:.]$/,'');let body=lines.slice(1).join('\n');
